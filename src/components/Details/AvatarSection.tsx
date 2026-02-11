@@ -1,5 +1,6 @@
 import { IEmployee } from '../../types/type';
 import React from 'react';
+import Icon from '../common/Icon';
 
 interface AvatarSectionProps {
   user: IEmployee;
@@ -16,10 +17,12 @@ export default function AvatarSection({
 }: AvatarSectionProps) {
   const isRemoteWork = user.isRemoteWork ? (
     <div className="home-box">
-      <img
+      <Icon
         src="/svgs/home-icon.svg"
         alt="home icon"
         className="home-box__icon"
+        width={16}
+        height={16}
       />
     </div>
   ) : null;
@@ -27,10 +30,12 @@ export default function AvatarSection({
   const editButton = canEdit ? (
     <button className="avatar-section__edit" onClick={onEditClick}>
       <div className="flex--horizontal">
-        <img
+        <Icon
           src="/svgs/edit-icon.svg"
           alt="edit icon"
           className="avatar-section__edit-icon icon"
+          width={16}
+          height={16}
         />
         <p>edit</p>
       </div>
@@ -60,7 +65,13 @@ export default function AvatarSection({
         className="flex--horizontal avatar-section__copy"
         onClick={onCopyLink}
       >
-        <img src="/svgs/link-icon.svg" className="avatar-section__link" />
+        <Icon
+          src="/svgs/link-icon.svg"
+          alt="copy link icon"
+          className="avatar-section__link"
+          width={16}
+          height={16}
+        />
         <p>Copy link</p>
       </button>
     </div>
