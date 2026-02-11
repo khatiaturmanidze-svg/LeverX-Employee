@@ -1,0 +1,85 @@
+@use "../abstracts/variables" as *;
+
+.section-roles {
+  display: grid;
+  grid-template-columns: 3fr 2fr 2fr 1fr;
+  margin: 1rem 4rem;
+  background-color: $color-white;
+  align-items: center;
+  padding: 2rem;
+  row-gap: 1rem;
+  font-size: 1.2rem;
+  margin-top: 10rem;
+
+  &__vacation,
+  &__book,
+  &__input {
+    margin-right: 3rem;
+    margin-left: 2rem;
+    border-right: 2px solid $color-lighter-grey;
+    padding: 1rem;
+  }
+  &__paragraph {
+    grid-column: 1/-1;
+    margin: 1rem 2rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: $color-darker-grey;
+  }
+
+  &__search {
+    color: $color-darker-grey;
+  }
+
+  // &__admin {
+  // }
+
+  &__row {
+    display: flex;
+
+    &-admin {
+      width: 9rem;
+      border: 2px solid $color-lighter-grey;
+      padding: 1rem;
+      text-transform: uppercase;
+    }
+
+    &-odd {
+      background-color: $color-lighter-grey;
+    }
+  }
+
+  &__role {
+    display: flex;
+    border: 2px solid $color-lighter-grey;
+    width: 18rem;
+    &-employee,
+    &-hr {
+      text-transform: uppercase;
+      padding: 1rem;
+      width: 50%;
+    }
+  }
+
+  &__role-admin {
+    text-transform: uppercase;
+    padding: 1rem;
+    width: 50%;
+  }
+
+  &__employee {
+    display: flex;
+    align-items: center;
+    &-img {
+      width: 6rem;
+      height: 6rem;
+      border-radius: 50%;
+    }
+  }
+}
+
+.role {
+  background-color: $color-500;
+  color: white;
+}

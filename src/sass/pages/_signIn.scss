@@ -1,0 +1,80 @@
+@use "../abstracts/variables" as *;
+
+.sign {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  row-gap: $space-lg;
+  align-items: start;
+  justify-content: center;
+  align-content: center;
+
+  height: 100vh;
+}
+
+.header-sign {
+  padding: $space-md;
+  background-color: $color-700;
+  display: flex;
+  justify-content: space-between;
+}
+
+.header {
+  &__btn-signup,
+  &__btn-signin {
+    padding: $space-md;
+    background-color: $color-900;
+    border-radius: $radius-pill;
+    color: $color-white;
+    transition: all 0.5s;
+    margin-right: $space-md;
+  }
+  &__btn-signup:hover,
+  &__btn-signin:hover {
+    background-color: $color-1000;
+    color: $color-lighter-grey;
+  }
+}
+
+.signup__form {
+  height: 32rem;
+}
+
+.signin__form,
+.signup__form {
+  justify-content: center;
+  margin: $space-lg;
+}
+
+.signin__error {
+  color: $color-purple;
+}
+
+.signin__btn,
+.signup__btn {
+  transition: all 0.5s;
+}
+.signin__btn:hover,
+.signup__btn:hover {
+  color: $color-lighter-grey;
+  background-color: $color-900;
+}
+
+.sign {
+  padding: $space-md;
+  &__message {
+    gap: $space-md;
+    margin: $space-lg;
+  }
+  &__welcome {
+    font-size: $font-largest;
+    color: $color-900;
+  }
+
+  &__paragraph {
+    font-size: $font-large;
+  }
+
+  &__label {
+    color: $color-darker-grey;
+  }
+}

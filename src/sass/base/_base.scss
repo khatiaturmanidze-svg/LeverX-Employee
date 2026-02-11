@@ -1,0 +1,28 @@
+@use "../abstracts/variables" as *;
+* {
+  padding: 0;
+  margin: 0;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+html {
+  box-sizing: border-box;
+  font-size: 62.5%;
+  color: $color-font;
+}
+
+body {
+  font-family: sans-serif;
+  background-color: $color-lighter-grey;
+}
+
+button {
+  text-decoration: none;
+  border: none;
+  background-color: none;
+}

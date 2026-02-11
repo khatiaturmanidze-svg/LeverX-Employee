@@ -1,0 +1,31 @@
+@use '../abstracts/variables' as *;
+
+.hidden {
+  display: none;
+}
+
+.flex--horizontal {
+  display: flex;
+  align-items: center;
+  gap: $space-sm;
+}
+
+.highlight {
+  position: relative;
+  z-index: 1;
+  color: $color-lighter-grey;
+
+  &::after {
+    display: block;
+    content: '';
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+    opacity: 0.7;
+    transform: scale(1.07, 1.05) skewX(-15deg);
+    background-image: $gradient-primary;
+  }
+}
