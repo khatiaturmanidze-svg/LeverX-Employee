@@ -7,7 +7,7 @@
     "start": "nodemon server/server.js",
     "build": "webpack --config webpack.config.cjs",
     "dev": "webpack serve --mode development",
-    "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\" --fix",
+    "lint": "eslint \"src/**/*.{js,jsx,ts,tsx,json}\" --fix",
     "prepare": "husky"
   },
   "repository": {
@@ -57,7 +57,7 @@
     "webpack-dev-server": "^5.2.2"
   },
   "lint-staged": {
-    "*.{js,ts,jsx,tsx}": [
+    "*.{js,ts,jsx,tsx, json}": [
       "eslint --fix",
       "prettier --write"
     ]
