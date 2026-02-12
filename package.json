@@ -7,7 +7,8 @@
     "start": "nodemon server/server.js",
     "build": "webpack --config webpack.config.cjs",
     "dev": "webpack serve --mode development",
-    "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\" --fix"
+    "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\" --fix",
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
@@ -43,6 +44,8 @@
     "fork-ts-checker-webpack-plugin": "^9.1.0",
     "globals": "^16.5.0",
     "html-webpack-plugin": "^5.6.5",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "mini-css-extract-plugin": "^2.9.4",
     "nodemon": "^3.1.11",
     "sass": "^1.94.2",
@@ -52,5 +55,11 @@
     "typescript": "^5.9.3",
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.2"
+  },
+  "lint-staged": {
+    "*.{js,ts,jsx,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   }
 }
