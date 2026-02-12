@@ -6,11 +6,11 @@ import './sass/styles';
 import React from 'react';
 
 const root = ReactDOM.createRoot(
-  document.getElementById('root')!
+  document.getElementById('root')!,
 ) as ReactDOM.Root;
 
 root.render(
   <Provider store={store}>
     <App />
-  </Provider>
+  </Provider>,
 );

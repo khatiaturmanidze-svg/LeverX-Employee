@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Header } from '../components/reusable/Header.tsx';
+import { Header } from '../components/reusable/Header';
 import { IEmployee } from '../types/type';
 import BasicSearchForm from '../components/Main/SearchBasic';
 import SearchAdvanced from '../components/Main/SearchAdvanced';
