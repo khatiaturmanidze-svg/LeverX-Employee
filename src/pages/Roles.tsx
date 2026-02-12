@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { getLoggedInUser, getErrorMessage } from '../core';
-import { Header } from '../components/Header';
+import { Header } from '../components/reusable/Header';
 import { RolesEmployee } from '../components/Roles/RolesEmployee';
 import {
   useGetUsersQuery,
@@ -36,7 +36,7 @@ export default function Roles(): React.ReactElement {
     return allUsers.filter(
       (user) =>
         user.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.last_name.toLowerCase().includes(searchTerm.toLowerCase())
+        user.last_name.toLowerCase().includes(searchTerm.toLowerCase()),
     );
   }, [allUsers, searchTerm]);
 

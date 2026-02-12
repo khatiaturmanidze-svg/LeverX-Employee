@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { Header } from '../components/Header';
+import { Header } from '../components/reusable/Header.tsx';
 import { getLoggedInUser, canEdit } from '../core';
 import { useParams } from 'react-router-dom';
 import AvatarSection from '../components/Details/AvatarSection';

@@ -16,7 +16,7 @@
 # BUGS
 
 - search on main shouldn't open details page. it's supposed to search and show filtered results in the list ✔️
-- sign in/up should be route, using root route rn T-T seperate routes for each ✔️
+- sign in/up should be route, using root route. seperate routes for each ✔️
 - rewrite server to TS
 
 # CRITICAL BUGS

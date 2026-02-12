@@ -1,6 +1,6 @@
 import { IEmployee } from '../../types/type';
 import React from 'react';
-import Icon from '../common/Icon';
+import Icon from '../reusable/Icon';
 
 interface AvatarSectionProps {
   user: IEmployee;

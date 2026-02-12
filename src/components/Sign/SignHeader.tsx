@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-
+import Logo from '../reusable/Logo';
 export default function SignHeader(): React.ReactElement {
   const location = useLocation();
   const navigate = useNavigate();
@@ -9,10 +9,7 @@ export default function SignHeader(): React.ReactElement {
 
   return (
     <header className="header-sign">
-      <button className="header__brand">
-        <h3 className="heade__brand-secondary">leverX</h3>
-        <h2 className="header__brand-main">employee services</h2>
-      </button>
+      <Logo />
       {!isSignUpPage && (
         <button
           className="header__btn-signup"

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Header } from '../components/Header';
+import { Header } from '../components/reusable/Header.tsx';
 import { IEmployee } from '../types/type';
 import BasicSearchForm from '../components/Main/SearchBasic';
 import SearchAdvanced from '../components/Main/SearchAdvanced';
@@ -39,7 +39,7 @@ export function SearchToggle({
 
 const filterUsers = (
   users: IEmployee[],
-  criteria: SearchCriteria
+  criteria: SearchCriteria,
 ): IEmployee[] => {
   const searchFullName = criteria.fullname.trim().toLowerCase();
 
@@ -48,12 +48,12 @@ const filterUsers = (
   }
 
   return users.filter((u) =>
-    `${u.first_name} ${u.last_name}`.toLowerCase().includes(searchFullName)
+    `${u.first_name} ${u.last_name}`.toLowerCase().includes(searchFullName),
   );
 };
 const filterAdvancedUsers = (
   users: IEmployee[],
-  criteria: AdvancedSearchCriteria
+  criteria: AdvancedSearchCriteria,
 ): IEmployee[] => {
   const name = criteria.name?.trim().toLowerCase() || '';
   const email = criteria.email?.trim().toLowerCase() || '';
@@ -82,7 +82,7 @@ const filterAdvancedUsers = (
 export default function Main(): React.ReactElement {
   const [isBasicSearch, setIsBasicSearch] = useState(true);
   const [basicCriteria, setBasicCriteria] = useState<SearchCriteria | null>(
-    null
+    null,
   );
   const [advancedCriteria, setAdvancedCriteria] =
     useState<AdvancedSearchCriteria | null>(null);
@@ -92,7 +92,7 @@ export default function Main(): React.ReactElement {
 
   const loggedUser = useMemo(
     () => getLoggedInUser(allUsers) || null,
-    [allUsers]
+    [allUsers],
   );
 
   const isAdmin = useMemo(() => loggedUser?.role === 'Admin', [loggedUser]);
@@ -118,10 +118,6 @@ export default function Main(): React.ReactElement {
     setBasicCriteria(null);
     setAdvancedCriteria(criteria);
   };
-
-  // const handleViewChange = (mode: 'grid' | 'list') => {
-  //   setViewMode(mode);
-  // };
 
   return (
     <>
