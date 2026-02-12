@@ -1,16 +1,16 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import { Header } from '../components/reusable/Header.tsx';
-import { getLoggedInUser, canEdit } from '../core';
-import { useParams } from 'react-router-dom';
-import AvatarSection from '../components/Details/AvatarSection';
-import { EmployeeView } from '../components/Details/EmployeeView';
-import { EmployeeEditForm } from '../components/Details/EmployeeEditForm';
+import React, { useState, useMemo, useCallback } from "react";
+import { Header } from "../components/reusable/Header.tsx";
+import { getLoggedInUser, canEdit } from "../utils/core";
+import { useParams } from "react-router-dom";
+import AvatarSection from "../components/Details/AvatarSection";
+import { EmployeeView } from "../components/Details/EmployeeView";
+import { EmployeeEditForm } from "../components/Details/EmployeeEditForm";
 import {
   useGetEmployeeDetailsQuery,
   useGetUsersQuery,
   useUpdateEmployeeMutation,
-} from '../features/usersApi.ts';
-import { EmployeeUpdate } from '../types/type.tsx';
+} from "../features/usersApi.ts";
+import { EmployeeUpdate } from "../types/type.tsx";
 
 export default function Details(): React.ReactElement {
   const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -29,7 +29,7 @@ export default function Details(): React.ReactElement {
     return getLoggedInUser(allUsers) || null;
   }, [allUsers]);
 
-  const isAdmin = useMemo(() => loggedUser?.role === 'Admin', [loggedUser]);
+  const isAdmin = useMemo(() => loggedUser?.role === "Admin", [loggedUser]);
 
   const canUserEdit = useMemo(() => {
     if (!viewedEmployee) return false;
@@ -46,8 +46,8 @@ export default function Details(): React.ReactElement {
 
   const handleCopyLink = () => {
     if (
-      localStorage.getItem('loggedInUser') ||
-      sessionStorage.getItem('loggedInUser')
+      localStorage.getItem("loggedInUser") ||
+      sessionStorage.getItem("loggedInUser")
     )
       navigator.clipboard.writeText(window.location.href);
   };

@@ -1,4 +1,4 @@
-@use "../abstracts/variables" as *;
+@use '../abstracts/variables' as *;
 
 .page {
   margin-top: 7rem;
@@ -267,25 +267,11 @@ label {
 .grid-container > * {
   min-width: 0;
 }
-.employee-grid {
+.employee-grid__container {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
   gap: $space-sm;
-
-  &__img {
-    width: 15rem;
-    height: 15rem;
-    border-radius: 50%;
-    margin-bottom: $space-md;
-    position: relative;
-  }
-
-  &__name {
-    font-size: 1.8rem;
-    margin-bottom: 3.7rem;
-    font-weight: 600;
-  }
 }
 
 .employee-menu {
@@ -306,7 +292,7 @@ label {
     font-size: 1.5rem;
   }
 }
-.employee-ind {
+.employee-grid {
   padding: $space-sm $space-md;
   background-color: $color-white;
 
@@ -314,6 +300,20 @@ label {
   flex-direction: column;
 
   align-items: center;
+
+  &__img {
+    width: 15rem;
+    height: 15rem;
+    border-radius: 50%;
+    margin-bottom: $space-md;
+    position: relative;
+  }
+
+  &__name {
+    font-size: 1.8rem;
+    margin-bottom: 3.7rem;
+    font-weight: 600;
+  }
 }
 
 .employee {
@@ -347,8 +347,8 @@ label {
   height: 1.5rem;
 }
 
-.employee-menu,
-.employee-grid,
+.employee-grid__container,
+.employee-menu__container,
 .nothing-found {
   grid-column: 2/3;
   grid-row: 2/3;
@@ -361,7 +361,7 @@ label {
 }
 
 .first-row,
-.employee-row {
+.employee-menu {
   display: grid;
   grid-template-columns: 1fr 3fr 2fr 2fr;
   background-color: $color-white;
@@ -377,7 +377,7 @@ label {
   padding: $space-sm;
 }
 
-.employee-row {
+.employee-menu {
   margin-bottom: $space-sm;
 }
 

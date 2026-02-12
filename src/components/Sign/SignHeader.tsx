@@ -1,11 +1,11 @@
-import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import Logo from '../reusable/Logo';
+import React from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import Logo from "../reusable/Logo";
 export default function SignHeader(): React.ReactElement {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const isSignUpPage = location.pathname === '/signup';
+  const isSignUpPage = location.pathname === "/signup";
 
   return (
     <header className="header-sign">
@@ -13,16 +13,15 @@ export default function SignHeader(): React.ReactElement {
       {!isSignUpPage && (
         <button
           className="header__btn-signup"
-          onClick={() => navigate('/signup')}
+          onClick={() => navigate("/signup")}
         >
           <p className="sign--up">Sign Up</p>
         </button>
       )}
-
       {isSignUpPage && (
         <button
           className="header__btn-signin"
-          onClick={() => navigate('/signin')}
+          onClick={() => navigate("/signin")}
         >
           <p className="header__btn-text">Sign In</p>
         </button>

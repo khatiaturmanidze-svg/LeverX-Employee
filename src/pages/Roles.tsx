@@ -1,14 +1,14 @@
-import React, { useState, useMemo } from 'react';
-import { getLoggedInUser, getErrorMessage } from '../core';
-import { Header } from '../components/reusable/Header';
-import { RolesEmployee } from '../components/Roles/RolesEmployee';
+import React, { useState, useMemo } from "react";
+import { getLoggedInUser, getErrorMessage } from "../utils/core";
+import { Header } from "../components/reusable/Header";
+import { RolesEmployee } from "../components/Roles/RolesEmployee";
 import {
   useGetUsersQuery,
   useUpdateEmployeeRoleMutation,
-} from '../features/usersApi';
+} from "../features/usersApi";
 
 export default function Roles(): React.ReactElement {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState<string | null>(null);
   const { data: allUsers = [] } = useGetUsersQuery();
   const [updateRole] = useUpdateEmployeeRoleMutation();
@@ -17,11 +17,11 @@ export default function Roles(): React.ReactElement {
     return getLoggedInUser(allUsers) || null;
   }, [allUsers]);
 
-  const isAdmin = useMemo(() => loggedUser?.role === 'Admin', [loggedUser]);
+  const isAdmin = useMemo(() => loggedUser?.role === "Admin", [loggedUser]);
 
   const handleRoleChange = async (targetUser: string, newRole: string) => {
     if (!isAdmin) {
-      setError('permission denied. only Admins can change roles.');
+      setError("permission denied. only Admins can change roles.");
       return error;
     }
     setError(null);
@@ -57,7 +57,7 @@ export default function Roles(): React.ReactElement {
           </div>
           <p className="section-roles__book">Address book role</p>
           <p className="section-roles__vacation">Vacation role</p>
-          <p className="section-roles__admin">Admin</p>{' '}
+          <p className="section-roles__admin">Admin</p>{" "}
           {filteredUsers.map((user) => (
             <RolesEmployee
               key={user._id}

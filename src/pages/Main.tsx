@@ -1,83 +1,15 @@
-import React, { useState, useMemo } from 'react';
-import { Header } from '../components/reusable/Header';
-import { IEmployee } from '../types/type';
-import BasicSearchForm from '../components/Main/SearchBasic';
-import SearchAdvanced from '../components/Main/SearchAdvanced';
-import EmployeeHeader from '../components/Main/EmployeeHeader';
-import EmployeeContainer from '../components/Main/EmployeeContainer';
-import { getLoggedInUser } from '../core.tsx';
-import { AdvancedSearchCriteria } from '../components/Main/SearchAdvanced';
-import { useGetUsersQuery } from '../features/usersApi';
-import { SearchCriteria } from '../components/Main/SearchBasic';
-
-interface SearchToggleProps {
-  isBasicSearch: boolean;
-  onToggleMode: (isBasic: boolean) => void;
-}
-
-export function SearchToggle({
-  isBasicSearch,
-  onToggleMode,
-}: SearchToggleProps): React.ReactElement {
-  return (
-    <div className="search flex--horizontal">
-      <button
-        className={`search__basic ${isBasicSearch ? 'active' : ''}`}
-        onClick={() => onToggleMode(true)}
-      >
-        basic search
-      </button>
-      <button
-        className={`search__advanced ${!isBasicSearch ? 'active' : ''}`}
-        onClick={() => onToggleMode(false)}
-      >
-        advanced search
-      </button>
-    </div>
-  );
-}
-
-const filterUsers = (
-  users: IEmployee[],
-  criteria: SearchCriteria,
-): IEmployee[] => {
-  const searchFullName = criteria.fullname.trim().toLowerCase();
-
-  if (!searchFullName) {
-    return users;
-  }
-
-  return users.filter((u) =>
-    `${u.first_name} ${u.last_name}`.toLowerCase().includes(searchFullName),
-  );
-};
-const filterAdvancedUsers = (
-  users: IEmployee[],
-  criteria: AdvancedSearchCriteria,
-): IEmployee[] => {
-  const name = criteria.name?.trim().toLowerCase() || '';
-  const email = criteria.email?.trim().toLowerCase() || '';
-  const phone = criteria.phone?.trim() || '';
-  const zoom = criteria.zoom?.trim() || '';
-  const building = criteria.building?.trim().toLowerCase() || 'any';
-  const room = criteria.room?.trim() || ''; // keep as string
-  const department = criteria.department?.trim().toLowerCase() || 'any';
-
-  return users.filter((u) => {
-    const userFullName = `${u.first_name} ${u.last_name}`.toLowerCase();
-    const userRoom = u.room?.toString() || '';
-
-    return (
-      (!name || userFullName.includes(name)) &&
-      (!email || u.email.toLowerCase() === email) &&
-      (!phone || u.phone === phone) &&
-      (!zoom || u.zoom_id === zoom) &&
-      (building === 'any' || u.building.toLowerCase() === building) &&
-      (!room || userRoom === room) &&
-      (department === 'any' || u.department.toLowerCase() === department)
-    );
-  });
-};
+import React, { useState, useMemo } from "react";
+import { Header } from "../components/reusable/Header";
+import BasicSearchForm from "../components/Main/SearchBasic";
+import SearchAdvanced from "../components/Main/SearchAdvanced";
+import EmployeeHeader from "../components/Main/EmployeeHeader";
+import EmployeeContainer from "../components/Main/EmployeeContainer";
+import { getLoggedInUser } from "../utils/core.tsx";
+import { AdvancedSearchCriteria } from "../components/Main/SearchAdvanced";
+import { useGetUsersQuery } from "../features/usersApi";
+import { SearchCriteria } from "../components/Main/SearchBasic";
+import { filterUsers, filterAdvancedUsers } from "../utils/userFilters.tsx";
+import TabGroup from "../components/reusable/TabGroup";
 
 export default function Main(): React.ReactElement {
   const [isBasicSearch, setIsBasicSearch] = useState(true);
@@ -86,7 +18,7 @@ export default function Main(): React.ReactElement {
   );
   const [advancedCriteria, setAdvancedCriteria] =
     useState<AdvancedSearchCriteria | null>(null);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   const { data: allUsers = [] } = useGetUsersQuery();
 
@@ -95,7 +27,7 @@ export default function Main(): React.ReactElement {
     [allUsers],
   );
 
-  const isAdmin = useMemo(() => loggedUser?.role === 'Admin', [loggedUser]);
+  const isAdmin = useMemo(() => loggedUser?.role === "Admin", [loggedUser]);
 
   const filteredUsers = useMemo(() => {
     if (basicCriteria) {
@@ -124,9 +56,26 @@ export default function Main(): React.ReactElement {
       <Header loggedInUser={loggedUser} isAdmin={isAdmin} />
       <div className="page">
         <div className="grid-container">
-          <SearchToggle
-            isBasicSearch={isBasicSearch}
-            onToggleMode={setIsBasicSearch}
+          <TabGroup
+            containerClassName="search flex--horizontal"
+            tabBaseClassName=""
+            activeModifierClassName="active"
+            tabs={[
+              {
+                id: "basic",
+                label: "basic search",
+                isActive: isBasicSearch,
+                onClick: () => setIsBasicSearch(true),
+                className: "search__basic",
+              },
+              {
+                id: "advanced",
+                label: "advanced search",
+                isActive: !isBasicSearch,
+                onClick: () => setIsBasicSearch(false),
+                className: "search__advanced",
+              },
+            ]}
           />
           <EmployeeHeader users={filteredUsers} onViewChange={setViewMode} />
           {isBasicSearch ? (

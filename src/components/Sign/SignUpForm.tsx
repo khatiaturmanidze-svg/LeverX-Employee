@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useSignUpMutation } from '../../features/authApi';
-import { getErrorMessage } from '../../core';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useSignUpMutation } from "../../features/authApi";
+import { getErrorMessage } from "../../utils/core";
 
 export default function SignUpForm(): React.ReactElement {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [errorMessage, seterrorMessage] = useState<string | null>(null);
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
 
   const [signUp] = useSignUpMutation();
 
@@ -26,10 +26,10 @@ export default function SignUpForm(): React.ReactElement {
       }).unwrap();
       const storage = rememberMe ? localStorage : sessionStorage;
       const employee = result.employee;
-      storage.setItem('loggedInUser', trimmedEmail);
-      storage.setItem('result', JSON.stringify(employee));
+      storage.setItem("loggedInUser", trimmedEmail);
+      storage.setItem("result", JSON.stringify(employee));
 
-      navigate('/main', { replace: true });
+      navigate("/main", { replace: true });
     } catch (err) {
       seterrorMessage(getErrorMessage(err));
     }

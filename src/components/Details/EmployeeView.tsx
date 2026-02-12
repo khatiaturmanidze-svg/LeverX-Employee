@@ -1,6 +1,6 @@
 import React from "react";
 import { IEmployee } from "../../types/type";
-import { formatDateOfBirth } from "../../core.tsx";
+import { formatDateOfBirth } from "../../utils/core.tsx";
 import { DetailRow } from "./DetailRow.tsx";
 
 interface EmployeeViewProps {
