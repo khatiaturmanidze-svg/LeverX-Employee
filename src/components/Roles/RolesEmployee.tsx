@@ -1,5 +1,6 @@
 import React from "react";
 import { IEmployee } from "../../types/type";
+import BtnRole from "./BtnRole";
 
 interface RolesEmployeeProps {
   user: IEmployee;
@@ -12,22 +13,6 @@ export function RolesEmployee({
   onRoleChange,
   isAdmin,
 }: RolesEmployeeProps) {
-  const renderRoleButton = (roleName: string) => {
-    const isActive = user.role === roleName;
-
-    return (
-      <button
-        type="button"
-        className={`section-roles__role-${roleName.toLowerCase()} ${
-          isActive ? "role" : ""
-        }`}
-        onClick={() => onRoleChange(user._id, roleName)}
-        disabled={isActive && isAdmin}
-      >
-        {roleName}
-      </button>
-    );
-  };
   return (
     <>
       <div className="section-roles__employee">
@@ -40,9 +25,20 @@ export function RolesEmployee({
           {user.first_name} {user.last_name}
         </p>
       </div>
+
       <div className="section-roles__role">
-        {renderRoleButton("Employee")}
-        {renderRoleButton("HR")}
+        <BtnRole
+          roleName="Employee"
+          user={user}
+          onRoleChange={onRoleChange}
+          isAdmin={isAdmin}
+        />
+        <BtnRole
+          roleName="HR"
+          user={user}
+          onRoleChange={onRoleChange}
+          isAdmin={isAdmin}
+        />
       </div>
 
       <div className="section-roles__vacation-role"></div>

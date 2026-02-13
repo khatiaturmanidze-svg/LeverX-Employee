@@ -1,6 +1,8 @@
 import { IEmployee } from "../types/type";
 import type { SearchCriteria } from "../components/Main/SearchBasic";
 import type { AdvancedSearchCriteria } from "../components/Main/SearchAdvanced";
+import { useMemo } from "react";
+
 export const filterUsers = (
   users: IEmployee[],
   criteria: SearchCriteria,
@@ -11,6 +13,7 @@ export const filterUsers = (
     `${u.first_name} ${u.last_name}`.toLowerCase().includes(searchFullName),
   );
 };
+
 export const filterAdvancedUsers = (
   users: IEmployee[],
   criteria: AdvancedSearchCriteria,
@@ -36,3 +39,14 @@ export const filterAdvancedUsers = (
     );
   });
 };
+
+export function useFilteredItems<IEmployee, TValue>(
+  allUsers: IEmployee[],
+  value: TValue,
+  filterFn: (user: IEmployee, value: TValue) => boolean,
+): IEmployee[] {
+  return useMemo(
+    () => allUsers.filter((user) => filterFn(user, value)),
+    [allUsers, value, filterFn],
+  );
+}
