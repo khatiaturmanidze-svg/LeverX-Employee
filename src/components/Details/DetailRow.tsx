@@ -1,4 +1,5 @@
-import React from 'react';
+import React from "react";
+import Icon from "../reusable/Icon";
 
 interface DetailRowProps {
   icon: string;
@@ -21,10 +22,12 @@ export function DetailRow({
     return (
       <div className="details-section__row">
         <div className="flex--horizontal">
-          <img
+          <Icon
             src={`/svgs/${icon}.svg`}
             className="details-section-icon"
             alt={`${label} icon`}
+            width={16}
+            height={16}
           />
           <p>{label}:</p>
         </div>
@@ -35,10 +38,12 @@ export function DetailRow({
   return (
     <div className="details-section__row details-section__row--edit">
       <div className="flex--horizontal">
-        <img
+        <Icon
           src={`/svgs/${icon}.svg`}
           className="details-section-icon"
           alt={`${label} icon`}
+          width={16}
+          height={16}
         />
         <label htmlFor={fieldName}>{label}</label>
       </div>
