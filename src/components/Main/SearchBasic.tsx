@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 export interface SearchCriteria {
   fullname: string;
@@ -11,15 +11,14 @@ interface BasicSearchFormProps {
 export default function SearchBasic({
   onSearchSubmit,
 }: BasicSearchFormProps): React.ReactElement {
-  const [fullname, setFullname] = useState('');
+  const [fullname, setFullname] = useState("");
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     const criteria: SearchCriteria = {
       fullname,
     };
-
-    setFullname('');
+    setFullname("");
     onSearchSubmit(criteria);
   };
   return (

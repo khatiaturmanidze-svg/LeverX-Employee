@@ -7,6 +7,8 @@ import {
   useUpdateEmployeeRoleMutation,
 } from "../features/usersApi";
 
+import Search from "../components/reusable/Search";
+
 export default function Roles(): React.ReactElement {
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -31,41 +33,48 @@ export default function Roles(): React.ReactElement {
       setError(getErrorMessage(error));
     }
   };
-
-  const filteredUsers = useMemo(() => {
-    return allUsers.filter(
-      (user) =>
-        user.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.last_name.toLowerCase().includes(searchTerm.toLowerCase()),
-    );
-  }, [allUsers, searchTerm]);
-
   return (
     <>
       <Header loggedInUser={loggedUser} isAdmin={isAdmin} />
       <main>
         <section className="section-roles">
           <p className="section-roles__paragraph">Roles & permissions</p>
-          <div className="section-roles__input">
-            <input
-              type="text"
-              className="section-roles__search"
-              placeholder="Type to search"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <p className="section-roles__book">Address book role</p>
-          <p className="section-roles__vacation">Vacation role</p>
-          <p className="section-roles__admin">Admin</p>{" "}
-          {filteredUsers.map((user) => (
-            <RolesEmployee
-              key={user._id}
-              user={user}
-              onRoleChange={handleRoleChange}
-              isAdmin={isAdmin}
-            />
-          ))}
+          <Search
+            items={allUsers}
+            value={searchTerm}
+            onChange={setSearchTerm}
+            filterFn={(user, term) =>
+              user.first_name.toLowerCase().startsWith(term.toLowerCase()) ||
+              user.last_name.toLowerCase().startsWith(term.toLowerCase())
+            }
+            renderInput={(value, onChange) => (
+              <div className="section-roles__input">
+                <input
+                  type="text"
+                  className="section-roles__search"
+                  placeholder="Type to search"
+                  value={value}
+                  onChange={(e) => onChange(e.target.value)}
+                />
+              </div>
+            )}
+          >
+            {(filteredUsers) => (
+              <>
+                <p className="section-roles__book">Address book role</p>
+                <p className="section-roles__vacation">Vacation role</p>
+                <p className="section-roles__admin">Admin</p>
+                {filteredUsers.map((user) => (
+                  <RolesEmployee
+                    key={user._id}
+                    user={user}
+                    onRoleChange={handleRoleChange}
+                    isAdmin={isAdmin}
+                  />
+                ))}
+              </>
+            )}
+          </Search>
         </section>
       </main>
     </>
