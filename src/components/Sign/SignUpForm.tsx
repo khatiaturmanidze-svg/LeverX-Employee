@@ -76,7 +76,6 @@ export default function SignUpForm(): React.ReactElement {
         onChange={(e) => setPassword(e.target.value)}
         required
       />
-
       <div className="flex--horizontal">
         <input
           type="checkbox"
