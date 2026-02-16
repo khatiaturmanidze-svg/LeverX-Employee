@@ -19,3 +19,9 @@ employee cards
 - broke Main page incapsulated/reusable components
 
 #### config of lint staged & husky, prettier, eslint.
+
+13/02
+Roles page
+
+- created reusable roles button, so now we can add as many roles as we want
+- created useFilteredItems hook
