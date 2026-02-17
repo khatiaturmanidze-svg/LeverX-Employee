@@ -47,7 +47,6 @@ export const validateEmployeeForm = (formData: EmployeeFormState) => {
   if (formData.desk_number && isNaN(Number(formData.desk_number)))
     errors.desk_number = "Desk number must be a number";
 
-  // date_birth
   if (formData.date_birth) {
     const [y, m, d] = formData.date_birth.split("-").map(Number);
     if (!y || y < 1900 || !m || m < 1 || m > 12 || !d || d < 1 || d > 31)
