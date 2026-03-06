@@ -1,14 +1,15 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import SignIn from './pages/SignIn';
-import SignUp from './pages/SignUp';
-import Main from './pages/Main';
-import Details from './pages/Details';
-import Roles from './pages/Roles';
+import React from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp";
+import Main from "./pages/Main";
+import Details from "./pages/Details";
+import Roles from "./pages/Roles";
+import Requests from "./pages/Requests";
 const isAuthenticated = () => {
   return (
-    localStorage.getItem('loggedInUser') ||
-    sessionStorage.getItem('loggedInUser')
+    localStorage.getItem("loggedInUser") ||
+    sessionStorage.getItem("loggedInUser")
   );
 };
 
@@ -48,6 +49,14 @@ export default function App() {
           element={
             <PrivateRoute>
               <Roles />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/requests"
+          element={
+            <PrivateRoute>
+              <Requests />
             </PrivateRoute>
           }
         />

@@ -54,9 +54,9 @@ export const validateEmployeeForm = (formData: EmployeeFormState) => {
   }
 
   // visas
-  formData.visas.forEach((v, idx) => {
-    if (!v.issuing_country) errors[`visa_${idx}_country`] = "Required";
-    if (!v.type) errors[`visa_${idx}_type`] = "Required";
+  formData.visas.forEach((v, i) => {
+    if (!v.issuing_country) errors[`visa_${i}_country`] = "Required";
+    if (!v.type) errors[`visa_${i}_type`] = "Required";
   });
 
   return errors;

@@ -9,13 +9,20 @@ export const getLoggedInUser = (users: IEmployee[]): IEmployee | undefined => {
   return users.find((u) => u.email === loggedEmail);
 };
 
+export const getUserById = (
+  users: IEmployee[],
+  id: string,
+): IEmployee | undefined => {
+  return users.find((u) => u._id === id);
+};
+
 export function canEdit(
   loggedIn: IEmployee | undefined,
   target: IEmployee,
 ): boolean {
   if (!loggedIn) return false;
 
-  return loggedIn.role === "Admin" || loggedIn._id === target.manager?._id;
+  return loggedIn.role === "Admin" || loggedIn._id === target.manager?.id;
 }
 
 export function formatDateOfBirth(

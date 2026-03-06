@@ -90,12 +90,16 @@
     {
       "email": "3r2t@gmail.com",
       "hashed_password": "$2b$13$prierpJUn1Rkd2vspxfUMOK9d.MMQuQh9Buf8VFtKiW3yPVhQdVc."
+    },
+    {
+      "email": "blabblabla@gmail.com",
+      "hashed_password": "$2b$13$Avl1qDDMlt3Q.Ri5IhizOewN07VQKOmYyGZGR3l3YhAFtqqEUtfHO"
     }
   ],
   "employees": [
     {
       "_id": "1",
-      "role": "HR",
+      "role": "Employee",
       "isRemoteWork": true,
       "user_avatar": "/users/rei.jpg",
       "first_name": "Rei",
@@ -111,7 +115,7 @@
         "month": 3,
         "day": 1
       },
-      "desk_number": 4,
+      "desk_number": 1,
       "manager": {
         "id": "11",
         "first_name": "Anno",
@@ -824,6 +828,37 @@
       "department": "",
       "building": "",
       "room": 0,
+      "desk_number": 0,
+      "isRemoteWork": false,
+      "phone": "",
+      "zoom_id": "",
+      "zoom_link": "",
+      "citizenship": "",
+      "date_birth": {
+        "year": null,
+        "month": null,
+        "day": null
+      },
+      "manager": {
+        "id": "",
+        "first_name": "",
+        "last_name": ""
+      },
+      "visa": []
+    },
+    {
+      "_id": "21",
+      "role": "Employee",
+      "first_name": "blabla",
+      "last_name": "blablabla",
+      "email": "blabblabla@gmail.com",
+      "user_avatar": "/users/dumplinh.jpg",
+      "first_native_name": "",
+      "middle_native_name": "",
+      "last_native_name": "",
+      "department": "",
+      "building": "",
+      "room": "0",
       "desk_number": 0,
       "isRemoteWork": false,
       "phone": "",
