@@ -17,7 +17,7 @@ import type {
   UpdateRoleResponse,
   DatabaseSchema,
 } from "./serverTypes.js";
-import type { IEmployee } from "./employeeTypes.js";
+import type { IEmployee, IRequestData } from "./employeeTypes.js";
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -153,6 +153,7 @@ app.post<{}, SignUpResponse | ErrorResponse, SignUpRequest>(
       date_birth: { year: null, month: null, day: null },
       manager: { id: "", first_name: "", last_name: "" },
       visa: [],
+      requests: [],
     };
 
     db.data.authUsers.push(newAuthUser);
@@ -217,6 +218,44 @@ app.put<{ id: string }, UpdateRoleResponse | ErrorResponse, UpdateRoleRequest>(
       message: "Role updated successfully",
       employee: employeeToEdit,
     });
+  },
+);
+
+app.get<{ id: string }, IRequestData[] | ErrorResponse>(
+  "/requests/:id",
+  async (req, res) => {
+    const employee = db.data.employees.find((emp) => emp._id === req.params.id);
+
+    if (!employee) {
+      res.status(401).json({ error: "employee not found" });
+      return;
+    }
+
+    res.json(employee.requests);
+  },
+);
+
+app.post<{ id: string }, IRequestData | ErrorResponse, IRequestData>(
+  "/requests/:id",
+  async (req, res) => {
+    const { id } = req.params;
+    const newRequest = req.body;
+
+    const employee = db.data.employees.find((emp) => emp._id === id);
+
+    if (!employee) {
+      res.status(401).json({ error: "employee not found" });
+      return;
+    }
+
+    const finalizedRequest: IRequestData = {
+      ...newRequest,
+      id: Math.random().toString(4),
+    };
+
+    employee.requests.push(finalizedRequest);
+
+    res.status(201).json(finalizedRequest);
   },
 );
 

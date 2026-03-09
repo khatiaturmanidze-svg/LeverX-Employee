@@ -52,8 +52,18 @@ export interface IEmployee {
   date_birth?: IDateOfBirth;
   manager?: IManager;
   visa?: IVisa[];
+
+  requests?: IRequestData[];
 }
 
 export type EmployeeUpdate = Partial<Omit<IEmployee, "manager">> & {
   manager?: string | null;
 };
+
+export interface IRequestData {
+  id: string;
+  type: string;
+  start_date: string;
+  end_date: string;
+  note: string;
+}

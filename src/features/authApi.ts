@@ -1,5 +1,5 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { IEmployee } from '../types/type';
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { IEmployee } from "../types/type";
 
 interface SignInPayload {
   email: string;
@@ -23,18 +23,20 @@ interface signUpResponse {
   employee: IEmployee;
 }
 
+const BASE_URL = "http://localhost:3000";
+
 export const authApi = createApi({
-  reducerPath: 'authApi',
+  reducerPath: "authApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: 'http://localhost:3000',
+    baseUrl: BASE_URL,
   }),
   endpoints: (builder) => ({
     signIn: builder.mutation<signInResponse, SignInPayload>({
       query: (body) => ({
-        url: '/sign-in',
-        method: 'POST',
+        url: "/sign-in",
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body,
       }),
@@ -42,10 +44,10 @@ export const authApi = createApi({
 
     signUp: builder.mutation<signUpResponse, SignUpPayload>({
       query: (body) => ({
-        url: '/sign-up',
-        method: 'POST',
+        url: "/sign-up",
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body,
       }),

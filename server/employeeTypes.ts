@@ -21,6 +21,14 @@ export interface IVisa {
   end_date: string;
 }
 
+export interface IRequestData {
+  id: string;
+  type: string;
+  start_date: string;
+  end_date: string;
+  note: string;
+}
+
 export interface IEmployee {
   _id: string;
   role: string;
@@ -47,4 +55,6 @@ export interface IEmployee {
   date_birth?: IDateOfBirth;
   manager?: IManager;
   visa?: IVisa[];
+
+  requests: IRequestData[];
 }

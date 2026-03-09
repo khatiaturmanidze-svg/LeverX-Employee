@@ -5,6 +5,7 @@ import { useGetUsersQuery } from "../features/usersApi";
 import Managers from "../components/Requests/Managers";
 import RequestForm from "../components/Requests/RequestForm";
 import RequestList from "../components/Requests/RequestList";
+
 export default function Requests(): React.ReactElement {
   const { data: allUsers = [] } = useGetUsersQuery();
   const loggedInUser = getLoggedInUser(allUsers);

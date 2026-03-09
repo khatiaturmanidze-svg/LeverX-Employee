@@ -1,20 +1,20 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { IEmployee, EmployeeUpdate } from '../types/type';
-const DUMMY_TOKEN = 'authorized-can-access';
-
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { IEmployee, EmployeeUpdate } from "../types/type";
+const DUMMY_TOKEN = "authorized-can-access";
+const BASE_URL = "http://localhost:3000";
 export const usersApi = createApi({
-  reducerPath: 'usersApi',
+  reducerPath: "usersApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: 'http://localhost:3000',
+    baseUrl: BASE_URL,
   }),
-  tagTypes: ['users'],
+  tagTypes: ["users"],
   endpoints: (builder) => ({
     getUsers: builder.query<IEmployee[], void>({
       query: () => ({
-        url: '/users',
+        url: "/users",
         headers: { Authorization: DUMMY_TOKEN },
       }),
-      providesTags: ['users'],
+      providesTags: ["users"],
     }),
 
     getEmployeeDetails: builder.query<IEmployee, string>({
@@ -22,7 +22,7 @@ export const usersApi = createApi({
         url: `/users/${id}`,
         headers: { Authorization: DUMMY_TOKEN },
       }),
-      providesTags: (result, error, id) => [{ type: 'users', id }],
+      providesTags: (result, error, id) => [{ type: "users", id }],
     }),
 
     updateEmployee: builder.mutation<
@@ -31,14 +31,14 @@ export const usersApi = createApi({
     >({
       query: ({ id, update }) => ({
         url: `/users/${id}`,
-        method: 'PUT',
+        method: "PUT",
         headers: {
           Authorization: DUMMY_TOKEN,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: update,
       }),
-      invalidatesTags: (result, error, { id }) => [{ type: 'users', id }],
+      invalidatesTags: (result, error, { id }) => [{ type: "users", id }],
     }),
 
     updateEmployeeRole: builder.mutation<
@@ -47,14 +47,14 @@ export const usersApi = createApi({
     >({
       query: ({ id, newRole }) => ({
         url: `/users/${id}/role`,
-        method: 'PUT',
+        method: "PUT",
         headers: {
           Authorization: DUMMY_TOKEN,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: { newRole },
       }),
-      invalidatesTags: ['users'],
+      invalidatesTags: ["users"],
     }),
   }),
 });
