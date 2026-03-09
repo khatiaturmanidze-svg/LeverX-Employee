@@ -87,4 +87,145 @@
 
 .request-list {
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: $space-md;
+
+  &__header {
+    font-size: $space-md;
+    color: $color-font;
+  }
+
+  &__select {
+    padding: $space-xs;
+    color: $color-darker-grey;
+    width: auto;
+
+    &:focus,
+    &:active {
+      outline: none;
+      border-color: $border-active;
+    }
+  }
+}
+
+.request-list__item {
+  padding: $space-md;
+  background-color: $color-lighter-grey;
+  border-radius: $radius-small;
+  box-shadow: $card-shadow;
+  display: flex;
+  flex-direction: column;
+  gap: $space-sm;
+  transition: all 0.3s;
+
+  &:hover {
+    background-color: $color-white;
+    box-shadow: $card-shadow-hover;
+  }
+
+  &-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid $color-grey;
+    padding-bottom: $space-xs;
+    margin-bottom: $space-xs;
+
+    .request-list__id {
+      font-weight: bold;
+      color: $color-font;
+    }
+  }
+
+  &-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $space-sm;
+
+    .detail-group {
+      display: flex;
+      flex-direction: column;
+
+      label {
+        font-size: 1rem;
+        text-transform: uppercase;
+        color: $color-darker-grey;
+        margin-bottom: 2px;
+      }
+
+      span {
+        font-size: $space-md;
+        color: $color-font;
+      }
+    }
+  }
+}
+
+.request-form {
+  padding: $space-lg;
+
+  &__img {
+    width: 100%;
+    height: auto;
+  }
+
+  &__title {
+    margin-bottom: $space-md;
+    font-size: 1.25rem;
+    font-weight: bold;
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: $space-md;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: $space-xs;
+
+    label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: $color-darker-grey;
+    }
+
+    input,
+    select,
+    textarea {
+      padding: $space-sm;
+      border: 1px solid $color-grey;
+      border-radius: $radius-small;
+
+      &:focus {
+        outline: none;
+        border-color: $border-active;
+      }
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $space-md;
+  }
+}
+
+.btn-submit {
+  padding: $space-sm;
+  border-radius: $radius-small;
+  background-color: $color-500;
+  color: $color-white;
+  transition: all 0.3s;
+  &:hover {
+    background-color: $color-700;
+  }
 }
