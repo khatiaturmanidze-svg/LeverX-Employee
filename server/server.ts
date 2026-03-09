@@ -251,6 +251,7 @@ app.post<{ id: string }, IRequestData | ErrorResponse, IRequestData>(
     const finalizedRequest: IRequestData = {
       ...newRequest,
       id: Math.random().toString(4),
+      status: "pending",
     };
 
     employee.requests.push(finalizedRequest);

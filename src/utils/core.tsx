@@ -1,5 +1,5 @@
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
-import { IEmployee, IDateOfBirth } from "../types/type";
+import { IEmployee, IDateOfBirth, IRequestData } from "../types/type";
 
 // getting logged in user
 export const getLoggedInUser = (users: IEmployee[]): IEmployee | undefined => {
@@ -67,4 +67,18 @@ export function getErrorMessage(err: unknown): string {
     return err.message;
   }
   return "Something went wrong";
+}
+
+export function getDisplayStatus(req: IRequestData) {
+  if (req.status === "pending") return "pending";
+  if (req.status === "rejected") return "rejected";
+
+  const today = new Date().getTime();
+  const start = new Date(req.start_date).getTime();
+  const end = new Date(req.end_date).getTime();
+
+  if (today >= start && today <= end) return "Active";
+  if (today < start) return "Approved (Upcoming)";
+
+  return "Completed";
 }

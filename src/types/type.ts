@@ -66,4 +66,7 @@ export interface IRequestData {
   start_date: string;
   end_date: string;
   note: string;
+
+  status: "approved" | "pending" | "rejected";
+  // need to add approver (manager of logged in user)
 }

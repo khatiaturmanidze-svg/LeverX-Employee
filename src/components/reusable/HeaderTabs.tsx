@@ -43,7 +43,7 @@ export default function HeaderTabs({
       id: "requests",
       label: "Requests",
       isActive: isRequests,
-      onClick: () => navigate("/requests"),
+      onClick: () => navigate(`/requests/${loggedInUser?._id}`),
       className: "header__requests-btn",
     },
   ];

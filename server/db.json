@@ -94,7 +94,15 @@
           "end_date": 1683608400000
         }
       ],
-      "requests": []
+      "requests": [
+        {
+          "id": "req-101",
+          "type": "Sick leave",
+          "start_date": "2026-03-10",
+          "end_date": "2026-03-12",
+          "note": "Medical checkup at NERV."
+        }
+      ]
     },
 
     {
@@ -181,7 +189,15 @@
           "end_date": 1683608400000
         }
       ],
-      "requests": []
+      "requests": [
+        {
+          "id": "1234",
+          "type": "Vacation",
+          "start_date": "2026-04-01",
+          "end_date": "2026-04-14",
+          "note": "Trip to the seaside."
+        }
+      ]
     },
     {
       "_id": "4",
@@ -259,7 +275,22 @@
           "end_date": 1683608400000
         }
       ],
-      "requests": []
+      "requests": [
+        {
+          "id": "req-102",
+          "type": "Military leave",
+          "start_date": "2026-05-20",
+          "end_date": "2026-05-25",
+          "note": "Training exercise."
+        },
+        {
+          "id": "req-103",
+          "type": "Vacation",
+          "start_date": "2026-08-01",
+          "end_date": "2026-08-05",
+          "note": "Going back to Germany."
+        }
+      ]
     },
     {
       "_id": "6",
@@ -298,7 +329,15 @@
           "end_date": 1683608400000
         }
       ],
-      "requests": []
+      "requests": [
+        {
+          "id": "req-105",
+          "type": "Sick leave",
+          "start_date": "2026-03-09",
+          "end_date": "2026-03-09",
+          "note": "Feeling a bit out of sync today."
+        }
+      ]
     },
     {
       "_id": "7",

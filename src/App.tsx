@@ -53,7 +53,7 @@ export default function App() {
           }
         />
         <Route
-          path="/requests"
+          path="/requests/:id"
           element={
             <PrivateRoute>
               <Requests />

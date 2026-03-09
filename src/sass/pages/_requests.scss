@@ -107,6 +107,12 @@
       border-color: $border-active;
     }
   }
+
+  &__nothing {
+    font-size: $font-medium;
+    text-align: center;
+    color: $color-darker-grey;
+  }
 }
 
 .request-list__item {
@@ -229,5 +235,22 @@
   transition: all 0.3s;
   &:hover {
     background-color: $color-700;
+  }
+}
+
+.request-list__status {
+  padding: 4px 8px;
+  border-radius: $radius-small;
+  font-size: $font-smallest;
+  font-weight: bold;
+
+  &.status--active {
+    background-color: $color-purple;
+    color: $color-white;
+  }
+
+  &.status--pending {
+    background-color: $color-500;
+    color: $color-white;
   }
 }

@@ -10,7 +10,7 @@ export const requestsApi = createApi({
   }),
   tagTypes: ["requests"],
   endpoints: (builder) => ({
-    getRequests: builder.query<IRequestData[], string>({
+    getRequests: builder.query<IRequestData[], string | undefined>({
       query: (id) => ({
         url: `/requests/${id}`,
         headers: { Authorization: DUMMY_TOKEN },

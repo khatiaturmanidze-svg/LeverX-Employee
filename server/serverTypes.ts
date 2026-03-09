@@ -52,11 +52,3 @@ export interface AuthUserContext {
   id: string;
   role: string;
 }
-
-export interface IRequestData {
-  id: string;
-  type: string;
-  start_date: string;
-  end_date: string;
-  note: string;
-}
