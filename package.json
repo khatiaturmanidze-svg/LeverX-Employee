@@ -8,6 +8,8 @@
     "build": "webpack --config webpack.config.cjs",
     "dev": "webpack serve --mode development",
     "lint": "eslint \"src/**/*.{js,jsx,ts,tsx,json}\" --fix",
+    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,scss,sass,md}\"",
+    "typecheck": "tsc --noEmit",
     "prepare": "husky"
   },
   "repository": {
@@ -44,6 +46,7 @@
     "babel-loader": "^10.0.0",
     "css-loader": "^7.1.2",
     "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react": "^7.37.5",
     "fork-ts-checker-webpack-plugin": "^9.1.0",
     "globals": "^16.5.0",
