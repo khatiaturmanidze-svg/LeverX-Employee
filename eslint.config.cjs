@@ -3,6 +3,7 @@ const react = require('eslint-plugin-react');
 const tsParser = require('@typescript-eslint/parser');
 const tsPlugin = require('@typescript-eslint/eslint-plugin');
 const globals = require('globals');
+const prettierConfig = require('eslint-config-prettier');
 
 module.exports = [
   {
