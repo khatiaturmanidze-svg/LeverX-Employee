@@ -7,7 +7,7 @@ const prettierConfig = require('eslint-config-prettier');
 
 module.exports = [
   {
-    files: ['src/**/*.{js,jsx,ts,tsx}'],
+    files: ['apps/**/*.{js,jsx,ts,tsx}'],
 
     languageOptions: {
       parser: tsParser,
@@ -15,6 +15,7 @@ module.exports = [
       sourceType: 'module',
       globals: {
         ...globals.browser,
+        ...globals.node,
       },
     },
 
@@ -27,6 +28,7 @@ module.exports = [
       ...js.configs.recommended.rules,
       ...tsPlugin.configs.recommended.rules,
       'react/prop-types': 'off',
+      'react/react-in-jsx-scope': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
     },
 
