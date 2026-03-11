@@ -7,6 +7,7 @@
   ],
   "type": "module",
   "scripts": {
+    "build": "npm run build --workspace=@mono/frontend && npm run build --workspace=@mono/backend",
     "dev:frontend": "npm run dev -w @mono/frontend",
     "dev:backend": "npm run start -w @mono/backend",
     "lint": "eslint \"apps/**/*.{js,jsx,ts,tsx,json}\" --fix",

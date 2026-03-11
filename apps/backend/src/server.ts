@@ -29,7 +29,7 @@ app.use(express.static(path.join(__dirname, '../dist')));
 
 // Use an absolute path so it works both when running from `server/`
 // and when running compiled output from `dist-server/`.
-const dbFilePath = path.join(__dirname, '../server/db.json');
+const dbFilePath = path.join(__dirname, '../src/db.json');
 const db = await JSONFilePreset<DatabaseSchema>(dbFilePath, {
   authUsers: [],
   employees: [],
@@ -68,6 +68,7 @@ app.post<Record<string, never>, SignInResponse | ErrorResponse, SignInRequest>(
     res,
   ) => {
     const { email, password } = req.body;
+
     const user = db.data.authUsers.find((u: IAuthUser) => u.email === email);
 
     if (!user) {

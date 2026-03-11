@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "module": "esnext",
     "skipLibCheck": true,
-    "moduleResolution": "bundler"
+    "moduleResolution": "bundler",
+    "strict": true
   }
 }

@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { IRequestData } from '../types/type';
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = '/api';
 const DUMMY_TOKEN = 'authorized-can-access';
 
 export const requestsApi = createApi({
