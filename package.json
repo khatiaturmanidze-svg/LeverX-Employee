@@ -1,56 +1,38 @@
 {
   "name": "khatia-turmanidze",
   "version": "1.0.0",
-  "description": "1. prepare project",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
   "type": "module",
   "scripts": {
-    "start": "nodemon server/server.js",
-    "build": "webpack --config webpack.config.cjs",
-    "dev": "webpack serve --mode development",
-    "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\" --fix"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://frontend-course-2025-gitlab.codelx.dev/fe/khatia-turmanidze.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@reduxjs/toolkit": "^2.11.2",
-    "bcrypt": "^6.0.0",
-    "cors": "^2.8.5",
-    "express": "^5.2.1",
-    "lowdb": "^7.0.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-redux": "^9.2.0",
-    "react-router-dom": "^7.10.1"
+    "dev:frontend": "npm run dev -w @mono/frontend",
+    "dev:backend": "npm run start -w @mono/backend",
+    "lint": "eslint \"apps/**/*.{js,jsx,ts,tsx,json}\" --fix",
+    "format": "prettier --write \"apps/**/*.{js,jsx,ts,tsx,json,css,scss,sass,md}\"",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "prepare": "husky"
   },
   "devDependencies": {
-    "@babel/core": "^7.28.5",
-    "@babel/preset-env": "^7.28.5",
-    "@babel/preset-react": "^7.28.5",
-    "@babel/preset-typescript": "^7.28.5",
-    "@types/react": "^18.3.27",
-    "@types/react-dom": "^18.3.7",
-    "@typescript-eslint/eslint-plugin": "^8.50.0",
-    "@typescript-eslint/parser": "^8.50.0",
-    "babel-loader": "^10.0.0",
-    "css-loader": "^7.1.2",
+    "@eslint/js": "^9.39.4",
+    "@typescript-eslint/eslint-plugin": "^8.57.0",
+    "@typescript-eslint/parser": "^8.57.0",
     "eslint": "^9.39.2",
+    "eslint-config-prettier": "^9.1.2",
     "eslint-plugin-react": "^7.37.5",
-    "fork-ts-checker-webpack-plugin": "^9.1.0",
-    "globals": "^16.5.0",
-    "html-webpack-plugin": "^5.6.5",
-    "mini-css-extract-plugin": "^2.9.4",
-    "nodemon": "^3.1.11",
-    "sass": "^1.94.2",
-    "sass-loader": "^16.0.6",
-    "style-loader": "^4.0.0",
-    "ts-loader": "^9.5.4",
-    "typescript": "^5.9.3",
-    "webpack-cli": "^6.0.1",
-    "webpack-dev-server": "^5.2.2"
+    "globals": "^15.15.0",
+    "husky": "^9.1.7",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "lint-staged": {
+    "apps/**/*.{js,ts,jsx,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "apps/**/*.{scss,sass,css}": [
+      "prettier --write"
+    ]
   }
 }
