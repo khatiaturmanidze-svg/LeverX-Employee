@@ -18,6 +18,7 @@ const initialState: FormState = {
     end_date: '',
     note: '',
     status: 'pending',
+    employeeId: '',
   },
   isSubmitting: false,
   errors: {},
@@ -83,6 +84,7 @@ export default function RequestForm(): React.ReactElement {
       await addRequest({
         employeeId: loggedInId,
         body: {
+          employeeId: state.data.employeeId,
           type: state.data.type,
           start_date: state.data.start_date,
           end_date: state.data.end_date,
