@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import RequestListItem from './RequestListItem';
 import { useGetRequestsQuery } from '../../features/RequestsApi';
 import { useParams } from 'react-router-dom';
+
 export default function RequestList(): React.ReactElement {
   const [requestType, setRequestType] = useState('');
   const { id } = useParams();

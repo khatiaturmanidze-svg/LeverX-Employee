@@ -19,10 +19,10 @@ export const requestsApi = createApi({
     }),
     addRequest: builder.mutation<
       IRequestData,
-      { id: string; body: Omit<IRequestData, 'id'> }
+      { employeeId: string; body: Omit<IRequestData, 'id'> }
     >({
-      query: ({ id, body }) => ({
-        url: `/requests/${id}`,
+      query: ({ employeeId, body }) => ({
+        url: `/requests/${employeeId}`,
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

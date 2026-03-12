@@ -4,18 +4,15 @@ import { useGetUsersQuery } from '../../features/usersApi';
 import { getUserById } from '../../utils/core';
 interface ManagerCardProps {
   manager: IManager;
-  key: string;
 }
-export default function ManagerCard({
-  manager,
-  key,
-}: ManagerCardProps): React.ReactElement {
+
+const ManagerCard: React.FC<ManagerCardProps> = ({ manager }) => {
   const { data: allUsers = [] } = useGetUsersQuery();
 
   const managerInfo = getUserById(allUsers, manager.id);
   console.log('managerInfo', managerInfo);
   return (
-    <div className="manager_card" key={key}>
+    <div className="manager_card">
       <img
         src={managerInfo?.user_avatar}
         alt="manager of user"
@@ -29,4 +26,6 @@ export default function ManagerCard({
       </div>
     </div>
   );
-}
+};
+
+export default ManagerCard;

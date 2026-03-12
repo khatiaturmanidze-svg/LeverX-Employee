@@ -4,15 +4,11 @@ import { getDisplayStatus } from '../../utils/core';
 
 interface RequestListItemProps {
   request: IRequestData;
-  key: string;
 }
 
-export default function RequestListItem({
-  request,
-  key,
-}: RequestListItemProps): React.ReactElement {
+const RequestListItem: React.FC<RequestListItemProps> = ({ request }) => {
   return (
-    <div className="request-list__item" key={key}>
+    <div className="request-list__item">
       <div className="request-list__item-header">
         <span className="request-list__id">{request.id}</span>
         <span className={`status-pill status--${request.status}`}>
@@ -37,4 +33,6 @@ export default function RequestListItem({
       </div>
     </div>
   );
-}
+};
+
+export default RequestListItem;
