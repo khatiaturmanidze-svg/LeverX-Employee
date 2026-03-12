@@ -82,3 +82,9 @@ export function getDisplayStatus(req: IRequestData) {
 
   return 'Completed';
 }
+
+export const getManagedEmployees = (users: IEmployee[]): IEmployee[] => {
+  const currentUser = getLoggedInUser(users);
+  if (!currentUser) return [];
+  return users.filter((u) => u.manager?.id === currentUser._id);
+};

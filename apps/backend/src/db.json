@@ -100,7 +100,9 @@
           "type": "Sick leave",
           "start_date": "2026-03-10",
           "end_date": "2026-03-12",
-          "note": "Medical checkup at NERV."
+          "note": "Medical checkup at NERV.",
+          "employeeId": "1",
+          "status": "rejected"
         }
       ]
     },
@@ -147,7 +149,8 @@
           "type": "vacation",
           "start_date": "12-12-12",
           "end_date": "12-12-12",
-          "note": "ajsjfrw"
+          "note": "ajsjfrw",
+          "employeeId": "2"
         }
       ]
     },
@@ -194,7 +197,8 @@
           "type": "Vacation",
           "start_date": "2026-04-01",
           "end_date": "2026-04-14",
-          "note": "Trip to the seaside."
+          "note": "Trip to the seaside.",
+          "employeeId": "3"
         }
       ]
     },
@@ -280,14 +284,16 @@
           "type": "Military leave",
           "start_date": "2026-05-20",
           "end_date": "2026-05-25",
-          "note": "Training exercise."
+          "note": "Training exercise.",
+          "employeeId": "5"
         },
         {
           "id": "req-103",
           "type": "Vacation",
           "start_date": "2026-08-01",
           "end_date": "2026-08-05",
-          "note": "Going back to Germany."
+          "note": "Going back to Germany.",
+          "employeeId": "5"
         }
       ]
     },
@@ -334,7 +340,8 @@
           "type": "Sick leave",
           "start_date": "2026-03-09",
           "end_date": "2026-03-09",
-          "note": "Feeling a bit out of sync today."
+          "note": "Feeling a bit out of sync today.",
+          "employeeId": "6"
         }
       ]
     },

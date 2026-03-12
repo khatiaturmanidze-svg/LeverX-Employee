@@ -31,7 +31,24 @@ export const requestsApi = createApi({
       }),
       invalidatesTags: ['requests'],
     }),
+    updateRequest: builder.mutation<
+      IRequestData,
+      { employeeId: string; requestId: string; newStatus: string }
+    >({
+      query: ({ employeeId, requestId, newStatus }) => ({
+        url: `/requests/${employeeId}`,
+        method: 'PUT',
+        body: { requestId, newStatus },
+      }),
+      invalidatesTags: (result, error, { requestId }) => [
+        { type: 'requests', id: requestId },
+      ],
+    }),
   }),
 });
 
-export const { useGetRequestsQuery, useAddRequestMutation } = requestsApi;
+export const {
+  useGetRequestsQuery,
+  useAddRequestMutation,
+  useUpdateRequestMutation,
+} = requestsApi;

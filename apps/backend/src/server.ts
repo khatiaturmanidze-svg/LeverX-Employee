@@ -29,7 +29,7 @@ app.use(express.static(path.join(__dirname, '../dist')));
 
 // Use an absolute path so it works both when running from `server/`
 // and when running compiled output from `dist-server/`.
-const dbFilePath = path.join(__dirname, '../server/db.json');
+const dbFilePath = path.join(__dirname, '../src/db.json');
 const db = await JSONFilePreset<DatabaseSchema>(dbFilePath, {
   authUsers: [],
   employees: [],
@@ -258,16 +258,42 @@ app.post<{ id: string }, IRequestData | ErrorResponse, IRequestData>(
 
     const finalizedRequest: IRequestData = {
       ...newRequest,
+      employeeId: id,
       id: Math.random().toString(4),
       status: 'pending',
     };
 
     employee.requests.push(finalizedRequest);
-
+    await db.write();
     res.status(201).json(finalizedRequest);
   },
 );
 
+app.put('/requests/:employeeId', async (req, res) => {
+  const { employeeId } = req.params;
+  const { requestId, newStatus } = req.body;
+
+  if (!db.data) return res.status(500).send('Database not loaded');
+
+  const employee = db.data.employees.find((emp) => emp._id === employeeId);
+
+  if (!employee) {
+    return res.status(404).json({ message: 'Employee not found' });
+  }
+
+  const request = employee.requests.find(
+    (r) => String(r.id) === String(requestId),
+  );
+  if (!request) {
+    return res.status(404).json({ message: 'Request not found' });
+  }
+
+  request.status = newStatus;
+  console.log(request);
+  await db.write();
+  res.json(request);
+  return res.status(200).json(request);
+});
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {

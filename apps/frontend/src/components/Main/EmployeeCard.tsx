@@ -15,7 +15,6 @@ export default function EmployeeCard({
   user,
   variant,
   onClick,
-  key,
 }: EmployeeCardProps): React.ReactElement {
   return (
     <div
@@ -23,7 +22,6 @@ export default function EmployeeCard({
       className={`employee-${variant} employee-item`}
       data-id={user._id}
       onClick={() => onClick(user._id)}
-      key={key}
     >
       <Wrapper display={variant} user={user} />
       <p className={`employee-${variant}__name`}>

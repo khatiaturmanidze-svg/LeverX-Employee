@@ -64,9 +64,14 @@ export interface IRequestData {
   id: string;
   type: string;
   start_date: string;
+  employeeId: string;
   end_date: string;
   note: string;
 
   status: 'approved' | 'pending' | 'rejected';
   // need to add approver (manager of logged in user)
 }
+
+export type RequestUpdate = Partial<Omit<IRequestData, 'id'>> & {
+  manager?: string | null;
+};

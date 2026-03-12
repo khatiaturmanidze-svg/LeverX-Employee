@@ -2,24 +2,63 @@ import React, { useState } from 'react';
 import RequestListItem from './RequestListItem';
 import { useGetRequestsQuery } from '../../features/RequestsApi';
 import { useParams } from 'react-router-dom';
+import TabGroup from '../reusable/TabGroup';
+import { getManagedEmployees } from '../../utils/core';
+import { useGetUsersQuery } from '../../features/usersApi';
 
 export default function RequestList(): React.ReactElement {
   const [requestType, setRequestType] = useState('');
+  const [isPersonal, setIsPersonal] = useState(true);
   const { id } = useParams();
 
   const { data: requests = [] } = useGetRequestsQuery(id);
+  const { data: allUsers = [] } = useGetUsersQuery();
 
-  const visibleRequests = requests.filter((req) => {
+  const managedUsers = getManagedEmployees(allUsers);
+  const teamRequests = managedUsers.flatMap((user) =>
+    user.requests.map((req) => ({
+      ...req,
+      employeeId: user._id,
+      employeeName: `${user.first_name} ${user.last_name}`,
+    })),
+  );
+
+  const currentDataSource = isPersonal ? requests : teamRequests;
+
+  const visibleRequests = currentDataSource.filter((req) => {
     if (requestType === 'All types of requests' || requestType === '') {
       return true;
     }
     return req.type.toLowerCase() === requestType.toLowerCase();
   });
 
+  const tabs = [
+    {
+      id: 'personal-requests',
+      label: 'personal requests',
+      isActive: true,
+      onClick: () => setIsPersonal(true),
+      className: 'request-list__personel',
+    },
+    {
+      id: 'team-requests',
+      label: 'team requests',
+      isActive: true,
+      onClick: () => setIsPersonal(false),
+      className: 'request-list__team',
+    },
+  ];
   return (
     <div className="request-list card">
+      <TabGroup
+        containerClassName="tab-container"
+        tabBaseClassName=""
+        tabs={tabs}
+      />
       <div className="flex--horizontal ">
-        <p className="request-list__header">My leave requests</p>
+        <p className="request-list__header">
+          {isPersonal ? 'My leave requests' : 'Team leave requests'}
+        </p>
         <select
           className="request-list__select"
           onChange={(e) => setRequestType(e.target.value)}
@@ -33,7 +72,7 @@ export default function RequestList(): React.ReactElement {
 
       {visibleRequests.length > 0 ? (
         visibleRequests.map((req) => (
-          <RequestListItem key={req.id} request={req} />
+          <RequestListItem key={req.id} request={req} isPersonal={isPersonal} />
         ))
       ) : (
         <div>
