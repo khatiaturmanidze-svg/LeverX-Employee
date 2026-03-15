@@ -1,7 +1,7 @@
 import React, { useReducer } from 'react';
 import { IRequestData } from '../../types/type';
 import { useAddRequestMutation } from '../../features/RequestsApi';
-import { getLoggedInUser } from '../../utils/core';
+import { getLoggedInUser, validateRequest } from '../../utils/core';
 import { useGetUsersQuery } from '../../features/usersApi';
 
 interface FormState {
@@ -77,8 +77,15 @@ export default function RequestForm(): React.ReactElement {
   const [addRequest, { isLoading, isError, error }] = useAddRequestMutation();
 
   const loggedInId = getLoggedInUser(allUsers)?._id;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const validationErrors = validateRequest(state.data);
+    console.log(state.data.start_date);
+    if (Object.keys(validationErrors).length > 0) {
+      dispatch({ type: 'SUBMIT_ERROR', errors: validationErrors });
+      return;
+    }
 
     try {
       await addRequest({
@@ -141,6 +148,9 @@ export default function RequestForm(): React.ReactElement {
                 })
               }
             />
+            {state.errors.start_date && (
+              <p className="form-error">{state.errors.start_date}</p>
+            )}
           </div>
           <div className="form-group">
             <label>End Date</label>
@@ -154,6 +164,9 @@ export default function RequestForm(): React.ReactElement {
                 })
               }
             />
+            {state.errors.end_date && (
+              <p className="form-error">{state.errors.end_date}</p>
+            )}
           </div>
         </div>
 
@@ -169,6 +182,9 @@ export default function RequestForm(): React.ReactElement {
               })
             }
           ></textarea>
+          {state.errors.note && (
+            <p className="form-error">{state.errors.note}</p>
+          )}
         </div>
 
         <button type="submit" className="btn-submit" disabled={isLoading}>

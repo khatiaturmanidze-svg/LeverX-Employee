@@ -69,7 +69,6 @@ export interface IRequestData {
   note: string;
 
   status: 'approved' | 'pending' | 'rejected';
-  // need to add approver (manager of logged in user)
 }
 
 export type RequestUpdate = Partial<Omit<IRequestData, 'id'>> & {

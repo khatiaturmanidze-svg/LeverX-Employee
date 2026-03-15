@@ -94,17 +94,7 @@
           "end_date": 1683608400000
         }
       ],
-      "requests": [
-        {
-          "id": "req-101",
-          "type": "Sick leave",
-          "start_date": "2026-03-10",
-          "end_date": "2026-03-12",
-          "note": "Medical checkup at NERV.",
-          "employeeId": "1",
-          "status": "rejected"
-        }
-      ]
+      "requests": []
     },
     {
       "_id": "2",
@@ -143,16 +133,7 @@
           "end_date": 1683608400000
         }
       ],
-      "requests": [
-        {
-          "id": "1234",
-          "type": "vacation",
-          "start_date": "12-12-12",
-          "end_date": "12-12-12",
-          "note": "ajsjfrw",
-          "employeeId": "2"
-        }
-      ]
+      "requests": []
     },
     {
       "_id": "3",
@@ -191,16 +172,7 @@
           "end_date": 1683608400000
         }
       ],
-      "requests": [
-        {
-          "id": "1234",
-          "type": "Vacation",
-          "start_date": "2026-04-01",
-          "end_date": "2026-04-14",
-          "note": "Trip to the seaside.",
-          "employeeId": "3"
-        }
-      ]
+      "requests": []
     },
     {
       "_id": "4",
@@ -278,24 +250,7 @@
           "end_date": 1683608400000
         }
       ],
-      "requests": [
-        {
-          "id": "req-102",
-          "type": "Military leave",
-          "start_date": "2026-05-20",
-          "end_date": "2026-05-25",
-          "note": "Training exercise.",
-          "employeeId": "5"
-        },
-        {
-          "id": "req-103",
-          "type": "Vacation",
-          "start_date": "2026-08-01",
-          "end_date": "2026-08-05",
-          "note": "Going back to Germany.",
-          "employeeId": "5"
-        }
-      ]
+      "requests": []
     },
     {
       "_id": "6",
@@ -334,16 +289,7 @@
           "end_date": 1683608400000
         }
       ],
-      "requests": [
-        {
-          "id": "req-105",
-          "type": "Sick leave",
-          "start_date": "2026-03-09",
-          "end_date": "2026-03-09",
-          "note": "Feeling a bit out of sync today.",
-          "employeeId": "6"
-        }
-      ]
+      "requests": []
     },
     {
       "_id": "7",
@@ -460,7 +406,17 @@
           "end_date": 1683608400000
         }
       ],
-      "requests": []
+      "requests": [
+        {
+          "employeeId": "9",
+          "type": "Sick leave",
+          "start_date": "2026-03-18",
+          "end_date": "2026-03-19",
+          "note": "ad",
+          "status": "approved",
+          "id": "0.311010012010032221200310122"
+        }
+      ]
     },
     {
       "_id": "10",
@@ -538,7 +494,17 @@
           "end_date": 1683608400000
         }
       ],
-      "requests": []
+      "requests": [
+        {
+          "employeeId": "11",
+          "type": "Military leave",
+          "start_date": "2026-03-25",
+          "end_date": "2026-03-27",
+          "note": "ad",
+          "status": "pending",
+          "id": "0.332021313030220033231333002"
+        }
+      ]
     }
   ]
 }

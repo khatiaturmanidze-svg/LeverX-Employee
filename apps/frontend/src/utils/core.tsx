@@ -88,3 +88,27 @@ export const getManagedEmployees = (users: IEmployee[]): IEmployee[] => {
   if (!currentUser) return [];
   return users.filter((u) => u.manager?.id === currentUser._id);
 };
+
+export function validateRequest(data: IRequestData) {
+  const errors: Record<string, string> = {};
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const start = new Date(data.start_date);
+  const end = new Date(data.end_date);
+
+  if (!data.start_date) {
+    errors.start_date = 'Start date is required';
+  } else if (start < today) {
+    errors.start_date = 'Start date cannot be in the past';
+  }
+
+  if (!data.end_date) {
+    errors.end_date = 'End date is required';
+  } else if (end < start) {
+    errors.end_date = 'End date must be after start date';
+  }
+
+  return errors;
+}

@@ -56,7 +56,13 @@ const RequestListItem: React.FC<RequestListItemProps> = ({
         </div>
         {isPersonal === true ? (
           <div className="detail-group">
-            <label>Approved by</label>
+            <label>
+              {request.status === 'approved'
+                ? 'Approved by'
+                : request.status === 'rejected'
+                  ? 'Rejected by'
+                  : 'Awaiting for approval'}
+            </label>
             <span className="approver"></span>
           </div>
         ) : (
