@@ -77,10 +77,10 @@ export function getDisplayStatus(req: IRequestData) {
   const start = new Date(req.start_date).getTime();
   const end = new Date(req.end_date).getTime();
 
-  if (today >= start && today <= end) return 'Active';
-  if (today < start) return 'Approved (Upcoming)';
+  if (today >= start && today <= end) return 'active';
+  if (today < start) return 'upcoming';
 
-  return 'Completed';
+  return 'completed';
 }
 
 export const getManagedEmployees = (users: IEmployee[]): IEmployee[] => {

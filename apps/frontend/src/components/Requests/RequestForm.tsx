@@ -139,7 +139,6 @@ export default function RequestForm(): React.ReactElement {
             <label>Start Date</label>
             <input
               type="date"
-              o
               onChange={(e) =>
                 dispatch({
                   type: 'SET_FIELD',

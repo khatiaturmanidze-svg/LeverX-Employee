@@ -75,13 +75,15 @@ const RequestListItem: React.FC<RequestListItemProps> = ({
           <div className="flex--horizontal">
             <button
               onClick={approveRequest}
-              disabled={isLoading || request.status === 'approved'}
+              disabled={isLoading || request.status !== 'pending'}
+              className="request-btn__approve"
             >
               {isLoading ? '...' : 'approve'}
             </button>
             <button
               onClick={rejectRequest}
-              disabled={isLoading || request.status === 'rejected'}
+              disabled={isLoading || request.status !== 'pending'}
+              className="request-btn__reject"
             >
               reject
             </button>

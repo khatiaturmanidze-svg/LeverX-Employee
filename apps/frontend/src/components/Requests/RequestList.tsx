@@ -36,24 +36,25 @@ export default function RequestList(): React.ReactElement {
     {
       id: 'personal-requests',
       label: 'personal requests',
-      isActive: true,
+      isActive: isPersonal,
       onClick: () => setIsPersonal(true),
-      className: 'request-list__personel',
+      className: 'request-list__tab-personal',
     },
     {
       id: 'team-requests',
       label: 'team requests',
-      isActive: true,
+      isActive: !isPersonal,
       onClick: () => setIsPersonal(false),
-      className: 'request-list__team',
+      className: 'request-list__tab-team',
     },
   ];
   return (
     <div className="request-list card">
       <TabGroup
-        containerClassName="tab-container"
+        containerClassName="request-list__tab"
         tabBaseClassName=""
         tabs={tabs}
+        activeModifierClassName="request-list__tab-active"
       />
       <div className="flex--horizontal ">
         <p className="request-list__header">
@@ -69,23 +70,28 @@ export default function RequestList(): React.ReactElement {
           <option>Military leave</option>
         </select>
       </div>
-
-      {visibleRequests.length > 0 ? (
-        visibleRequests.map((req) => (
-          <RequestListItem key={req.id} request={req} isPersonal={isPersonal} />
-        ))
-      ) : (
-        <div>
-          <img
-            src="/assets/nothing-found.jpg"
-            alt="nothing found"
-            className="request-form__img"
-          />
-          <p className="request-list__nothing">
-            No {requestType} requests found
-          </p>
-        </div>
-      )}
+      <div className="request-list__items">
+        {visibleRequests.length > 0 ? (
+          visibleRequests.map((req) => (
+            <RequestListItem
+              key={req.id}
+              request={req}
+              isPersonal={isPersonal}
+            />
+          ))
+        ) : (
+          <div>
+            <img
+              src="/assets/nothing-found.jpg"
+              alt="nothing found"
+              className="request-form__img"
+            />
+            <p className="request-list__nothing">
+              No {requestType} requests found
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

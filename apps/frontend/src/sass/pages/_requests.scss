@@ -12,12 +12,13 @@
 .requests-grid {
   display: grid;
   grid-template-columns: 1fr 2fr;
-  grid-template-rows: 1fr 3fr;
-  justify-items: center;
-  align-items: center;
+  grid-template-rows: auto 1fr;
+  align-items: start;
+  justify-items: start;
   margin: 1rem 4rem;
   padding: 2rem;
   gap: $space-md;
+  height: auto;
 }
 
 .manager-wrapper {
@@ -43,15 +44,20 @@
 .manager_card {
   display: grid;
   border-radius: 8px;
-  grid-template-columns: 1fr 3fr;
-  //   align-items: center;
+  grid-template-columns: auto 1fr;
+  align-items: center;
 
-  gap: 1rem;
-  padding: $space-sm;
-
+  gap: $space-md;
+  padding: $space-md;
+  transition: all 0.3s;
   &:hover {
     background-color: $color-lighter-grey;
-    transition: all 0.3s;
+    transform: translateY(-1px);
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
   }
 
   &__img {
@@ -65,16 +71,16 @@
   &__name {
     margin: 0;
     font-weight: 600;
-    font-size: 1.1rem;
-    color: #333;
+    font-size: $font-small;
+    color: $color-font;
   }
 
   &__department {
     margin: 0.25rem 0 0;
-    font-size: 0.9rem;
+    font-size: $font-smallest;
     color: #666;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.6px;
   }
 }
 
@@ -86,10 +92,10 @@
 }
 
 .request-list {
-  height: 100%;
   display: flex;
   flex-direction: column;
   gap: $space-md;
+  min-height: 0;
 
   &__header {
     font-size: $space-md;
@@ -114,7 +120,14 @@
     color: $color-darker-grey;
   }
 }
-
+.request-list__items {
+  display: flex;
+  flex-direction: column;
+  gap: $space-md;
+  flex: 1;
+  max-height: 400px;
+  overflow-y: auto;
+}
 .request-list__item {
   padding: $space-md;
   background-color: $color-lighter-grey;
@@ -173,7 +186,9 @@
 
   &__img {
     width: 100%;
+    max-height: 420px;
     height: auto;
+    object-fit: contain;
     margin-bottom: $space-md;
   }
 
@@ -238,19 +253,75 @@
   }
 }
 
-.request-list__status {
-  padding: 4px 8px;
-  border-radius: $radius-small;
-  font-size: $font-smallest;
-  font-weight: bold;
-
-  &.status--active {
-    background-color: $color-purple;
-    color: $color-white;
+.request-list__tab {
+  display: flex;
+  gap: $space-md;
+  justify-content: space-around;
+  &-team,
+  &-personal {
+    color: $color-grey;
+    text-transform: uppercase;
+    font-size: $font-smallest;
+    padding-bottom: $space-md;
+    font-weight: 300;
   }
 
-  &.status--pending {
-    background-color: $color-500;
-    color: $color-white;
+  &-active {
+    border-bottom: 1px solid $color-darker-grey;
+    color: $color-darker-grey;
+  }
+}
+
+.status-pill {
+  background-color: $color-darker-grey;
+  padding: $space-xs;
+  border-radius: $radius-pill;
+  color: $color-darker-grey;
+}
+
+.status {
+  &--pending {
+    background-color: $status-pending;
+  }
+
+  &--rejected {
+    background-color: $status-rejected;
+  }
+
+  &--approved {
+    background-color: $status-approved;
+  }
+  &--upcoming {
+    background-color: $status-upcoming;
+  }
+  &--completed {
+    background-color: $status-completed;
+  }
+}
+
+.request-btn {
+  &__approve,
+  &__reject {
+    margin-top: $space-sm;
+    padding: $space-xs;
+    border-radius: $radius-pill;
+    background-color: #cdd9ea;
+    color: $color-darker-grey;
+    transition: all 0.3s;
+    &:disabled {
+      background-color: $color-lighter-grey;
+      color: $color-font;
+    }
+  }
+
+  &__approve:hover,
+  &__reject:hover {
+    background-color: #b0c9ec;
+    color: $color-lighter-grey;
+
+    &:disabled {
+      background-color: $color-lighter-grey;
+      color: $color-font;
+    }
   }
 }

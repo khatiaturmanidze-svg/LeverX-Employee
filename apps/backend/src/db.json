@@ -415,6 +415,33 @@
           "note": "ad",
           "status": "rejected",
           "id": "0.311010012010032221200310122"
+        },
+        {
+          "employeeId": "9",
+          "type": "Military leave",
+          "start_date": "2026-03-19",
+          "end_date": "2026-03-25",
+          "note": "AWE",
+          "status": "pending",
+          "id": "0.220312303022023211211011"
+        },
+        {
+          "employeeId": "9",
+          "type": "Vacation",
+          "start_date": "2026-03-21",
+          "end_date": "2026-03-28",
+          "note": "",
+          "status": "pending",
+          "id": "0.12302202011220122100203102"
+        },
+        {
+          "employeeId": "9",
+          "type": "Sick leave",
+          "start_date": "2026-03-19",
+          "end_date": "2026-03-25",
+          "note": "ff",
+          "status": "pending",
+          "id": "0.01300131303102211300012"
         }
       ]
     },
@@ -501,7 +528,7 @@
           "start_date": "2026-03-25",
           "end_date": "2026-03-27",
           "note": "ad",
-          "status": "pending",
+          "status": "rejected",
           "id": "0.332021313030220033231333002"
         }
       ]
