@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom';
 import TabGroup from '../reusable/TabGroup';
 import { getManagedEmployees } from '../../utils/core';
 import { useGetUsersQuery } from '../../features/usersApi';
+import { IRequestData } from '../../types/type';
 
 export default function RequestList(): React.ReactElement {
   const [requestType, setRequestType] = useState('');
@@ -16,7 +17,7 @@ export default function RequestList(): React.ReactElement {
 
   const managedUsers = getManagedEmployees(allUsers);
   const teamRequests = managedUsers.flatMap((user) =>
-    user.requests.map((req) => ({
+    user.requests?.map((req) => ({
       ...req,
       employeeId: user._id,
       employeeName: `${user.first_name} ${user.last_name}`,
@@ -29,7 +30,7 @@ export default function RequestList(): React.ReactElement {
     if (requestType === 'All types of requests' || requestType === '') {
       return true;
     }
-    return req.type.toLowerCase() === requestType.toLowerCase();
+    return req?.type.toLowerCase() === requestType.toLowerCase();
   });
 
   const tabs = [
@@ -72,13 +73,15 @@ export default function RequestList(): React.ReactElement {
       </div>
       <div className="request-list__items">
         {visibleRequests.length > 0 ? (
-          visibleRequests.map((req) => (
-            <RequestListItem
-              key={req.id}
-              request={req}
-              isPersonal={isPersonal}
-            />
-          ))
+          visibleRequests
+            .filter((req): req is IRequestData => req !== undefined)
+            .map((req) => (
+              <RequestListItem
+                key={req?.id}
+                request={req}
+                isPersonal={isPersonal}
+              />
+            ))
         ) : (
           <div>
             <img

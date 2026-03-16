@@ -76,8 +76,6 @@ export default function RequestForm(): React.ReactElement {
   const [state, dispatch] = useReducer(requestReducer, initialState);
   const [addRequest, { isLoading, isError, error }] = useAddRequestMutation();
 
-  const loggedInId = getLoggedInUser(allUsers)?._id;
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const validationErrors = validateRequest(state.data);
@@ -86,7 +84,12 @@ export default function RequestForm(): React.ReactElement {
       dispatch({ type: 'SUBMIT_ERROR', errors: validationErrors });
       return;
     }
+    const loggedInId = getLoggedInUser(allUsers)?._id;
 
+    if (!loggedInId) {
+      console.error('User not found');
+      return;
+    }
     try {
       await addRequest({
         employeeId: loggedInId,

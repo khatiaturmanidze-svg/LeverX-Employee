@@ -1,7 +1,9 @@
 {
   "extends": "../../tsconfig.common.json",
-  "include": ["src/*"],
+  "include": ["src/*", "src/features/pages"],
   "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "outDir": "dist",
     "jsx": "react-jsx"
   }

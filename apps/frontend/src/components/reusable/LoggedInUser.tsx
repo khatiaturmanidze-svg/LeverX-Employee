@@ -1,7 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { IEmployee } from '../../types/type';
 
-export default function LoggedInUser({ loggedInUser }) {
+interface LoggedInUserProps {
+  loggedInUser: IEmployee | null;
+}
+
+export default function LoggedInUser({ loggedInUser }: LoggedInUserProps) {
   const navigate = useNavigate();
   return (
     <div

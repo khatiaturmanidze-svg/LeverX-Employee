@@ -68,7 +68,7 @@ const RequestListItem: React.FC<RequestListItemProps> = ({
                   : 'Awaiting for approval'}
             </label>
             <span className="approver">
-              {manager.first_name} {manager.last_name}
+              {manager?.first_name} {manager?.last_name}
             </span>
           </div>
         ) : (
