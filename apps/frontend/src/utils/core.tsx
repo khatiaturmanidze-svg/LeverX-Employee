@@ -112,3 +112,10 @@ export function validateRequest(data: IRequestData) {
 
   return errors;
 }
+
+// export function getManager(employeeId: string, users: IEmployee[]) {
+//   const employeeObj = users.find((u) => u._id === employeeId);
+
+//   const employeeManager = employeeObj?.manager;
+//   return employeeManager;
+// }

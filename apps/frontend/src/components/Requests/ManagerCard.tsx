@@ -10,7 +10,6 @@ const ManagerCard: React.FC<ManagerCardProps> = ({ manager }) => {
   const { data: allUsers = [] } = useGetUsersQuery();
 
   const managerInfo = getUserById(allUsers, manager.id);
-  console.log('managerInfo', managerInfo);
   return (
     <div className="manager_card">
       <img

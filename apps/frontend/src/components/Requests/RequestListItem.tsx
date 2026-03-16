@@ -2,6 +2,7 @@ import React from 'react';
 import { IRequestData } from '../../types/type';
 import { getDisplayStatus } from '../../utils/core';
 import { useUpdateRequestMutation } from '../../features/RequestsApi';
+import { useGetManager } from '../../utils/customHooks';
 
 interface RequestListItemProps {
   request: IRequestData;
@@ -35,6 +36,9 @@ const RequestListItem: React.FC<RequestListItemProps> = ({
       console.error('Reject failed:', error);
     }
   };
+
+  const manager = useGetManager(request.employeeId);
+
   return (
     <div className="request-list__item">
       <div className="request-list__item-header">
@@ -63,7 +67,9 @@ const RequestListItem: React.FC<RequestListItemProps> = ({
                   ? 'Rejected by'
                   : 'Awaiting for approval'}
             </label>
-            <span className="approver"></span>
+            <span className="approver">
+              {manager.first_name} {manager.last_name}
+            </span>
           </div>
         ) : (
           <div className="flex--horizontal">
