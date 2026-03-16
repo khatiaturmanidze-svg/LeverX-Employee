@@ -1,10 +1,10 @@
-import { JSONFilePreset } from 'lowdb/node';
 import bcrypt from 'bcrypt';
 import express from 'express';
 import cors from 'cors';
 import type { Request, Response, NextFunction } from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
 
 import type {
   IAuthUser,
@@ -15,27 +15,21 @@ import type {
   SignUpResponse,
   ErrorResponse,
   UpdateRoleResponse,
-  DatabaseSchema,
 } from './serverTypes.js';
 import type { IEmployee, IRequestData } from './employeeTypes.js';
-const app = express();
-app.use(cors());
-app.use(express.json());
+import { initDatabase } from './database.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
+const app = express();
+app.use(cors());
+app.use(express.json());
 app.use(express.static(path.join(__dirname, '../dist')));
 
-// Use an absolute path so it works both when running from `server/`
-// and when running compiled output from `dist-server/`.
-const dbFilePath = path.join(__dirname, '../src/db.json');
-const db = await JSONFilePreset<DatabaseSchema>(dbFilePath, {
-  authUsers: [],
-  employees: [],
-});
-
-const DUMMY_TOKEN = 'authorized-can-access';
+const db = await initDatabase();
+const DUMMY_TOKEN = process.env.VITE_AUTH_TOKEN || 'secret-token';
 
 function authMiddleware(
   req: Request,
@@ -135,8 +129,8 @@ app.post<Record<string, never>, SignUpResponse | ErrorResponse, SignUpRequest>(
       res.status(400).json({ error: 'email already exists' });
       return;
     }
-
-    const hashed_password = await bcrypt.hash(password, 13);
+    const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS) || 13;
+    const hashed_password = await bcrypt.hash(password, saltRounds);
 
     const newAuthUser: IAuthUser = { email, hashed_password };
 
@@ -265,12 +259,13 @@ app.post<{ id: string }, IRequestData | ErrorResponse, IRequestData>(
 
     employee.requests.push(finalizedRequest);
 
+    await db.write();
+
     res.status(201).json(finalizedRequest);
   },
 );
 
-const PORT = process.env.PORT || 3000;
-
+const PORT = process.env.VITE_API_PORT;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

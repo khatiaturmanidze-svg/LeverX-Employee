@@ -1,27 +1,25 @@
-12/02
-Main page
-Refactoring Header Component
+# setup and installation
 
-- moved Logo into reusable stateless component
-- moved log off button into reusable stateless component
-- moved Header Tabs as separate component that encapsulates its own logic (stateful)
+### install dependencies
 
-created TabGroup reusable
+npm i
 
-- using it on address book
-- search toggle
-- grid/list view
+### configure env variables
 
-employee cards
+Create a `.env` file in the root directory and define the following variables:
+`VITE_API_PORT` -> The port the backend server runs on
+`VITE_API_TARGET` -> The full URL the frontend proxies to
+`VITE_AUTH_TOKEN` -> Static token for API authorization
+`BCRYPT_SALT_ROUNDS` -> Cost factor for password hashing
+`DATABASE_PATH` -> Relative path to the JSON database
+`VITE_TEST_USER_EMAIL` -> Email for the auto-generated Admin
+`VITE_TEST_USER_PASSWORD` -> Password for the auto-generated Admin
 
-- combined employee grid card and list card, for dry principle
-- removed unnessecary code from Main
-- broke Main page incapsulated/reusable components
+### database
 
-#### config of lint staged & husky, prettier, eslint.
+- on the first run, the program will automatically generate a fresh db.json file (ignored by Git)
+- send the database with they test user credentials defined in your .env (the role of test user is 'admin' by default)
 
-13/02
-Roles page
+# scripts to run from root directory
 
-- created reusable roles button, so now we can add as many roles as we want
-- created useFilteredItems hook
+- npm run dev -> builds the project, then starts the frontend and backend in parallel
