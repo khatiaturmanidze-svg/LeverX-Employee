@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
-    "module": "esnext",
+    "target": "ESNext",
+    "types": ["vite/client"],
     "skipLibCheck": true,
-    "moduleResolution": "bundler"
+    "moduleResolution": "bundler",
+    "strict": true
   }
 }

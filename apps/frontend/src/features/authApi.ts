@@ -23,7 +23,7 @@ interface signUpResponse {
   employee: IEmployee;
 }
 
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = '/api';
 
 export const authApi = createApi({
   reducerPath: 'authApi',

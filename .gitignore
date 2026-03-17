@@ -3,3 +3,5 @@ dist/
 package-lock.json
 .vscode/
 dist-server/
+.env
+apps/backend/src/db.json
