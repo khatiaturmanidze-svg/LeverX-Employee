@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> 705f3a45841f7a66cb6eee40bcabf5b93a5c5d92
 # setup and installation
 
 ### install dependencies
@@ -23,3 +27,7 @@ Create a `.env` file in the root directory and define the following variables:
 # scripts to run from root directory
 
 - npm run dev -> builds the project, then starts the frontend and backend in parallel
+<<<<<<< HEAD
+=======
+
+>>>>>>> 705f3a45841f7a66cb6eee40bcabf5b93a5c5d92
