@@ -1,34 +1,3 @@
-<<<<<<< HEAD
-The feature includes:
-
-- Request creation form
-- Form validation
-- Integration with backend API
-- User authentication check
-- Error handling for invalid inputs
-
-## Running the Project
-
-Start Backend
-
-- npm run start -w @mono/backend
-  Start Frontend
-- npm run dev -w @mono/frontend
-
-## Test User Credentials
-
-Use the following credentials to log in:
-Email: anno.hideaki@leverx.com
-Password: password11
-
-to test sending request log in with:
-manager credentials:
-Email: misato.katsuragi@leverx.com
-Password: password4
-managed employee:
-Email: pen.pen@leverx.com
-Password: password9
-=======
 # setup and installation
 
 ### install dependencies
@@ -54,4 +23,3 @@ Create a `.env` file in the root directory and define the following variables:
 # scripts to run from root directory
 
 - npm run dev -> builds the project, then starts the frontend and backend in parallel
->>>>>>> da2c56d66358c35e8f74e5b59f0a51bd2d5e93df
