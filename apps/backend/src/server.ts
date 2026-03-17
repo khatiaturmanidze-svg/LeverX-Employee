@@ -286,9 +286,7 @@ app.put('/requests/:employeeId', async (req, res) => {
   }
 
   request.status = newStatus;
-  console.log(request);
   await db.write();
-  res.json(request);
   return res.status(200).json(request);
 });
 

@@ -79,7 +79,6 @@ export default function RequestForm(): React.ReactElement {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const validationErrors = validateRequest(state.data);
-    console.log(state.data.start_date);
     if (Object.keys(validationErrors).length > 0) {
       dispatch({ type: 'SUBMIT_ERROR', errors: validationErrors });
       return;

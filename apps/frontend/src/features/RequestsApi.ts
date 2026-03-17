@@ -15,7 +15,7 @@ export const requestsApi = createApi({
         url: `/requests/${id}`,
         headers: { Authorization: DUMMY_TOKEN },
       }),
-      providesTags: ['requests'],
+      providesTags: (result, error, id) => [{ type: 'requests', id }],
     }),
     addRequest: builder.mutation<
       IRequestData,
@@ -29,7 +29,9 @@ export const requestsApi = createApi({
         },
         body,
       }),
-      invalidatesTags: ['requests'],
+      invalidatesTags: (result, error, { employeeId }) => [
+        { type: 'requests', id: employeeId },
+      ],
     }),
     updateRequest: builder.mutation<
       IRequestData,
@@ -38,10 +40,11 @@ export const requestsApi = createApi({
       query: ({ employeeId, requestId, newStatus }) => ({
         url: `/requests/${employeeId}`,
         method: 'PUT',
+        headers: { Authorization: DUMMY_TOKEN },
         body: { requestId, newStatus },
       }),
-      invalidatesTags: (result, error, { requestId }) => [
-        { type: 'requests', id: requestId },
+      invalidatesTags: (result, error, { employeeId }) => [
+        { type: 'requests', id: employeeId },
       ],
     }),
   }),

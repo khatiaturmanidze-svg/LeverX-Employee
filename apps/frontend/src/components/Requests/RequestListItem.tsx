@@ -3,6 +3,8 @@ import { IRequestData } from '../../types/type';
 import { getDisplayStatus } from '../../utils/core';
 import { useUpdateRequestMutation } from '../../features/RequestsApi';
 import { useGetManager } from '../../utils/customHooks';
+import { useDispatch } from 'react-redux';
+import { usersApi } from '../../features/usersApi';
 
 interface RequestListItemProps {
   request: IRequestData;
@@ -14,24 +16,31 @@ const RequestListItem: React.FC<RequestListItemProps> = ({
   isPersonal,
 }) => {
   const [updateRequest, { isLoading }] = useUpdateRequestMutation();
+  const dispatch = useDispatch();
   const approveRequest = async () => {
+    if (isLoading) return;
     try {
       await updateRequest({
         employeeId: request.employeeId,
         requestId: request.id,
         newStatus: 'approved',
       }).unwrap();
+      dispatch(usersApi.util.invalidateTags([{ type: 'users' }]));
     } catch (error) {
       console.error('Approve failed:', error);
     }
   };
   const rejectRequest = async () => {
+    if (isLoading) return;
+
     try {
       await updateRequest({
         employeeId: request.employeeId,
         requestId: request.id,
         newStatus: 'rejected',
       }).unwrap();
+
+      dispatch(usersApi.util.invalidateTags(['users']));
     } catch (error) {
       console.error('Reject failed:', error);
     }

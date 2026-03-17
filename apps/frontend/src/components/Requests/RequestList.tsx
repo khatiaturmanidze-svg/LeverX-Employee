@@ -4,16 +4,18 @@ import { useGetRequestsQuery } from '../../features/RequestsApi';
 import { useParams } from 'react-router-dom';
 import TabGroup from '../reusable/TabGroup';
 import { getManagedEmployees } from '../../utils/core';
-import { useGetUsersQuery } from '../../features/usersApi';
+import { useGetUsersQuery, usersApi } from '../../features/usersApi';
 import { IRequestData } from '../../types/type';
+import { useDispatch } from 'react-redux';
 
 export default function RequestList(): React.ReactElement {
   const [requestType, setRequestType] = useState('');
   const [isPersonal, setIsPersonal] = useState(true);
   const { id } = useParams();
-
+  const dispatch = useDispatch();
   const { data: requests = [] } = useGetRequestsQuery(id);
   const { data: allUsers = [] } = useGetUsersQuery();
+  dispatch(usersApi.util.invalidateTags(['users']));
 
   const managedUsers = getManagedEmployees(allUsers);
   const teamRequests = managedUsers.flatMap((user) =>
