@@ -12,7 +12,7 @@ export function EmployeeView({ user }: EmployeeViewProps) {
     ? formatDateOfBirth(user.date_birth)
     : 'no date of birth';
   const managerName = user.manager
-    ? `${user.manager.first_name.concat(user.manager.last_name)}`
+    ? `${user.manager.first_name} ${user.manager.last_name}`
     : 'no manager assigned';
 
   return (

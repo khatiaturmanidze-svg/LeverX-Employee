@@ -3,63 +3,18 @@ import { IEmployee, EmployeeUpdate, IVisa } from '../../types/type';
 import { DetailRow } from './DetailRow';
 import VisaEditorList from './VisaEditorList';
 import {
-  EmployeeFormState,
-  getEmployeeFormState,
+  getInitialState,
   validateEmployeeForm,
-} from '../../utils/employeeFormUtils';
-
-const defaultVisa: IVisa = {
-  issuing_country: '',
-  type: '',
-  start_date: '',
-  end_date: '',
-};
-
-type FormAction =
-  | {
-      type: 'SET_FIELD';
-      field: keyof EmployeeFormState;
-      value: EmployeeFormState[keyof EmployeeFormState];
-    }
-  | { type: 'SET_VISA'; index: number; field: keyof IVisa; value: string }
-  | { type: 'SUBMIT_START' }
-  | { type: 'SUBMIT_SUCCESS' }
-  | { type: 'SUBMIT_ERROR'; errors: Record<string, string> };
-
-interface FormState {
-  formData: EmployeeFormState;
-  isSubmitting: boolean;
-  errors: Record<string, string>;
-}
-
-function formReducer(state: FormState, action: FormAction): FormState {
-  switch (action.type) {
-    case 'SET_FIELD':
-      return {
-        ...state,
-        formData: { ...state.formData, [action.field]: action.value },
-      };
-    case 'SET_VISA': {
-      const visas = [...(state.formData.visas || [])];
-      visas[action.index] = {
-        ...(visas[action.index] || defaultVisa),
-        [action.field]: action.value,
-      };
-      return {
-        ...state,
-        formData: { ...state.formData, visas },
-      };
-    }
-    case 'SUBMIT_START':
-      return { ...state, isSubmitting: true };
-    case 'SUBMIT_SUCCESS':
-      return { ...state, isSubmitting: false, errors: {} };
-    case 'SUBMIT_ERROR':
-      return { ...state, isSubmitting: false, errors: action.errors };
-    default:
-      return state;
-  }
-}
+} from '../../features/details/EmployeeEditForm/helpers';
+import { EmployeeFormState } from '../../features/details/EmployeeEditForm/state.types';
+import {
+  editReducer,
+  setField,
+  setVisa,
+  submitError,
+  submitStart,
+  submitSuccess,
+} from '../../features/details/EmployeeEditForm/state';
 
 interface EmployeEditFormProps {
   user: IEmployee;
@@ -67,38 +22,30 @@ interface EmployeEditFormProps {
   onSaveSuccess: (updatedUser: EmployeeUpdate) => void;
 }
 
-const getInitialState = (user: IEmployee): FormState => ({
-  formData: getEmployeeFormState(user),
-  isSubmitting: false,
-  errors: {},
-});
-
 export function EmployeeEditForm({
   user,
   onCancel,
   onSaveSuccess,
 }: EmployeEditFormProps) {
-  const [state, dispatch] = useReducer(formReducer, user, getInitialState);
+  const [state, dispatch] = useReducer(editReducer, user, getInitialState);
   const { formData, isSubmitting, errors } = state;
 
   const handleInputChange = (
     fieldName: keyof EmployeeFormState,
     newValue: string,
-  ) => {
-    dispatch({ type: 'SET_FIELD', field: fieldName, value: newValue });
-  };
+  ) => dispatch(setField(fieldName, newValue));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch({ type: 'SUBMIT_START' });
+    dispatch(submitStart());
 
     const validationErrors = validateEmployeeForm(formData);
     if (Object.keys(validationErrors).length > 0) {
-      dispatch({ type: 'SUBMIT_ERROR', errors: validationErrors });
+      dispatch(submitError(validationErrors));
       return;
     }
 
-    dispatch({ type: 'SUBMIT_SUCCESS' });
+    dispatch(submitSuccess());
 
     const [year, month, day] = formData.date_birth
       ? formData.date_birth.split('-').map(Number)
@@ -130,7 +77,7 @@ export function EmployeeEditForm({
     field: keyof IVisa,
     value: string,
   ) => {
-    dispatch({ type: 'SET_VISA', index, field, value });
+    dispatch(setVisa(index, field, value));
   };
 
   const renderEditableRow = (
