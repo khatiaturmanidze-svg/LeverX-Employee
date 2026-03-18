@@ -1,5 +1,6 @@
 import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
-import { IEmployee, IDateOfBirth, IRequestData } from '../types/type';
+import { IEmployee, IDateOfBirth } from '../types/type';
+import { IRequestData } from '../features/requests/requestForm/state.types';
 
 // getting logged in user
 export const getLoggedInUser = (users: IEmployee[]): IEmployee | undefined => {
@@ -112,10 +113,3 @@ export function validateRequest(data: IRequestData) {
 
   return errors;
 }
-
-// export function getManager(employeeId: string, users: IEmployee[]) {
-//   const employeeObj = users.find((u) => u._id === employeeId);
-
-//   const employeeManager = employeeObj?.manager;
-//   return employeeManager;
-// }

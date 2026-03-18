@@ -5,7 +5,7 @@ import type { Request, Response, NextFunction } from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
-
+import { v4 as uuidv4 } from 'uuid';
 import type {
   IAuthUser,
   SignInRequest,
@@ -254,7 +254,7 @@ app.post<{ id: string }, IRequestData | ErrorResponse, IRequestData>(
     const finalizedRequest: IRequestData = {
       ...newRequest,
       employeeId: id,
-      id: Math.random().toString(4),
+      id: uuidv4(),
       status: 'pending',
     };
 

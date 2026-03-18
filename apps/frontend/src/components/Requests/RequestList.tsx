@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import RequestListItem from './RequestListItem';
-import { useGetRequestsQuery } from '../../features/RequestsApi';
+import { useGetRequestsQuery } from '../../features/requests/RequestsApi';
 import { useParams } from 'react-router-dom';
 import TabGroup from '../reusable/TabGroup';
 import { getManagedEmployees } from '../../utils/core';
 import { useGetUsersQuery, usersApi } from '../../features/usersApi';
-import { IRequestData } from '../../types/type';
 import { useDispatch } from 'react-redux';
+import { IRequestData } from '../../features/requests/requestForm/state.types';
 
 export default function RequestList(): React.ReactElement {
   const [requestType, setRequestType] = useState('');

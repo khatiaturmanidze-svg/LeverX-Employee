@@ -1,3 +1,4 @@
+import { IRequestData } from '../features/requests/requestForm/state.types';
 // For date of birth
 export interface IDateOfBirth {
   year: number | null;
@@ -57,20 +58,5 @@ export interface IEmployee {
 }
 
 export type EmployeeUpdate = Partial<Omit<IEmployee, 'manager'>> & {
-  manager?: string | null;
-};
-
-export interface IRequestData {
-  id: string;
-  type: string;
-  start_date: string;
-  employeeId: string;
-  end_date: string;
-  note: string;
-
-  status: 'approved' | 'pending' | 'rejected';
-}
-
-export type RequestUpdate = Partial<Omit<IRequestData, 'id'>> & {
   manager?: string | null;
 };

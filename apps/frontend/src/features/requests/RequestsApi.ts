@@ -1,7 +1,9 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { IRequestData } from '../types/type';
-const BASE_URL = '/api';
+
+import { IRequestData } from './requestForm/state.types';
+
 const DUMMY_TOKEN = import.meta.env.VITE_AUTH_TOKEN;
+const BASE_URL = '/api';
 
 export const requestsApi = createApi({
   reducerPath: 'requestsApi',

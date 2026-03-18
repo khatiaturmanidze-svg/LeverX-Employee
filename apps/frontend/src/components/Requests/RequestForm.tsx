@@ -1,74 +1,16 @@
 import React, { useReducer } from 'react';
-import { IRequestData } from '../../types/type';
-import { useAddRequestMutation } from '../../features/RequestsApi';
+
+import { useAddRequestMutation } from '../../features/requests/RequestsApi';
 import { getLoggedInUser, validateRequest } from '../../utils/core';
 import { useGetUsersQuery } from '../../features/usersApi';
 
-interface FormState {
-  data: IRequestData;
-  isSubmitting: boolean;
-  errors: Record<string, string>;
-}
-
-const initialState: FormState = {
-  data: {
-    id: '',
-    type: 'Vacation',
-    start_date: '',
-    end_date: '',
-    note: '',
-    status: 'pending',
-    employeeId: '',
-  },
-  isSubmitting: false,
-  errors: {},
-};
-
-type requestAction =
-  | {
-      type: 'SET_FIELD';
-      field: keyof IRequestData;
-      value: IRequestData[keyof IRequestData];
-    }
-  | {
-      type: 'RESET_FORM';
-    }
-  | {
-      type: 'SUBMIT_START';
-    }
-  | {
-      type: 'SUBMIT_SUCCESS';
-    }
-  | {
-      type: 'SUBMIT_ERROR';
-      errors: Record<string, string>;
-    };
-
-function requestReducer(state: FormState, action: requestAction): FormState {
-  switch (action.type) {
-    case 'SET_FIELD':
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          [action.field]: action.value,
-        },
-      };
-    case 'RESET_FORM':
-      return {
-        ...initialState,
-      };
-    case 'SUBMIT_START':
-      return { ...state, isSubmitting: true };
-    case 'SUBMIT_SUCCESS':
-      return { ...state, isSubmitting: false, errors: {} };
-    case 'SUBMIT_ERROR':
-      return { ...state, isSubmitting: false, errors: action.errors };
-
-    default:
-      return state;
-  }
-}
+import {
+  requestReducer,
+  initialState,
+  resetForm,
+  setField,
+  submitError,
+} from '../../features/requests/requestForm/state';
 
 export default function RequestForm(): React.ReactElement {
   const { data: allUsers = [] } = useGetUsersQuery();
@@ -80,7 +22,7 @@ export default function RequestForm(): React.ReactElement {
     e.preventDefault();
     const validationErrors = validateRequest(state.data);
     if (Object.keys(validationErrors).length > 0) {
-      dispatch({ type: 'SUBMIT_ERROR', errors: validationErrors });
+      dispatch(submitError(validationErrors));
       return;
     }
     const loggedInId = getLoggedInUser(allUsers)?._id;
@@ -102,7 +44,7 @@ export default function RequestForm(): React.ReactElement {
         },
       }).unwrap();
 
-      dispatch({ type: 'RESET_FORM' });
+      dispatch(resetForm());
     } catch (err) {
       console.error('Failed to save the request: ', err);
     }
@@ -122,13 +64,7 @@ export default function RequestForm(): React.ReactElement {
           <select
             id="type"
             className="request-list__select"
-            onChange={(e) =>
-              dispatch({
-                type: 'SET_FIELD',
-                field: 'type',
-                value: e.target.value,
-              })
-            }
+            onChange={(e) => dispatch(setField('type', e.target.value))}
           >
             <option>Vacation</option>
             <option>Sick leave</option>
@@ -141,13 +77,7 @@ export default function RequestForm(): React.ReactElement {
             <label>Start Date</label>
             <input
               type="date"
-              onChange={(e) =>
-                dispatch({
-                  type: 'SET_FIELD',
-                  field: 'start_date',
-                  value: e.target.value,
-                })
-              }
+              onChange={(e) => dispatch(setField('start_date', e.target.value))}
             />
             {state.errors.start_date && (
               <p className="form-error">{state.errors.start_date}</p>
@@ -157,13 +87,7 @@ export default function RequestForm(): React.ReactElement {
             <label>End Date</label>
             <input
               type="date"
-              onChange={(e) =>
-                dispatch({
-                  type: 'SET_FIELD',
-                  field: 'end_date',
-                  value: e.target.value,
-                })
-              }
+              onChange={(e) => dispatch(setField('end_date', e.target.value))}
             />
             {state.errors.end_date && (
               <p className="form-error">{state.errors.end_date}</p>
@@ -175,13 +99,7 @@ export default function RequestForm(): React.ReactElement {
           <label>Note</label>
           <textarea
             placeholder="Reason for leave..."
-            onChange={(e) =>
-              dispatch({
-                type: 'SET_FIELD',
-                field: 'note',
-                value: e.target.value,
-              })
-            }
+            onChange={(e) => dispatch(setField('note', e.target.value))}
           ></textarea>
           {state.errors.note && (
             <p className="form-error">{state.errors.note}</p>

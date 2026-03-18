@@ -1,10 +1,11 @@
 import React from 'react';
-import { IRequestData } from '../../types/type';
+import { IRequestData } from '../../features/requests/requestForm/state.types';
 import { getDisplayStatus } from '../../utils/core';
-import { useUpdateRequestMutation } from '../../features/RequestsApi';
+
 import { useGetManager } from '../../utils/customHooks';
 import { useDispatch } from 'react-redux';
 import { usersApi } from '../../features/usersApi';
+import { useUpdateRequestMutation } from '../../features/requests/RequestsApi';
 
 interface RequestListItemProps {
   request: IRequestData;
@@ -25,7 +26,7 @@ const RequestListItem: React.FC<RequestListItemProps> = ({
         requestId: request.id,
         newStatus: 'approved',
       }).unwrap();
-      dispatch(usersApi.util.invalidateTags([{ type: 'users' }]));
+      dispatch(usersApi.util.invalidateTags(['users']));
     } catch (error) {
       console.error('Approve failed:', error);
     }
@@ -67,7 +68,7 @@ const RequestListItem: React.FC<RequestListItemProps> = ({
             {request.start_date} — {request.end_date}
           </span>
         </div>
-        {isPersonal === true ? (
+        {isPersonal ? (
           <div className="detail-group">
             <label>
               {request.status === 'approved'
