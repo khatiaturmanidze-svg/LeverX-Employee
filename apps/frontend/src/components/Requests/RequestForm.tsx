@@ -3,7 +3,7 @@ import React, { useReducer } from 'react';
 import { useAddRequestMutation } from '../../features/requests/RequestsApi';
 import { getLoggedInUser, validateRequest } from '../../utils/core';
 import { useGetUsersQuery } from '../../features/usersApi';
-
+import { FormGroup } from './FormGroup';
 import {
   requestReducer,
   initialState,
@@ -11,6 +11,7 @@ import {
   setField,
   submitError,
 } from '../../features/requests/requestForm/state';
+import { InputField } from './InputField';
 
 export default function RequestForm(): React.ReactElement {
   const { data: allUsers = [] } = useGetUsersQuery();
@@ -59,8 +60,7 @@ export default function RequestForm(): React.ReactElement {
       <h2 className="request-form__title">New Request</h2>
 
       <form className="request-form__content" onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="type">Type</label>
+        <FormGroup label={'Type'}>
           <select
             id="type"
             className="request-list__select"
@@ -70,33 +70,26 @@ export default function RequestForm(): React.ReactElement {
             <option>Sick leave</option>
             <option>Military leave</option>
           </select>
-        </div>
+        </FormGroup>
 
         <div className="form-row">
-          <div className="form-group">
-            <label>Start Date</label>
-            <input
-              type="date"
+          <FormGroup label={'Start Date'}>
+            <InputField
+              type={'date'}
               onChange={(e) => dispatch(setField('start_date', e.target.value))}
+              error={state.errors.start_date}
             />
-            {state.errors.start_date && (
-              <p className="form-error">{state.errors.start_date}</p>
-            )}
-          </div>
-          <div className="form-group">
-            <label>End Date</label>
-            <input
+          </FormGroup>
+          <FormGroup label={'End Date'}>
+            <InputField
               type="date"
               onChange={(e) => dispatch(setField('end_date', e.target.value))}
+              error={state.errors.end_date}
             />
-            {state.errors.end_date && (
-              <p className="form-error">{state.errors.end_date}</p>
-            )}
-          </div>
+          </FormGroup>
         </div>
 
-        <div className="form-group">
-          <label>Note</label>
+        <FormGroup label={'Note'}>
           <textarea
             placeholder="Reason for leave..."
             onChange={(e) => dispatch(setField('note', e.target.value))}
@@ -104,7 +97,7 @@ export default function RequestForm(): React.ReactElement {
           {state.errors.note && (
             <p className="form-error">{state.errors.note}</p>
           )}
-        </div>
+        </FormGroup>
 
         <button type="submit" className="btn-submit" disabled={isLoading}>
           {isLoading ? 'Submitting...' : 'Submit Request'}
