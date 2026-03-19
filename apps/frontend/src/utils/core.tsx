@@ -12,7 +12,7 @@ export const getLoggedInUser = (users: IEmployee[]): IEmployee | undefined => {
 
 export const getUserById = (
   users: IEmployee[],
-  id: string,
+  id?: string,
 ): IEmployee | undefined => {
   return users.find((u) => u._id === id);
 };
