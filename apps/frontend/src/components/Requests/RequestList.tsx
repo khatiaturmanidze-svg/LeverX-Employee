@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import RequestListItem from './RequestListItem';
 import { useGetRequestsQuery } from '../../features/requests/RequestsApi';
 import { useParams } from 'react-router-dom';
@@ -15,7 +15,10 @@ export default function RequestList(): React.ReactElement {
   const dispatch = useDispatch();
   const { data: requests = [] } = useGetRequestsQuery(id);
   const { data: allUsers = [] } = useGetUsersQuery();
-  dispatch(usersApi.util.invalidateTags(['users']));
+
+  useEffect(() => {
+    dispatch(usersApi.util.invalidateTags(['users']));
+  }, []);
 
   const managedUsers = getManagedEmployees(allUsers);
   const teamRequests = managedUsers.flatMap((user) =>

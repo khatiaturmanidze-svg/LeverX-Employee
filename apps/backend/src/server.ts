@@ -258,7 +258,7 @@ app.post<{ id: string }, IRequestData | ErrorResponse, IRequestData>(
       status: 'pending',
     };
 
-    employee.requests.push(finalizedRequest);
+    employee.requests.unshift(finalizedRequest);
 
     await db.write();
 
