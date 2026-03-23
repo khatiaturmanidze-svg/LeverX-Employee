@@ -1,4 +1,4 @@
-import { IRequestData } from '../features/requests/requestForm/state.types';
+import { IRequestData } from '../features/requests/model/state.types';
 // For date of birth
 export interface IDateOfBirth {
   year: number | null;

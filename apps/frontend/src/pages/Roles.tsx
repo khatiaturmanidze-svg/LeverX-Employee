@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { getLoggedInUser } from '../utils/core';
-import { Header } from '../components/reusable/Header';
-import { RolesEmployee } from '../components/Roles/RolesEmployee';
+import { getLoggedInUser } from '../shared/lib/core';
+import { Header } from '../shared/ui/Header';
+import { RolesEmployee } from '../features/role-change/ui/RolesEmployee';
 import { useGetUsersQuery } from '../features/usersApi';
-import { useFilteredItems, useRoleChange } from '../utils/customHooks';
+import { useFilteredItems, useRoleChange } from '../shared/lib/customHooks';
 
 export default function Roles(): React.ReactElement {
   const [searchTerm, setSearchTerm] = useState('');

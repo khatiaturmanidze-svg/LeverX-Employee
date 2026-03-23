@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
-import { Header } from '../components/reusable/Header';
-import { getLoggedInUser } from '../utils/core';
+import { Header } from '../shared/ui/Header';
+import { getLoggedInUser } from '../shared/lib/core';
 import { useGetUsersQuery } from '../features/usersApi';
-import Managers from '../components/Requests/Managers';
-import RequestForm from '../components/Requests/RequestForm';
-import RequestList from '../components/Requests/RequestList';
+import Managers from '../features/requests/ui/Managers';
+import RequestForm from '../features/requests/ui/RequestForm';
+import RequestList from '../features/requests/ui/RequestList';
 
 export default function Requests(): React.ReactElement {
   const { data: allUsers = [] } = useGetUsersQuery();

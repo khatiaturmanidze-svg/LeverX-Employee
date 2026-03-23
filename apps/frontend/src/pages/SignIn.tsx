@@ -1,7 +1,7 @@
 import React from 'react';
-import SignHeader from '../components/Sign/SignHeader';
-import SignInForm from '../components/Sign/SignInForm';
-import SignMain from '../components/Sign/SignMain';
+import SignHeader from '../shared/ui/SignHeader';
+import SignInForm from '../features/sign-in/SignInForm';
+import SignMain from '../shared/ui/SignMain';
 
 export default function SignIn(): React.ReactElement {
   return (

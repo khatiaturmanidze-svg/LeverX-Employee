@@ -1,15 +1,18 @@
 import React, { useState, useMemo } from 'react';
-import { Header } from '../components/reusable/Header';
-import BasicSearchForm from '../components/Main/SearchBasic';
-import SearchAdvanced from '../components/Main/SearchAdvanced';
-import EmployeeHeader from '../components/Main/EmployeeHeader';
-import EmployeeContainer from '../components/Main/EmployeeContainer';
-import { getLoggedInUser } from '../utils/core';
-import { AdvancedSearchCriteria } from '../components/Main/SearchAdvanced';
+import { Header } from '../shared/ui/Header';
+import BasicSearchForm from '../features/search/ui/SearchBasic';
+import SearchAdvanced from '../features/search/ui/SearchAdvanced';
+import EmployeeHeader from '../shared/ui/EmployeeHeader';
+import EmployeeContainer from '../shared/ui/EmployeeContainer';
+import { getLoggedInUser } from '../shared/lib/core';
+import { AdvancedSearchCriteria } from '../features/search/ui/SearchAdvanced';
 import { useGetUsersQuery } from '../features/usersApi';
-import { SearchCriteria } from '../components/Main/SearchBasic';
-import { filterUsers, filterAdvancedUsers } from '../utils/userFilters';
-import TabGroup from '../components/reusable/TabGroup';
+import { SearchCriteria } from '../features/search/ui/SearchBasic';
+import {
+  filterUsers,
+  filterAdvancedUsers,
+} from '../features/search/lib/userFilters';
+import TabGroup from '../shared/ui/TabGroup';
 
 export default function Main(): React.ReactElement {
   const [isBasicSearch, setIsBasicSearch] = useState(true);
