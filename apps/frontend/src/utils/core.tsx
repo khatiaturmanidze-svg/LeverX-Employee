@@ -14,6 +14,8 @@ export const getUserById = (
   users: IEmployee[],
   id?: string,
 ): IEmployee | undefined => {
+  if (!id) return undefined;
+  if (users.length === 0) return undefined;
   return users.find((u) => u._id === id);
 };
 
