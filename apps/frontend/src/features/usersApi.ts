@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { IEmployee, EmployeeUpdate } from '../types/type';
-const DUMMY_TOKEN = 'authorized-can-access';
+const DUMMY_TOKEN = import.meta.env.VITE_AUTH_TOKEN || 'authorized-can-access';
 const BASE_URL = '/api';
 export const usersApi = createApi({
   reducerPath: 'usersApi',

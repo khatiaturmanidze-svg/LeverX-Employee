@@ -1,4 +1,5 @@
-import { IEmployee, IVisa } from '../types/type';
+import { IEmployee } from '../../../types/type';
+import { EmployeeFormState, FormState } from './state.types';
 
 export const getEmployeeFormState = (user: IEmployee) => ({
   department: user.department,
@@ -34,10 +35,6 @@ export const getEmployeeFormState = (user: IEmployee) => ({
     })) || [],
 });
 
-export type EmployeeFormState = ReturnType<typeof getEmployeeFormState> & {
-  visas: IVisa[];
-};
-
 export const validateEmployeeForm = (formData: EmployeeFormState) => {
   const errors: Record<string, string> = {};
 
@@ -61,3 +58,9 @@ export const validateEmployeeForm = (formData: EmployeeFormState) => {
 
   return errors;
 };
+
+export const getInitialState = (user: IEmployee): FormState => ({
+  formData: getEmployeeFormState(user),
+  isSubmitting: false,
+  errors: {},
+});

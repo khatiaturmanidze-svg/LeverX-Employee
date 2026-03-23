@@ -27,6 +27,7 @@ export interface IRequestData {
   start_date: string;
   end_date: string;
   note: string;
+  employeeId: string;
 
   status: 'approved' | 'pending' | 'rejected';
 }

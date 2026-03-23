@@ -1,5 +1,6 @@
 import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
-import { IEmployee, IDateOfBirth, IRequestData } from '../types/type';
+import { IEmployee, IDateOfBirth } from '../types/type';
+import { IRequestData } from '../features/requests/requestForm/state.types';
 
 // getting logged in user
 export const getLoggedInUser = (users: IEmployee[]): IEmployee | undefined => {
@@ -11,7 +12,7 @@ export const getLoggedInUser = (users: IEmployee[]): IEmployee | undefined => {
 
 export const getUserById = (
   users: IEmployee[],
-  id: string,
+  id?: string,
 ): IEmployee | undefined => {
   return users.find((u) => u._id === id);
 };
@@ -77,8 +78,38 @@ export function getDisplayStatus(req: IRequestData) {
   const start = new Date(req.start_date).getTime();
   const end = new Date(req.end_date).getTime();
 
-  if (today >= start && today <= end) return 'Active';
-  if (today < start) return 'Approved (Upcoming)';
+  if (today >= start && today <= end) return 'active';
+  if (today < start) return 'upcoming';
 
-  return 'Completed';
+  return 'completed';
+}
+
+export const getManagedEmployees = (users: IEmployee[]): IEmployee[] => {
+  const currentUser = getLoggedInUser(users);
+  if (!currentUser) return [];
+  return users.filter((u) => u.manager?.id === currentUser._id);
+};
+
+export function validateRequest(data: IRequestData) {
+  const errors: Record<string, string> = {};
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const start = new Date(data.start_date);
+  const end = new Date(data.end_date);
+
+  if (!data.start_date) {
+    errors.start_date = 'Start date is required';
+  } else if (start < today) {
+    errors.start_date = 'Start date cannot be in the past';
+  }
+
+  if (!data.end_date) {
+    errors.end_date = 'End date is required';
+  } else if (end < start) {
+    errors.end_date = 'End date must be after start date';
+  }
+
+  return errors;
 }

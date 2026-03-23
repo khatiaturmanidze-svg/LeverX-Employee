@@ -1,6 +1,9 @@
 import { useMemo, useState } from 'react';
 import { IEmployee } from '../types/type';
-import { useUpdateEmployeeRoleMutation } from '../features/usersApi';
+import {
+  useGetUsersQuery,
+  useUpdateEmployeeRoleMutation,
+} from '../features/usersApi';
 import { getErrorMessage } from './core';
 
 export function useFilteredItems<TItem, TValue>(
@@ -34,4 +37,12 @@ export function useRoleChange(loggedUser: IEmployee | null) {
   };
 
   return { handleRoleChange, error, isAdmin, isLoading };
+}
+
+export function useGetManager(employeeId: string) {
+  const { data: allUsers = [] } = useGetUsersQuery();
+
+  const employeeObj = allUsers.find((u) => u._id === employeeId);
+
+  return employeeObj?.manager;
 }

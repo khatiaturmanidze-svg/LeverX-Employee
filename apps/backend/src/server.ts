@@ -5,7 +5,7 @@ import type { Request, Response, NextFunction } from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
-
+import { v4 as uuidv4 } from 'uuid';
 import type {
   IAuthUser,
   SignInRequest,
@@ -253,11 +253,12 @@ app.post<{ id: string }, IRequestData | ErrorResponse, IRequestData>(
 
     const finalizedRequest: IRequestData = {
       ...newRequest,
-      id: Math.random().toString(4),
+      employeeId: id,
+      id: uuidv4(),
       status: 'pending',
     };
 
-    employee.requests.push(finalizedRequest);
+    employee.requests.unshift(finalizedRequest);
 
     await db.write();
 
@@ -265,7 +266,32 @@ app.post<{ id: string }, IRequestData | ErrorResponse, IRequestData>(
   },
 );
 
-const PORT = process.env.VITE_API_PORT;
+app.put('/requests/:employeeId', async (req, res) => {
+  const { employeeId } = req.params;
+  const { requestId, newStatus } = req.body;
+
+  if (!db.data) return res.status(500).send('Database not loaded');
+
+  const employee = db.data.employees.find((emp) => emp._id === employeeId);
+
+  if (!employee) {
+    return res.status(404).json({ message: 'Employee not found' });
+  }
+
+  const request = employee.requests.find(
+    (r) => String(r.id) === String(requestId),
+  );
+  if (!request) {
+    return res.status(404).json({ message: 'Request not found' });
+  }
+
+  request.status = newStatus;
+  await db.write();
+  return res.status(200).json(request);
+});
+
+const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
