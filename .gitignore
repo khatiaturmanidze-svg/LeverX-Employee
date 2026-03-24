@@ -5,3 +5,4 @@ package-lock.json
 dist-server/
 .env
 apps/backend/src/db.json
+coverage/
