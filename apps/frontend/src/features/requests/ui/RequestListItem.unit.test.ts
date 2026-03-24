@@ -1,0 +1,159 @@
+import React from 'react';
+import { describe, expect, it, vi } from 'vitest';
+import { act } from 'react';
+import { createRoot } from 'react-dom/client';
+import { renderToStaticMarkup } from 'react-dom/server';
+import RequestListItem from './RequestListItem';
+import { IRequestData } from '../model/state.types';
+
+const {
+  useGetManagerMock,
+  useDispatchMock,
+  useUpdateRequestMutationMock,
+  invalidateTagsMock,
+  updateRequestMock,
+  getDisplayStatusMock,
+} = vi.hoisted(() => ({
+  useGetManagerMock: vi.fn(),
+  useDispatchMock: vi.fn(),
+  useUpdateRequestMutationMock: vi.fn(),
+  invalidateTagsMock: vi.fn(() => ({ type: 'invalidate-users' })),
+  updateRequestMock: vi.fn(),
+  getDisplayStatusMock: vi.fn(() => 'pending'),
+}));
+
+vi.mock('../../../shared/lib/customHooks', () => ({
+  useGetManager: useGetManagerMock,
+}));
+
+vi.mock('react-redux', () => ({
+  useDispatch: useDispatchMock,
+}));
+
+vi.mock('../api/RequestsApi', () => ({
+  useUpdateRequestMutation: useUpdateRequestMutationMock,
+}));
+
+vi.mock('../../usersApi', () => ({
+  usersApi: {
+    util: {
+      invalidateTags: invalidateTagsMock,
+    },
+  },
+}));
+
+vi.mock('../../../shared/lib/core', () => ({
+  getDisplayStatus: getDisplayStatusMock,
+}));
+
+const baseRequest: IRequestData = {
+  id: 'req-1',
+  employeeId: 'emp-1',
+  type: 'Vacation',
+  start_date: '2026-06-01',
+  end_date: '2026-06-05',
+  note: 'Trip',
+  status: 'pending',
+};
+
+describe('RequestListItem', () => {
+  it('renders personal mode with manager info label', () => {
+    useGetManagerMock.mockReturnValue({
+      first_name: 'Alice',
+      last_name: 'Smith',
+    });
+    useUpdateRequestMutationMock.mockReturnValue([
+      updateRequestMock,
+      { isLoading: false },
+    ]);
+    getDisplayStatusMock.mockReturnValue('pending');
+
+    const html = renderToStaticMarkup(
+      React.createElement(RequestListItem, {
+        request: baseRequest,
+        isPersonal: true,
+      }),
+    );
+
+    expect(html).toContain('Awaiting for approval');
+    expect(html).toContain('Alice Smith');
+    expect(html).toContain('status--pending');
+  });
+
+  it('calls approve mutation and invalidates users on approve click', async () => {
+    const dispatch = vi.fn();
+    useDispatchMock.mockReturnValue(dispatch);
+    useGetManagerMock.mockReturnValue(undefined);
+    updateRequestMock.mockReturnValue({ unwrap: () => Promise.resolve({}) });
+    useUpdateRequestMutationMock.mockReturnValue([
+      updateRequestMock,
+      { isLoading: false },
+    ]);
+
+    const container = document.createElement('div');
+    const root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        React.createElement(RequestListItem, {
+          request: baseRequest,
+          isPersonal: false,
+        }),
+      );
+    });
+
+    const approveBtn = container.querySelector(
+      '.request-btn__approve',
+    ) as HTMLButtonElement;
+    await act(async () => {
+      approveBtn.click();
+    });
+
+    expect(updateRequestMock).toHaveBeenCalledWith({
+      employeeId: 'emp-1',
+      requestId: 'req-1',
+      newStatus: 'approved',
+    });
+    expect(invalidateTagsMock).toHaveBeenCalledWith(['users']);
+    expect(dispatch).toHaveBeenCalledWith({ type: 'invalidate-users' });
+
+    await act(async () => {
+      root.unmount();
+    });
+  });
+
+  it('disables approve/reject buttons when request is not pending', () => {
+    useDispatchMock.mockReturnValue(vi.fn());
+    useGetManagerMock.mockReturnValue(undefined);
+    useUpdateRequestMutationMock.mockReturnValue([
+      updateRequestMock,
+      { isLoading: false },
+    ]);
+
+    const container = document.createElement('div');
+    const root = createRoot(container);
+
+    act(() => {
+      root.render(
+        React.createElement(RequestListItem, {
+          request: { ...baseRequest, status: 'approved' },
+          isPersonal: false,
+        }),
+      );
+    });
+
+    const approveBtn = container.querySelector(
+      '.request-btn__approve',
+    ) as HTMLButtonElement;
+    const rejectBtn = container.querySelector(
+      '.request-btn__reject',
+    ) as HTMLButtonElement;
+
+    expect(approveBtn.disabled).toBe(true);
+    expect(rejectBtn.disabled).toBe(true);
+
+    act(() => {
+      root.unmount();
+    });
+  });
+});
