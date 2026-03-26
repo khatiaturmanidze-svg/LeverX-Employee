@@ -1,10 +1,12 @@
 {
   "extends": "../../tsconfig.common.json",
-  "include": ["src/*", "src/features/pages"],
+  "include": ["src", "setUpTests.ts", "**/*.test.ts", "**/*.test.tsx"],
+
   "compilerOptions": {
     "module": "esnext",
     "moduleResolution": "bundler",
     "outDir": "dist",
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"]
   }
 }

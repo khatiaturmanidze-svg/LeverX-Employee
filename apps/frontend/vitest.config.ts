@@ -1,6 +1,13 @@
 import { defineConfig } from 'vitest/config';
+import path from 'path';
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      react: path.resolve(__dirname, './node_modules/react'),
+      'react-dom': path.resolve(__dirname, './node_modules/react-dom'),
+    },
+  },
   test: {
     coverage: {
       provider: 'v8',
@@ -14,7 +21,7 @@ export default defineConfig({
           name: 'unit',
           environment: 'jsdom',
           include: ['**/*.unit.test.ts'],
-          globals: true,
+          setupFiles: './setUpTests.ts',
         },
       },
       {
@@ -23,6 +30,7 @@ export default defineConfig({
           environment: 'jsdom',
           include: ['**/*.integration.test.ts'],
           globals: true,
+          setupFiles: './setUpTests.ts',
         },
       },
     ],

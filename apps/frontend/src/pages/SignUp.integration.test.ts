@@ -160,7 +160,6 @@ describe('pages/SignUp (integration)', () => {
       );
     });
 
-    // rememberMe=true -> localStorage.
     expect(localStorage.getItem('loggedInUser')).toBe('alice@site.com');
     expect(localStorage.getItem('result')).toBe(
       JSON.stringify({
