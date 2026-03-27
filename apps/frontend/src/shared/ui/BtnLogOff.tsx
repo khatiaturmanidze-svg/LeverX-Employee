@@ -13,12 +13,14 @@ export default function btnLogOff() {
   };
 
   return (
-    <button className="header__logoff-wrap flex--horizontal">
+    <button
+      className="header__logoff-wrap flex--horizontal"
+      onClick={handleLogOff}
+    >
       <img
         src="/svgs/log-off-icon.svg"
         alt="log off icon"
         className="header__logoff-btn"
-        onClick={handleLogOff}
       />
     </button>
   );

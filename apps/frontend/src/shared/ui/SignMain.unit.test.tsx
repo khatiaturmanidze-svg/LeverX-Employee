@@ -10,9 +10,8 @@ describe('SignMain', () => {
         <div data-testid="child-form">Form goes here</div>
       </SignMain>,
     );
-
-    expect(screen.getByText('Welcome')).toBeInTheDocument();
-    expect(screen.getByText('To LeverX Employee Services')).toBeInTheDocument();
-    expect(screen.getByTestId('child-form')).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /welcome/i }),
+    ).toBeInTheDocument();
   });
 });

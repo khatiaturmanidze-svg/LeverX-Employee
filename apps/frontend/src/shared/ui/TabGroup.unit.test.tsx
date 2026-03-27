@@ -1,18 +1,32 @@
-import { render, screen } from '@testing-library/react';
-import React from 'react';
-import SignMain from './SignMain';
-import { describe, it, expect } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import TabGroup from './TabGroup';
+import { vi, expect, describe, it } from 'vitest';
 
-describe('SignMain', () => {
-  it('renders welcome message and children', () => {
+describe('TabGroup', () => {
+  const mockOnClick = vi.fn();
+  const tabs = [
+    { id: '1', label: 'Profile', isActive: true, onClick: mockOnClick },
+    { id: '2', label: 'Settings', isActive: false, onClick: mockOnClick },
+  ];
+
+  it('renders all tabs and handles clicks', () => {
     render(
-      <SignMain>
-        <div data-testid="child-form">Form goes here</div>
-      </SignMain>,
+      <TabGroup
+        tabs={tabs}
+        tabBaseClassName="tab-btn"
+        activeModifierClassName="active"
+      />,
     );
 
-    expect(screen.getByText('Welcome')).toBeInTheDocument();
-    expect(screen.getByText('To LeverX Employee Services')).toBeInTheDocument();
-    expect(screen.getByTestId('child-form')).toBeInTheDocument();
+    // Find the button by its text
+    const profileTab = screen.getByText('Profile');
+    expect(profileTab).toBeInTheDocument();
+
+    // Check for the active class
+    expect(profileTab).toHaveClass('active');
+
+    // Simulate click
+    fireEvent.click(screen.getByText('Settings'));
+    expect(mockOnClick).toHaveBeenCalledTimes(1);
   });
 });

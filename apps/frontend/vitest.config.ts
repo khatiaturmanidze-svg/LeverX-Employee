@@ -13,14 +13,18 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'html'],
       include: ['src/**/*.{ts,tsx}'],
-      exclude: ['**/*.unit.test.ts', '**/*.integration.test.ts', '**/*.d.ts'],
+      exclude: [
+        '**/*.unit.test.{ts,tsx}',
+        '**/*.integration.test.{ts,tsx}',
+        '**/*.d.ts',
+      ],
     },
     projects: [
       {
         test: {
           name: 'unit',
           environment: 'jsdom',
-          include: ['**/*.unit.test.ts'],
+          include: ['**/*.unit.test.{ts,tsx}'],
           setupFiles: './setUpTests.ts',
         },
       },
@@ -28,7 +32,7 @@ export default defineConfig({
         test: {
           name: 'integration',
           environment: 'jsdom',
-          include: ['**/*.integration.test.ts'],
+          include: ['**/*.integration.test.{ts,tsx}'],
           globals: true,
           setupFiles: './setUpTests.ts',
         },

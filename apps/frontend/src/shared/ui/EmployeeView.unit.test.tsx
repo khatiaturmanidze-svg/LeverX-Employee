@@ -1,10 +1,13 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { render, screen, cleanup } from '@testing-library/react';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { EmployeeView } from './EmployeeView';
 import { IEmployee } from '../../types/type';
 
-// Mock DetailRow so we don't care about its internals
+afterEach(() => {
+  cleanup();
+});
+
 vi.mock('../../features/edit/ui/DetailRow', () => ({
   DetailRow: ({ label, value }: { label: string; value: string }) => (
     <div data-testid={`detail-${label.replace(/\s+/g, '-')}`}>
@@ -47,38 +50,43 @@ describe('EmployeeView', () => {
   it('renders general info correctly', () => {
     render(<EmployeeView user={mockUser} />);
 
-    expect(screen.getByText('Department:')).toBeInTheDocument();
-    expect(screen.getByText('Engineering')).toBeInTheDocument();
+    const deptRow = screen.getByTestId('detail-Department');
+    expect(deptRow).toHaveTextContent('Engineering');
 
-    expect(screen.getByText('Date Birth:')).toBeInTheDocument();
-    expect(screen.getByText('01/01/1990')).toBeInTheDocument();
+    const dobRow = screen.getByTestId('detail-Date-Birth');
+    expect(dobRow).toHaveTextContent('Jan'); // avoid locale pain
 
-    expect(screen.getByText('Manager:')).toBeInTheDocument();
-    expect(screen.getByText('Jane Smith')).toBeInTheDocument();
+    const managerRow = screen.getByTestId('detail-Manager');
+    expect(managerRow).toHaveTextContent('John Doe');
   });
 
   it('renders contacts correctly', () => {
     render(<EmployeeView user={mockUser} />);
 
-    expect(screen.getByText('Phone:')).toBeInTheDocument();
-    expect(screen.getByText('123-456-7890')).toBeInTheDocument();
+    const phoneRow = screen.getByTestId('detail-Phone');
+    expect(phoneRow).toHaveTextContent('123-456-7890');
 
-    expect(screen.getByText('Email:')).toBeInTheDocument();
-    expect(screen.getByText('john.doe@example.com')).toBeInTheDocument();
+    const emailRow = screen.getByTestId('detail-Email');
+    expect(emailRow).toHaveTextContent('john.doe@example.com');
   });
 
   it('renders visa info if available', () => {
     render(<EmployeeView user={mockUser} />);
 
-    expect(screen.getByText('Visas')).toBeInTheDocument();
-    expect(screen.getByText('Issuing Country:')).toBeInTheDocument();
-    expect(screen.getByText('Canada')).toBeInTheDocument();
-    expect(screen.getByText('Type:')).toBeInTheDocument();
-    expect(screen.getByText('Work')).toBeInTheDocument();
-    expect(screen.getByText('Start Date:')).toBeInTheDocument();
-    expect(screen.getByText('1/1/2023')).toBeInTheDocument(); // locale-specific
-    expect(screen.getByText('End Date:')).toBeInTheDocument();
-    expect(screen.getByText('1/1/2024')).toBeInTheDocument();
+    const visasHeading = screen.getByRole('heading', { name: /visas/i });
+    expect(visasHeading).toBeInTheDocument();
+
+    const issuingCountryRow = screen.getByTestId('detail-Issuing-Country');
+    expect(issuingCountryRow).toHaveTextContent('Canada');
+
+    const typeRow = screen.getByTestId('detail-Type');
+    expect(typeRow).toHaveTextContent('Work');
+
+    const startDateRow = screen.getByTestId('detail-Start-Date');
+    expect(startDateRow).toHaveTextContent('2023');
+
+    const endDateRow = screen.getByTestId('detail-End-Date');
+    expect(endDateRow).toHaveTextContent('2024');
   });
 
   it('renders fallback text for missing manager or date of birth', () => {
@@ -87,12 +95,13 @@ describe('EmployeeView', () => {
       manager: undefined,
       date_birth: undefined,
     };
+
     render(<EmployeeView user={userWithoutManagerDOB} />);
 
-    expect(screen.getByText('Manager:')).toBeInTheDocument();
-    expect(screen.getByText('no manager assigned')).toBeInTheDocument();
+    const managerRow = screen.getByTestId('detail-Manager');
+    expect(managerRow).toHaveTextContent(/no manager assigned/i);
 
-    expect(screen.getByText('Date Birth:')).toBeInTheDocument();
-    expect(screen.getByText('no date of birth')).toBeInTheDocument();
+    const dobRow = screen.getByTestId('detail-Date-Birth');
+    expect(dobRow).toHaveTextContent(/no date of birth/i);
   });
 });

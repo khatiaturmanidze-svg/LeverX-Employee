@@ -1,16 +1,23 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import LoggedInUser from './LoggedInUser';
 import { IEmployee } from '../../types/type';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import * as Router from 'react-router-dom';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 
+const { mockNavigate } = vi.hoisted(() => ({
+  mockNavigate: vi.fn(),
+}));
+vi.mock('react-router-dom', async () => {
+  const actual =
+    await vi.importActual<typeof import('react-router-dom')>(
+      'react-router-dom',
+    );
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+    useLocation: () => ({ pathname: '/main' }),
+  };
+});
 describe('LoggedInUser', () => {
-  const mockNavigate = vi.fn();
-
-  beforeEach(() => {
-    vi.spyOn(Router, 'useNavigate').mockReturnValue(mockNavigate);
-  });
-
   afterEach(() => {
     vi.clearAllMocks();
   });

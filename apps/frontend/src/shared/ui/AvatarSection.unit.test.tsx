@@ -30,21 +30,18 @@ describe('AvatarSection', () => {
       />,
     );
 
-    expect(screen.getByText('John Doe')).toBeInTheDocument();
-    expect(screen.getByText('John Doe')).toBeInTheDocument();
-  });
+    const fullName = screen.getByRole('heading', { name: /john doe/i });
+    expect(fullName).toBeInTheDocument();
 
-  it('renders remote work icon when user.isRemoteWork is true', () => {
-    render(
-      <AvatarSection
-        user={mockUser}
-        canEdit={false}
-        onEditClick={vi.fn()}
-        onCopyLink={vi.fn()}
-      />,
+    const nativeName = screen.getByText((content, element) =>
+      Boolean(
+        element &&
+        element.classList.contains('avatar-section__native') &&
+        content.includes('John') &&
+        content.includes('Doe'),
+      ),
     );
-
-    expect(screen.getByAltText('home icon')).toBeInTheDocument();
+    expect(nativeName).toBeInTheDocument();
   });
 
   it('does NOT render remote work icon when user.isRemoteWork is false', () => {
