@@ -2,7 +2,7 @@ import React from 'react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSignInMutation } from '../../authApi';
-import { getErrorMessage } from '../../../shared/lib/core';
+import { getErrorMessage } from '@shared/lib';
 
 export default function SignInForm(): React.ReactElement {
   const navigate = useNavigate();

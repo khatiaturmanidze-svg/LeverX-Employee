@@ -22,10 +22,6 @@ const {
   getDisplayStatusMock: vi.fn(() => 'pending'),
 }));
 
-vi.mock('../../../shared/lib/customHooks', () => ({
-  useGetManager: useGetManagerMock,
-}));
-
 vi.mock('react-redux', () => ({
   useDispatch: useDispatchMock,
 }));
@@ -42,8 +38,9 @@ vi.mock('../../usersApi', () => ({
   },
 }));
 
-vi.mock('../../../shared/lib/core', () => ({
+vi.mock('@shared/lib', () => ({
   getDisplayStatus: getDisplayStatusMock,
+  useGetManager: useGetManagerMock,
 }));
 
 const baseRequest: IRequestData = {

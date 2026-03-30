@@ -1,7 +1,7 @@
 import React, { useReducer } from 'react';
 
 import { useAddRequestMutation } from '../api/RequestsApi';
-import { getLoggedInUser, validateRequest } from '../../../shared/lib/core';
+import { getLoggedInUser, validateRequest } from '@shared/lib';
 import { useGetUsersQuery } from '../../usersApi';
 import { FormGroup } from './FormGroup';
 import {

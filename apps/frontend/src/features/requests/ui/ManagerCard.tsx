@@ -1,7 +1,8 @@
 import React from 'react';
 import { IManager } from '../../../types/type';
 import { useGetUsersQuery } from '../../usersApi';
-import { getUserById } from '../../../shared/lib/core';
+import { getUserById } from '@shared/lib';
+
 interface ManagerCardProps {
   manager: IManager | undefined;
 }

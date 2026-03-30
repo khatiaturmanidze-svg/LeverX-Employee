@@ -1,10 +1,8 @@
-import React from 'react';
+import React, { act } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import Main from './Main';
-import type { AdvancedSearchCriteria } from '../features/search/ui/SearchAdvanced';
-import type { SearchCriteria } from '../features/search/ui/SearchBasic';
+import type { AdvancedSearchCriteria, SearchCriteria } from '@features/search';
 import type { IEmployee } from '../types/type';
 
 const { useGetUsersQueryMock, getLoggedInUserMock } = vi.hoisted(() => ({
@@ -27,96 +25,99 @@ vi.mock('../features/usersApi', () => ({
   useGetUsersQuery: useGetUsersQueryMock,
 }));
 
-vi.mock('../shared/lib/core', () => ({
+vi.mock('@shared/lib', () => ({
   getLoggedInUser: getLoggedInUserMock,
 }));
 
-vi.mock('../shared/ui/Header', () => ({
-  Header: () => React.createElement('header', null, 'Header'),
-}));
+vi.mock('@shared/ui', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@shared/ui')>();
 
-vi.mock('../shared/ui/EmployeeHeader', () => ({
-  __esModule: true,
-  default: ({
-    users,
-    onViewChange,
-  }: {
-    users: IEmployee[];
-    onViewChange: (mode: 'grid' | 'list') => void;
-  }) =>
-    React.createElement('div', { 'data-testid': 'employee-header' }, [
-      React.createElement(
-        'span',
-        { key: 'count' },
-        `employees:${users.length}`,
-      ),
-      React.createElement(
-        'button',
-        {
-          key: 'toggle',
-          type: 'button',
-          onClick: () => onViewChange('list'),
-        },
-        'toggle-view',
-      ),
-    ]),
-}));
+  return {
+    ...actual,
 
-vi.mock('../shared/ui/EmployeeContainer', () => ({
-  __esModule: true,
-  default: ({
-    users,
-    viewMode,
-  }: {
-    users: IEmployee[];
-    viewMode: 'grid' | 'list';
-  }) =>
-    React.createElement(
-      'div',
-      { 'data-testid': 'employee-container' },
-      `container:${users.length}:${viewMode}`,
-    ),
-}));
+    Header: () => React.createElement('header', null, 'Header'),
 
-vi.mock('../features/search/ui/SearchBasic', () => ({
-  __esModule: true,
-  default: ({
-    onSearchSubmit,
-  }: {
-    onSearchSubmit: (criteria: SearchCriteria) => void;
-  }) =>
-    React.createElement('div', { 'data-testid': 'basic-search' }, [
-      React.createElement(
-        'button',
-        {
-          key: 'submit',
-          type: 'button',
-          onClick: () => onSearchSubmit(basicCriteriaValue),
-        },
-        'submit-basic',
-      ),
-    ]),
-}));
+    EmployeeHeader: ({
+      users,
+      onViewChange,
+    }: {
+      users: IEmployee[];
+      onViewChange: (mode: 'grid' | 'list') => void;
+    }) =>
+      React.createElement('div', { 'data-testid': 'employee-header' }, [
+        React.createElement(
+          'span',
+          { key: 'count' },
+          `employees:${users.length}`,
+        ),
+        React.createElement(
+          'button',
+          {
+            key: 'toggle',
+            type: 'button',
+            onClick: () => onViewChange('list'),
+          },
+          'toggle-view',
+        ),
+      ]),
 
-vi.mock('../features/search/ui/SearchAdvanced', () => ({
-  __esModule: true,
-  default: ({
-    onSearchSubmit,
-  }: {
-    onSearchSubmit: (criteria: AdvancedSearchCriteria) => void;
-  }) =>
-    React.createElement('div', { 'data-testid': 'advanced-search' }, [
+    EmployeeContainer: ({
+      users,
+      viewMode,
+    }: {
+      users: IEmployee[];
+      viewMode: 'grid' | 'list';
+    }) =>
       React.createElement(
-        'button',
-        {
-          key: 'submit',
-          type: 'button',
-          onClick: () => onSearchSubmit(advancedCriteriaValue),
-        },
-        'submit-advanced',
+        'div',
+        { 'data-testid': 'employee-container' },
+        `container:${users.length}:${viewMode}`,
       ),
-    ]),
-}));
+  };
+});
+
+vi.mock('@features/search', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@features/search')>();
+
+  return {
+    ...actual,
+    __esModule: true,
+
+    SearchBasic: ({
+      onSearchSubmit,
+    }: {
+      onSearchSubmit: (criteria: SearchCriteria) => void;
+    }) =>
+      React.createElement('div', { 'data-testid': 'basic-search' }, [
+        React.createElement(
+          'button',
+          {
+            key: 'submit-basic',
+            type: 'button',
+            onClick: () => onSearchSubmit(basicCriteriaValue),
+          },
+          'submit-basic',
+        ),
+      ]),
+
+    SearchAdvanced: ({
+      onSearchSubmit,
+    }: {
+      onSearchSubmit: (criteria: AdvancedSearchCriteria) => void;
+    }) =>
+      React.createElement('div', { 'data-testid': 'advanced-search' }, [
+        React.createElement(
+          'button',
+          {
+            key: 'submit-advanced',
+            type: 'button',
+            onClick: () => onSearchSubmit(advancedCriteriaValue),
+          },
+          'submit-advanced',
+        ),
+      ]),
+  };
+});
 
 describe('pages/Main', () => {
   const users: IEmployee[] = [

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { IEmployee } from '../../types/type';
-import TabGroup from '../../shared/ui/TabGroup';
+import { TabGroup } from '@shared/ui';
 
 interface EmployeeHeaderProps {
   users: IEmployee[];

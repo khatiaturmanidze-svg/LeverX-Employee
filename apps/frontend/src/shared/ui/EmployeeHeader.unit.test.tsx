@@ -12,8 +12,8 @@ type Tab = {
   label?: React.ReactNode;
 };
 
-vi.mock('../../shared/ui/TabGroup', () => ({
-  default: ({ tabs }: { tabs: Tab[] }) => (
+vi.mock('@shared/ui', () => ({
+  TabGroup: ({ tabs }: { tabs: Tab[] }) => (
     <div>
       {tabs.map((tab: any) => (
         <button

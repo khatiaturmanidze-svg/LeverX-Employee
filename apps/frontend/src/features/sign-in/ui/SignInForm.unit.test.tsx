@@ -17,8 +17,8 @@ vi.mock('react-router-dom', () => ({
 vi.mock('../../authApi', () => ({
   useSignInMutation: () => [signInMock],
 }));
-vi.mock('../../../shared/lib/core', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../../../shared')>();
+vi.mock('@shared/lib', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@shared/lib')>();
 
   return {
     ...actual,

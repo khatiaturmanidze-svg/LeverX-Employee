@@ -1,5 +1,5 @@
 import React from 'react';
-import Icon from '../../../shared/ui/Icon';
+import { Icon } from '@shared/ui';
 
 interface DetailRowProps {
   icon: string;

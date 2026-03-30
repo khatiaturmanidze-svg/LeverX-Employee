@@ -1,7 +1,7 @@
 import React from 'react';
 import { IEmployee } from '../../types/type';
 import { formatDateOfBirth } from '../lib/core';
-import { DetailRow } from '../../features/edit/ui/DetailRow';
+import { DetailRow } from '@features/edit';
 
 interface EmployeeViewProps {
   user: IEmployee;

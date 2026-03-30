@@ -1,7 +1,6 @@
 import React from 'react';
-import SignHeader from '../shared/ui/SignHeader';
-import SignUpForm from '../features/sign-up/ui/SignUpForm';
-import SignMain from '../shared/ui/SignMain';
+import { SignHeader, SignMain } from '@shared/ui';
+import { SignUpForm } from '@features/sign-up';
 
 export default function SignUp(): React.ReactElement {
   return (

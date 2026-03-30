@@ -41,12 +41,12 @@ vi.mock('react-redux', () => ({
   useDispatch: useDispatchMock,
 }));
 
-vi.mock('../../../shared/lib/core', () => ({
+vi.mock('@shared/lib', () => ({
   getManagedEmployees: getManagedEmployeesMock,
 }));
 
-vi.mock('../../../shared/ui/TabGroup', () => ({
-  default: ({
+vi.mock('@shared/ui', () => ({
+  TabGroup: ({
     tabs,
   }: {
     tabs: { id: string; label: string; onClick: () => void }[];

@@ -17,7 +17,7 @@ vi.mock('../../authApi', () => ({
   useSignUpMutation: () => [signUpMock],
 }));
 
-vi.mock('../../../shared/lib/core', () => ({
+vi.mock('@shared/lib', () => ({
   getErrorMessage: getErrorMessageMock,
 }));
 

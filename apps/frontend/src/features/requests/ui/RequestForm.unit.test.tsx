@@ -26,7 +26,7 @@ vi.mock('../api/RequestsApi', () => ({
   useAddRequestMutation: useAddRequestMutationMock,
 }));
 
-vi.mock('../../../shared/lib/core', () => ({
+vi.mock('@shared/lib', () => ({
   validateRequest: validateRequestMock,
   getLoggedInUser: getLoggedInUserMock,
 }));

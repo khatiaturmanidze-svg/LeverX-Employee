@@ -8,13 +8,18 @@ afterEach(() => {
   cleanup();
 });
 
-vi.mock('../../features/edit/ui/DetailRow', () => ({
-  DetailRow: ({ label, value }: { label: string; value: string }) => (
-    <div data-testid={`detail-${label.replace(/\s+/g, '-')}`}>
-      <span>{label}</span>: <span>{value}</span>
-    </div>
-  ),
-}));
+vi.mock('@features/edit', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@features/edit')>();
+
+  return {
+    ...actual,
+    DetailRow: ({ label, value }: { label: string; value: string }) => (
+      <div data-testid={`detail-${label.replace(/\s+/g, '-')}`}>
+        <span>{label}</span>: <span>{value}</span>
+      </div>
+    ),
+  };
+});
 
 const mockUser: IEmployee = {
   _id: '1',

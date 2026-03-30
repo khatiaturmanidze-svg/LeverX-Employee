@@ -12,7 +12,7 @@ vi.mock('../../usersApi', () => ({
   useGetUsersQuery: useGetUsersQueryMock,
 }));
 
-vi.mock('../../../shared/lib/core', () => ({
+vi.mock('@shared/lib', () => ({
   getUserById: getUserByIdMock,
 }));
 

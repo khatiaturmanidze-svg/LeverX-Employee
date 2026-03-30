@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import Logo from '../../shared/ui/Logo';
+import { Logo } from '@shared/ui';
 export default function SignHeader(): React.ReactElement {
   const location = useLocation();
   const navigate = useNavigate();

@@ -11,8 +11,12 @@ const { signUpMock, navigateMock, getErrorMessageMock } = vi.hoisted(() => ({
   getErrorMessageMock: vi.fn(() => 'Sign up failed'),
 }));
 
-vi.mock('../shared/ui/SignHeader', () => ({
-  default: () => React.createElement('div', { 'data-testid': 'sign-header' }),
+vi.mock('@shared/ui', () => ({
+  SignHeader: () =>
+    React.createElement('div', { 'data-testid': 'sign-header' }),
+
+  SignMain: ({ children }: { children?: React.ReactNode }) =>
+    React.createElement('div', { 'data-testid': 'sign-main' }, children),
 }));
 
 vi.mock('react-router-dom', () => ({
@@ -23,7 +27,7 @@ vi.mock('../features/authApi', () => ({
   useSignUpMutation: () => [signUpMock],
 }));
 
-vi.mock('../shared/lib/core', () => ({
+vi.mock('@shared/lib', () => ({
   getErrorMessage: getErrorMessageMock,
 }));
 

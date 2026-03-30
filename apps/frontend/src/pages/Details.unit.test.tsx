@@ -31,62 +31,63 @@ vi.mock('../features/usersApi', () => ({
   useUpdateEmployeeMutation: useUpdateEmployeeMutationMock,
 }));
 
-vi.mock('../shared/lib/core', () => ({
+vi.mock('@shared/lib', () => ({
   getLoggedInUser: getLoggedInUserMock,
   canEdit: canEditMock,
 }));
 
-vi.mock('../shared/ui/Header', () => ({
-  Header: () => React.createElement('header', null, 'Header'),
-}));
+vi.mock('@shared/ui', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@shared/ui')>();
 
-vi.mock('../shared/ui/AvatarSection', () => ({
-  __esModule: true,
-  default: ({
-    canEdit,
-    onEditClick,
-    onCopyLink,
-  }: {
-    canEdit: boolean;
-    onEditClick: () => void;
-    onCopyLink: () => void;
-  }) =>
-    React.createElement('section', { 'data-testid': 'avatar' }, [
-      canEdit
-        ? React.createElement(
-            'button',
-            {
-              key: 'edit',
-              type: 'button',
-              className: 'avatar-section__edit',
-              onClick: onEditClick,
-            },
-            'edit',
-          )
-        : null,
+  return {
+    ...actual,
+
+    Header: () => React.createElement('header', null, 'Header'),
+
+    AvatarSection: ({
+      canEdit,
+      onEditClick,
+      onCopyLink,
+    }: {
+      canEdit: boolean;
+      onEditClick: () => void;
+      onCopyLink: () => void;
+    }) =>
+      React.createElement('section', { 'data-testid': 'avatar' }, [
+        canEdit
+          ? React.createElement(
+              'button',
+              {
+                key: 'edit',
+                type: 'button',
+                className: 'avatar-section__edit',
+                onClick: onEditClick,
+              },
+              'edit',
+            )
+          : null,
+        React.createElement(
+          'button',
+          {
+            key: 'copy',
+            type: 'button',
+            className: 'avatar-section__copy',
+            onClick: onCopyLink,
+          },
+          'Copy link',
+        ),
+      ]),
+
+    EmployeeView: () =>
       React.createElement(
-        'button',
-        {
-          key: 'copy',
-          type: 'button',
-          className: 'avatar-section__copy',
-          onClick: onCopyLink,
-        },
-        'Copy link',
+        'div',
+        { 'data-testid': 'employee-view' },
+        'EmployeeView',
       ),
-    ]),
-}));
+  };
+});
 
-vi.mock('../shared/ui/EmployeeView', () => ({
-  EmployeeView: () =>
-    React.createElement(
-      'div',
-      { 'data-testid': 'employee-view' },
-      'EmployeeView',
-    ),
-}));
-
-vi.mock('../features/edit/ui/EmployeeEditForm', () => ({
+vi.mock('@features/edit', () => ({
   EmployeeEditForm: ({
     onCancel,
     onSaveSuccess,

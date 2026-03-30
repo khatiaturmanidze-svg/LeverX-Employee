@@ -16,14 +16,11 @@ vi.mock('../features/usersApi', () => ({
   useGetUsersQuery: useGetUsersQueryMock,
 }));
 
-vi.mock('../shared/lib/core', () => ({
-  getLoggedInUser: getLoggedInUserMock,
-}));
-
-vi.mock('../shared/lib/customHooks', () => {
-  const actual = vi.importActual('../shared/lib/customHooks') as unknown;
+vi.mock('@shared/lib', () => {
+  const actual = vi.importActual('@shared/lib') as unknown;
   return {
     ...(actual as object),
+    getLoggedInUser: getLoggedInUserMock,
     useRoleChange: useRoleChangeMock,
     useFilteredItems: (
       users: IEmployee[],
@@ -33,7 +30,7 @@ vi.mock('../shared/lib/customHooks', () => {
   };
 });
 
-vi.mock('../shared/ui/Header', () => ({
+vi.mock('@shared/ui', () => ({
   Header: ({
     loggedInUser,
     isAdmin,
@@ -50,7 +47,7 @@ vi.mock('../shared/ui/Header', () => ({
     ),
 }));
 
-vi.mock('../features/role-change/ui/RolesEmployee', () => ({
+vi.mock('@features/role-change', () => ({
   RolesEmployee: ({
     user,
     isAdmin,

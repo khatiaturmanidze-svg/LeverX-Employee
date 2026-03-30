@@ -14,11 +14,11 @@ vi.mock('../features/usersApi', () => ({
   useGetUsersQuery: useGetUsersQueryMock,
 }));
 
-vi.mock('../shared/lib/core', () => ({
+vi.mock('@shared/lib', () => ({
   getLoggedInUser: getLoggedInUserMock,
 }));
 
-vi.mock('../shared/ui/Header', () => ({
+vi.mock('@shared/ui', () => ({
   Header: ({
     loggedInUser,
     isAdmin,
@@ -35,25 +35,22 @@ vi.mock('../shared/ui/Header', () => ({
     ),
 }));
 
-vi.mock('../features/requests/ui/Managers', () => ({
-  __esModule: true,
-  default: ({ loggedInUser }: { loggedInUser: IEmployee | undefined }) =>
-    React.createElement(
-      'div',
-      { 'data-testid': 'managers' },
-      loggedInUser ? `managers:${loggedInUser.email}` : 'managers:no-user',
-    ),
-}));
-
-vi.mock('../features/requests/ui/RequestForm', () => ({
-  __esModule: true,
-  default: () => React.createElement('div', { 'data-testid': 'request-form' }),
-}));
-
-vi.mock('../features/requests/ui/RequestList', () => ({
-  __esModule: true,
-  default: () => React.createElement('div', { 'data-testid': 'request-list' }),
-}));
+vi.mock(import('@features/requests'), async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    Managers: ({ loggedInUser }: { loggedInUser: IEmployee | undefined }) =>
+      React.createElement(
+        'div',
+        { 'data-testid': 'managers' },
+        loggedInUser ? `managers:${loggedInUser.email}` : 'managers:no-user',
+      ),
+    RequestForm: () =>
+      React.createElement('div', { 'data-testid': 'request-form' }),
+    RequestList: () =>
+      React.createElement('div', { 'data-testid': 'request-list' }),
+  };
+});
 
 describe('pages/Requests', () => {
   const allUsers: IEmployee[] = [

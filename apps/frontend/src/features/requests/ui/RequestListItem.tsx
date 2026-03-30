@@ -1,8 +1,7 @@
 import React from 'react';
 import { IRequestData } from '../model/state.types';
-import { getDisplayStatus } from '../../../shared/lib/core';
+import { getDisplayStatus, useGetManager } from '@shared/lib';
 
-import { useGetManager } from '../../../shared/lib/customHooks';
 import { useDispatch } from 'react-redux';
 import { usersApi } from '../../usersApi';
 import { useUpdateRequestMutation } from '../api/RequestsApi';
