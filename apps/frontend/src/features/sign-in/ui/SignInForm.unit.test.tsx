@@ -2,27 +2,31 @@ import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import SignUpForm from './SignUpForm';
+import SignInForm from './SignInForm';
 
-const { signUpMock, navigateMock, getErrorMessageMock } = vi.hoisted(() => ({
-  signUpMock: vi.fn(),
+const { signInMock, navigateMock, getErrorMessageMock } = vi.hoisted(() => ({
+  signInMock: vi.fn(),
   navigateMock: vi.fn(),
-  getErrorMessageMock: vi.fn(() => 'Sign up failed'),
+  getErrorMessageMock: vi.fn(() => 'Sign in failed'),
 }));
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => navigateMock,
 }));
 
-vi.mock('../authApi', () => ({
-  useSignUpMutation: () => [signUpMock],
+vi.mock('../../authApi', () => ({
+  useSignInMutation: () => [signInMock],
 }));
+vi.mock('../../../shared/lib/core', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../shared')>();
 
-vi.mock('../../shared/lib/core', () => ({
-  getErrorMessage: getErrorMessageMock,
-}));
+  return {
+    ...actual,
+    getErrorMessage: getErrorMessageMock,
+  };
+});
 
-describe('SignUpForm', () => {
+describe('SignInForm', () => {
   const setInputValue = (input: HTMLInputElement, value: string) => {
     const setter = Object.getOwnPropertyDescriptor(
       HTMLInputElement.prototype,
@@ -34,45 +38,34 @@ describe('SignUpForm', () => {
   };
 
   beforeEach(() => {
-    signUpMock.mockReset();
+    signInMock.mockReset();
     navigateMock.mockReset();
     getErrorMessageMock.mockClear();
     localStorage.clear();
     sessionStorage.clear();
   });
 
-  it('submits expected payload and stores employee in sessionStorage by default', async () => {
-    signUpMock.mockReturnValue({
-      unwrap: () =>
-        Promise.resolve({
-          employee: { id: '1', first_name: 'John', last_name: 'Doe' },
-        }),
+  it('submits trimmed email and stores result in sessionStorage by default', async () => {
+    signInMock.mockReturnValue({
+      unwrap: () => Promise.resolve({ token: 'abc' }),
     });
 
     const container = document.createElement('div');
     const root = createRoot(container);
 
     await act(async () => {
-      root.render(React.createElement(SignUpForm));
+      root.render(React.createElement(SignInForm));
     });
 
-    const firstNameInput = container.querySelector(
-      '.signup__form-first',
-    ) as HTMLInputElement;
-    const lastNameInput = container.querySelector(
-      '.signup__form-last',
-    ) as HTMLInputElement;
     const emailInput = container.querySelector(
-      '.signup__form-email',
+      '.signin__form-email',
     ) as HTMLInputElement;
     const passwordInput = container.querySelector(
-      '.signup__form-password',
+      '.signin__form-password',
     ) as HTMLInputElement;
     const form = container.querySelector('form') as HTMLFormElement;
 
     await act(async () => {
-      setInputValue(firstNameInput, 'John');
-      setInputValue(lastNameInput, 'Doe');
       setInputValue(emailInput, '  user@example.com  ');
       setInputValue(passwordInput, 'secret');
     });
@@ -83,15 +76,13 @@ describe('SignUpForm', () => {
       );
     });
 
-    expect(signUpMock).toHaveBeenCalledWith({
+    expect(signInMock).toHaveBeenCalledWith({
       email: 'user@example.com',
       password: 'secret',
-      first_name: 'John',
-      last_name: 'Doe',
     });
     expect(sessionStorage.getItem('loggedInUser')).toBe('user@example.com');
     expect(sessionStorage.getItem('result')).toBe(
-      JSON.stringify({ id: '1', first_name: 'John', last_name: 'Doe' }),
+      JSON.stringify({ token: 'abc' }),
     );
     expect(localStorage.getItem('loggedInUser')).toBeNull();
     expect(navigateMock).toHaveBeenCalledWith('/main', { replace: true });
@@ -101,42 +92,31 @@ describe('SignUpForm', () => {
     });
   });
 
-  it('stores signup state in localStorage when remember-me is checked', async () => {
-    signUpMock.mockReturnValue({
-      unwrap: () =>
-        Promise.resolve({
-          employee: { id: '2', first_name: 'Alice', last_name: 'Smith' },
-        }),
+  it('stores sign-in state in localStorage when remember-me is checked', async () => {
+    signInMock.mockReturnValue({
+      unwrap: () => Promise.resolve({ token: 'remember-token' }),
     });
 
     const container = document.createElement('div');
     const root = createRoot(container);
 
     await act(async () => {
-      root.render(React.createElement(SignUpForm));
+      root.render(React.createElement(SignInForm));
     });
 
-    const firstNameInput = container.querySelector(
-      '.signup__form-first',
-    ) as HTMLInputElement;
-    const lastNameInput = container.querySelector(
-      '.signup__form-last',
-    ) as HTMLInputElement;
     const emailInput = container.querySelector(
-      '.signup__form-email',
+      '.signin__form-email',
     ) as HTMLInputElement;
     const passwordInput = container.querySelector(
-      '.signup__form-password',
+      '.signin__form-password',
     ) as HTMLInputElement;
     const rememberInput = container.querySelector(
-      '#signup__remember-me',
+      '#signin__remember-me',
     ) as HTMLInputElement;
     const form = container.querySelector('form') as HTMLFormElement;
 
     await act(async () => {
-      setInputValue(firstNameInput, 'Alice');
-      setInputValue(lastNameInput, 'Smith');
-      setInputValue(emailInput, 'alice@site.com');
+      setInputValue(emailInput, 'remember@site.com');
       setInputValue(passwordInput, 'pass');
       rememberInput.click();
     });
@@ -147,9 +127,9 @@ describe('SignUpForm', () => {
       );
     });
 
-    expect(localStorage.getItem('loggedInUser')).toBe('alice@site.com');
+    expect(localStorage.getItem('loggedInUser')).toBe('remember@site.com');
     expect(localStorage.getItem('result')).toBe(
-      JSON.stringify({ id: '2', first_name: 'Alice', last_name: 'Smith' }),
+      JSON.stringify({ token: 'remember-token' }),
     );
     expect(sessionStorage.getItem('loggedInUser')).toBeNull();
 
@@ -158,39 +138,31 @@ describe('SignUpForm', () => {
     });
   });
 
-  it('renders error message when signup request fails', async () => {
-    const error = new Error('request failed');
-    signUpMock.mockReturnValue({
+  it('renders error message when sign-in request fails', async () => {
+    const error = new Error('network');
+    signInMock.mockReturnValue({
       unwrap: () => Promise.reject(error),
     });
-    getErrorMessageMock.mockReturnValue('Email already used');
+    getErrorMessageMock.mockReturnValue('Bad credentials');
 
     const container = document.createElement('div');
     const root = createRoot(container);
 
     await act(async () => {
-      root.render(React.createElement(SignUpForm));
+      root.render(React.createElement(SignInForm));
     });
 
-    const firstNameInput = container.querySelector(
-      '.signup__form-first',
-    ) as HTMLInputElement;
-    const lastNameInput = container.querySelector(
-      '.signup__form-last',
-    ) as HTMLInputElement;
     const emailInput = container.querySelector(
-      '.signup__form-email',
+      '.signin__form-email',
     ) as HTMLInputElement;
     const passwordInput = container.querySelector(
-      '.signup__form-password',
+      '.signin__form-password',
     ) as HTMLInputElement;
     const form = container.querySelector('form') as HTMLFormElement;
 
     await act(async () => {
-      setInputValue(firstNameInput, 'User');
-      setInputValue(lastNameInput, 'Test');
       setInputValue(emailInput, 'user@example.com');
-      setInputValue(passwordInput, 'pw');
+      setInputValue(passwordInput, 'wrong');
     });
 
     await act(async () => {
@@ -199,9 +171,9 @@ describe('SignUpForm', () => {
       );
     });
 
-    const errorNode = container.querySelector('.signup__form-error');
+    const errorNode = container.querySelector('.signin__error');
     expect(getErrorMessageMock).toHaveBeenCalledWith(error);
-    expect(errorNode?.textContent).toBe('Email already used');
+    expect(errorNode?.textContent).toBe('Bad credentials');
     expect(navigateMock).not.toHaveBeenCalled();
 
     await act(async () => {

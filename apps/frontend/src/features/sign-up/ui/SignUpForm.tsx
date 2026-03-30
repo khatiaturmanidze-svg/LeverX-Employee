@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSignUpMutation } from '../authApi';
-import { getErrorMessage } from '../../shared/lib/core';
+import { useSignUpMutation } from '../../authApi';
+import { getErrorMessage } from '../../../shared/lib/core';
 
 export default function SignUpForm(): React.ReactElement {
   const navigate = useNavigate();
