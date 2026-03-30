@@ -22,4 +22,7 @@ Create a `.env` file in the root directory and define the following variables:
 
 # scripts to run from root directory
 
-- npm run dev -> builds the project, then starts the frontend and backend in parallel
+- `npm run dev` -> builds the project, then starts the frontend and backend in parallel
+- `npm run test` -> runs all unit and integration tests with Vitest
+- `npm run test:watch` -> runs tests in watch mode
+- `npm run test:coverage` -> runs tests with coverage report
