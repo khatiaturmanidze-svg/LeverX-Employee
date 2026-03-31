@@ -1,5 +1,5 @@
 @use '../abstracts/variables' as *;
-
+@use '../abstracts/mixins' as *;
 .page {
   margin-top: 7rem;
 }
@@ -39,6 +39,14 @@
     &-main {
       text-transform: uppercase;
     }
+
+    @include respond(phone) {
+      padding: $space-xs 0 $space-sm $space-md;
+      font-size: $font-small;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
   }
 
   &__address-book,
@@ -52,6 +60,10 @@
     &.active-tab {
       color: $color-lighter-grey;
       border-bottom: 2px solid $color-white;
+    }
+
+    @include respond(phone) {
+      display: none;
     }
   }
 
@@ -78,6 +90,10 @@
         background-color: $color-1000;
         color: $color-lighter-grey;
       }
+
+      @include respond(small-tab) {
+        display: none;
+      }
     }
     &-paragraph {
       text-transform: uppercase;
@@ -96,7 +112,7 @@
     height: $space-lg;
     border-radius: 50%;
     position: absolute;
-    left: -3%;
+    left: 2%;
   }
   &__logoff-wrap {
     position: relative;
@@ -105,6 +121,10 @@
     font-size: 1.2rem;
     padding: 0.8rem;
     text-transform: uppercase;
+
+    @include respond(phone) {
+      display: none;
+    }
   }
 
   &__logged-in {
@@ -113,6 +133,16 @@
     border-radius: $radius-pill;
     padding: $space-sm $space-sm $space-sm 3.5rem;
     position: relative;
+
+    @include respond(smaller-tab) {
+      display: none;
+    }
+  }
+
+  @include respond(phone) {
+    padding: $space-sm 0 $space-md $space-md;
+    justify-content: center;
+    align-items: center;
   }
 }
 
@@ -137,6 +167,12 @@
       color: $color-darker-grey;
       border-bottom: 2px solid $color-darker-grey;
     }
+
+    @include respond(phone) {
+      padding: $space-sm;
+
+      grid-column: 1/-1;
+    }
   }
 
   &-form__advanced *,
@@ -146,6 +182,7 @@
 
   &-form__basic {
     height: 14rem;
+    grid-row: 2/3;
   }
 
   &-form__advanced {
@@ -263,6 +300,11 @@ label {
   column-gap: $space-lg;
 
   padding: $space-lg;
+
+  @include respond(phone) {
+    grid-template-columns: 1fr;
+    row-gap: $space-lg;
+  }
 }
 
 .grid-container > * {
@@ -273,6 +315,10 @@ label {
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
   gap: $space-sm;
+
+  @include respond(small-tab) {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .employee-menu {
@@ -281,6 +327,11 @@ label {
     width: 8rem;
     border-radius: 50%;
     margin-left: $space-sm;
+
+    @include respond(small-tab) {
+      height: 6rem;
+      width: 6rem;
+    }
   }
 
   &__name {
@@ -291,6 +342,12 @@ label {
   &__room {
     color: $color-darker-grey;
     font-size: 1.5rem;
+  }
+
+  &__room {
+    @include respond(smaller-tab) {
+      display: none;
+    }
   }
 }
 .employee-grid {
@@ -314,6 +371,12 @@ label {
     font-size: 1.8rem;
     margin-bottom: 3.7rem;
     font-weight: 600;
+  }
+
+  @include respond(smaller-tab) {
+    &__name {
+      margin-bottom: 2.5rem;
+    }
   }
 }
 
@@ -353,6 +416,17 @@ label {
 .nothing-found {
   grid-column: 2/3;
   grid-row: 2/3;
+
+  @include respond(phone) {
+    grid-column: 1/-1;
+    grid-row: auto;
+  }
+}
+
+.nothing-found {
+  @include respond(smaller-tab) {
+    width: 100%;
+  }
 }
 /* menu view */
 
@@ -371,11 +445,21 @@ label {
 
   font-size: 1.5rem;
   font-weight: 400;
+
+  @include respond(smaller-tab) {
+    grid-template-columns: 1fr 3fr 1fr;
+  }
 }
 
 .first-row {
   margin-bottom: $space-sm;
   padding: $space-sm;
+}
+
+.last-child {
+  @include respond(smaller-tab) {
+    display: none;
+  }
 }
 
 .employee-menu {
