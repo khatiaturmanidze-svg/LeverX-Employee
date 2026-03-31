@@ -1,0 +1,44 @@
+/*
+
+0-600px: Phone (phone)
+600-900px: Tablet portrait (tab-port)
+950-1200px: tablet landscape (tab-land)
+1800px and above: Desktop (big-desktop)
+
+
+1em = 16px
+*/
+
+@mixin respond($breakpoint) {
+  @if $breakpoint == phone {
+    @media (max-width: 37.5em) {
+      // up to 600px
+      @content;
+    }
+  } @else if $breakpoint == smaller-tab {
+    @media (max-width: 717px) {
+      // up to 600px
+      @content;
+    }
+  } @else if $breakpoint == small-tab {
+    @media (max-width: 880px) {
+      // 600px - 800px
+      @content;
+    }
+  } @else if $breakpoint == tab-port {
+    @media (max-width: 50em) {
+      // 800px - 900px
+      @content;
+    }
+  } @else if $breakpoint == tab-land {
+    @media (max-width: 75em) {
+      // 900px - 1200px
+      @content;
+    }
+  } @else if $breakpoint == big-desktop {
+    @media (min-width: 112.5em) {
+      // 1800px+
+      @content;
+    }
+  }
+}

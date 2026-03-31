@@ -22,7 +22,7 @@ export default function ListHeader() {
         <p>Department</p>
       </div>
 
-      <div className="flex--horizontal">
+      <div className="flex--horizontal last-child">
         <img src="/svgs/door-icon.svg" alt="room icon" className="icon" />
         <p>Room</p>
       </div>
