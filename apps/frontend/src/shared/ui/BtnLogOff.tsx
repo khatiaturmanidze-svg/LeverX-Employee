@@ -1,7 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export default function btnLogOff() {
+interface BtnLogOffProps {
+  className?: string;
+}
+
+export default function btnLogOff({
+  className = '',
+}: BtnLogOffProps): React.ReactElement {
   const navigate = useNavigate();
   const handleLogOff = () => {
     if (localStorage.getItem('loggedInUser')) {
@@ -14,7 +20,7 @@ export default function btnLogOff() {
 
   return (
     <button
-      className="header__logoff-wrap flex--horizontal"
+      className={`header__logoff-wrap flex--horizontal ${className}`.trim()}
       onClick={handleLogOff}
     >
       <img

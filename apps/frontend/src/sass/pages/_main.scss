@@ -10,7 +10,8 @@
   justify-content: space-between;
   position: fixed;
   width: 100%;
-  top: -1%;
+  top: 0;
+  left: 0;
   z-index: 1000;
 
   &__brand {
@@ -59,11 +60,12 @@
 
     &.active-tab {
       color: $color-lighter-grey;
-      border-bottom: 2px solid $color-white;
-    }
+      border-bottom: 2px solid $color-lighter-grey;
 
-    @include respond(phone) {
-      display: none;
+      @include respond(phone) {
+        border-bottom: none;
+        border-left: 3px solid $color-lighter-grey;
+      }
     }
   }
 
@@ -121,10 +123,6 @@
     font-size: 1.2rem;
     padding: 0.8rem;
     text-transform: uppercase;
-
-    @include respond(phone) {
-      display: none;
-    }
   }
 
   &__logged-in {
@@ -141,8 +139,87 @@
 
   @include respond(phone) {
     padding: $space-sm 0 $space-md $space-md;
-    justify-content: center;
-    align-items: center;
+    justify-content: space-between;
+  }
+
+  &--menu-btn {
+    display: none;
+    cursor: pointer;
+
+    @include respond(phone) {
+      display: block;
+    }
+  }
+
+  &--mobile-menu {
+    display: none;
+
+    @include respond(phone) {
+      display: block;
+      position: fixed;
+      top: 8.6rem;
+      left: 0;
+      width: min(28rem, 80vw);
+      height: 100%;
+      background-color: $color-700;
+      padding: $space-md 0;
+      z-index: 1001;
+      transform: translateX(-100%);
+      visibility: hidden;
+      display: flex;
+      flex-direction: column;
+      transition:
+        transform 0.3s ease,
+        visibility 0.3s ease;
+    }
+
+    &.header--mobile-menu-open {
+      @include respond(phone) {
+        transform: translateX(0);
+        visibility: visible;
+      }
+    }
+  }
+
+  &--mobile-overlay {
+    display: none;
+
+    @include respond(phone) {
+      display: block;
+      position: fixed;
+      top: 8.6rem;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(3px);
+      border: none;
+      padding: 0;
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    &.header--mobile-overlay-open {
+      @include respond(phone) {
+        opacity: 1;
+        pointer-events: auto;
+      }
+    }
+  }
+
+  &__mobile-tabs {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+
+    button {
+      width: 100%;
+      text-align: left;
+    }
   }
 }
 
@@ -487,4 +564,18 @@ label {
 
 .wrapper {
   position: relative;
+}
+
+.tab-container {
+  @include respond(phone) {
+    display: none;
+  }
+
+  &.header__mobile-tabs {
+    @include respond(phone) {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+  }
 }
