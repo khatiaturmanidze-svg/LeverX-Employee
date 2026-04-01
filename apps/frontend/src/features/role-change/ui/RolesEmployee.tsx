@@ -43,8 +43,6 @@ export function RolesEmployee({
         />
       </div>
 
-      <div className="section-roles__vacation-role"></div>
-
       <p
         className={`section-roles__role-admin ${
           user.role === 'Admin' ? 'role' : ''
