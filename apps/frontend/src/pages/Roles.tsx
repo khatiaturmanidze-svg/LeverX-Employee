@@ -41,7 +41,6 @@ export default function Roles(): React.ReactElement {
           </div>
           {error && <p className="section-roles__error">{error}</p>}
           <p className="section-roles__book">Address book role</p>
-          <p className="section-roles__vacation">Vacation role</p>
           <p className="section-roles__admin">Admin</p>
           {filteredUsers.map((user) => (
             <RolesEmployee
