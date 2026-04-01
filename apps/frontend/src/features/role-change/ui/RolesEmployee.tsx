@@ -16,8 +16,8 @@ export function RolesEmployee({
   key,
 }: RolesEmployeeProps) {
   return (
-    <>
-      <div className="section-roles__employee" key={key}>
+    <div className="section-roles__employee-container" key={key}>
+      <div className="section-roles__employee">
         <img
           src={user.user_avatar}
           alt="employee img"
@@ -50,6 +50,6 @@ export function RolesEmployee({
       >
         admin
       </p>
-    </>
+    </div>
   );
 }
