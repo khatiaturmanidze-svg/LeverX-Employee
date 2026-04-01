@@ -16,7 +16,6 @@
   &__book,
   &__input {
     margin-right: 3rem;
-    margin-left: 2rem;
     border-right: 2px solid $color-lighter-grey;
     padding: 1rem;
   }
@@ -66,13 +65,11 @@
   &__role {
     display: flex;
     border: 2px solid $color-lighter-grey;
-    width: 75%;
-
+    width: fit-content;
     &-employee,
     &-hr {
       text-transform: uppercase;
       padding: 1rem;
-      width: 50%;
       font-size: $font-small;
     }
   }
@@ -90,6 +87,12 @@
     display: flex;
     align-items: center;
     gap: $space-sm;
+    &-container {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 3fr 2fr 1fr;
+      grid-column: 1/-1;
+    }
     &-img {
       width: 6rem;
       height: 6rem;
@@ -105,16 +108,21 @@
 
   @include respond(smaller-tab) {
     grid-template-columns: 3fr 2fr;
+
+    &__employee {
+      &-container {
+        grid-template-columns: 3fr 2fr;
+      }
+    }
   }
 
   @include respond(phone) {
-    grid-template-columns: 1fr;
-    justify-items: center;
-    gap: 0;
+    display: flex;
 
-    &__role {
-      width: 100%;
-    }
+    flex-direction: column;
+    justify-items: center;
+    gap: $space-md;
+    background-color: $color-lighter-grey;
 
     &__book {
       display: none;
@@ -122,15 +130,20 @@
 
     &__input {
       border: none;
+      margin: 0;
     }
 
-    &__employee {
-      width: 100%;
-      margin-top: $space-md;
+    &__employee-container {
+      display: flex;
+      flex-direction: column;
       justify-content: center;
-      border: 2px solid $color-lighter-grey;
-      border-bottom: none;
-      padding: $space-sm;
+      align-items: center;
+      width: 70%;
+      gap: $space-md;
+      background-color: $color-white;
+      border-radius: $radius-medium;
+      box-shadow: $card-shadow;
+      padding: $space-md;
     }
   }
 }
