@@ -5,6 +5,7 @@ import BtnLogOff from './BtnLogOff';
 import BtnSupport from './BtnSupport';
 import LoggedInUser from './LoggedInUser';
 import HeaderTabs from './HeaderTabs';
+import { HeaderMenu } from './HeaderMenu';
 interface HeaderProps {
   loggedInUser: IEmployee | null;
   isAdmin?: boolean;
@@ -16,6 +17,7 @@ export function Header({
 }: HeaderProps): React.ReactElement {
   return (
     <header className="header flex--horizontal">
+      <HeaderMenu loggedInUser={loggedInUser} isAdmin={isAdmin} />
       <Logo />
       <HeaderTabs isAdmin={isAdmin} loggedInUser={loggedInUser} />
       <div className="header--right flex--horizontal">
