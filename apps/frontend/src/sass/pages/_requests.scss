@@ -24,8 +24,12 @@
   @include respond(tab-port) {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto;
-    margin: 1rem 2rem;
+    place-content: center;
   }
+}
+
+.requests-grid > * {
+  min-width: 0;
 }
 
 .manager-wrapper {
@@ -109,6 +113,7 @@
   flex-direction: column;
   gap: $space-md;
   min-height: 0;
+  min-width: 0;
 
   &__header {
     font-size: $space-md;
@@ -138,14 +143,27 @@
     }
   }
 }
+
 .request-list__items {
   display: flex;
   flex-direction: column;
   gap: $space-md;
   flex: 1;
+  min-width: 0;
   max-height: 400px;
   overflow-y: auto;
+
+  @include respond(phone) {
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    max-height: none;
+    flex-wrap: nowrap;
+    padding-bottom: $space-xs;
+    overscroll-behavior-x: contain;
+  }
 }
+
 .request-list__item {
   padding: $space-md;
   background-color: $color-lighter-grey;
@@ -155,6 +173,11 @@
   flex-direction: column;
   gap: $space-sm;
   transition: all 0.3s;
+
+  @include respond(phone) {
+    flex: 0 0 300px;
+    width: 300px;
+  }
 
   &:hover {
     background-color: $color-white;
@@ -179,6 +202,10 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: $space-sm;
+
+    @include respond(phone) {
+      grid-template-columns: 1fr;
+    }
 
     .detail-group {
       display: flex;
