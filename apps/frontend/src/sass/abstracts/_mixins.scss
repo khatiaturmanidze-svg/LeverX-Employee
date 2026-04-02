@@ -16,23 +16,23 @@
       @content;
     }
   } @else if $breakpoint == smaller-tab {
-    @media (max-width: 717px) {
-      // up to 600px
+    @media (max-width: 44.8125em) {
+      // up to 717px
       @content;
     }
   } @else if $breakpoint == small-tab {
-    @media (max-width: 880px) {
-      // 600px - 800px
+    @media (max-width: 55em) {
+      // up to 880px
       @content;
     }
   } @else if $breakpoint == tab-port {
-    @media (max-width: 50em) {
-      // 800px - 900px
+    @media (max-width: 56em) {
+      // up to 900px
       @content;
     }
   } @else if $breakpoint == tab-land {
     @media (max-width: 75em) {
-      // 900px - 1200px
+      // up to 1200px
       @content;
     }
   } @else if $breakpoint == big-desktop {

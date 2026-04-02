@@ -1,5 +1,6 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import { HeaderMenu } from './HeaderMenu';
 import type { IEmployee } from '../../types/type';
@@ -38,7 +39,11 @@ const mockUser: IEmployee = {
 
 describe('HeaderMenu', () => {
   it('renders closed by default', () => {
-    render(<HeaderMenu loggedInUser={mockUser} isAdmin />);
+    render(
+      <MemoryRouter>
+        <HeaderMenu loggedInUser={mockUser} isAdmin />
+      </MemoryRouter>,
+    );
 
     expect(screen.getByAltText('open menu')).toBeInTheDocument();
     expect(
@@ -51,7 +56,11 @@ describe('HeaderMenu', () => {
   });
 
   it('opens the sidebar and passes mobile tab props when icon is clicked', () => {
-    render(<HeaderMenu loggedInUser={mockUser} isAdmin />);
+    render(
+      <MemoryRouter>
+        <HeaderMenu loggedInUser={mockUser} isAdmin />
+      </MemoryRouter>,
+    );
 
     fireEvent.click(screen.getByAltText('open menu'));
 
@@ -77,7 +86,11 @@ describe('HeaderMenu', () => {
   });
 
   it('closes the sidebar when overlay is clicked', () => {
-    render(<HeaderMenu loggedInUser={mockUser} isAdmin />);
+    render(
+      <MemoryRouter>
+        <HeaderMenu loggedInUser={mockUser} isAdmin />
+      </MemoryRouter>,
+    );
 
     fireEvent.click(screen.getByAltText('open menu'));
     fireEvent.click(screen.getByRole('button', { name: 'close menu overlay' }));

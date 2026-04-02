@@ -1,4 +1,5 @@
 @use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
 
 .card {
   border: 1px solid $color-lighter-grey;
@@ -19,6 +20,12 @@
   padding: 2rem;
   gap: $space-md;
   height: auto;
+
+  @include respond(tab-port) {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    margin: 1rem 2rem;
+  }
 }
 
 .manager-wrapper {
@@ -88,7 +95,13 @@
   grid-row: 1/-1;
   grid-column: 2/-1;
 
-  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  @include respond(tab-port) {
+    grid-row: 2/3;
+    grid-column: 1/-1;
+  }
 }
 
 .request-list {
@@ -118,6 +131,11 @@
     font-size: $font-medium;
     text-align: center;
     color: $color-darker-grey;
+  }
+  &__header {
+    justify-content: space-between;
+    @include respond(tab-port) {
+    }
   }
 }
 .request-list__items {

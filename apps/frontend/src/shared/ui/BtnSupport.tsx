@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function BtnSupport() {
+export default function BtnSupport(): React.ReactElement {
   return (
     <button className="header__support-btn flex--horizontal">
       <img

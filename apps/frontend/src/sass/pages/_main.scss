@@ -15,10 +15,6 @@
   z-index: 1000;
 
   &__brand {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    color: $color-white;
     text-decoration: none;
     font-size: 1.3rem;
     padding: $space-sm 0 $space-md $space-lg;
@@ -42,7 +38,6 @@
     }
 
     @include respond(phone) {
-      padding: $space-xs 0 $space-sm $space-md;
       font-size: $font-small;
       display: flex;
       flex-direction: column;
@@ -62,7 +57,7 @@
       color: $color-lighter-grey;
       border-bottom: 2px solid $color-lighter-grey;
 
-      @include respond(phone) {
+      @include respond(small-tab) {
         border-bottom: none;
         border-left: 3px solid $color-lighter-grey;
       }
@@ -91,10 +86,6 @@
       &:hover {
         background-color: $color-1000;
         color: $color-lighter-grey;
-      }
-
-      @include respond(small-tab) {
-        display: none;
       }
     }
     &-paragraph {
@@ -131,22 +122,18 @@
     border-radius: $radius-pill;
     padding: $space-sm $space-sm $space-sm 3.5rem;
     position: relative;
-
-    @include respond(smaller-tab) {
-      display: none;
-    }
   }
 
-  @include respond(phone) {
-    padding: $space-sm 0 $space-md $space-md;
-    justify-content: space-between;
+  @include respond(small-tab) {
+    // justify-content: space-around;
+    // gap: $space-sm;
   }
 
   &--menu-btn {
     display: none;
     cursor: pointer;
 
-    @include respond(phone) {
+    @include respond(small-tab) {
       display: block;
     }
   }
@@ -154,40 +141,51 @@
   &--mobile-menu {
     display: none;
 
-    @include respond(phone) {
-      display: block;
+    @include respond(small-tab) {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      gap: $space-md;
+
       position: fixed;
-      top: 8.6rem;
+      top: 7rem;
       left: 0;
       width: min(28rem, 80vw);
-      height: 100%;
+      height: calc(100vh - 7rem);
       background-color: $color-700;
       padding: $space-md 0;
       z-index: 1001;
       transform: translateX(-100%);
       visibility: hidden;
-      display: flex;
-      flex-direction: column;
+
       transition:
         transform 0.3s ease,
         visibility 0.3s ease;
     }
 
     &.header--mobile-menu-open {
-      @include respond(phone) {
+      @include respond(small-tab) {
         transform: translateX(0);
         visibility: visible;
       }
+    }
+
+    &-footer {
+      display: flex;
+      flex-direction: column;
+      gap: $space-sm;
+      align-items: center;
     }
   }
 
   &--mobile-overlay {
     display: none;
 
-    @include respond(phone) {
+    @include respond(small-tab) {
       display: block;
       position: fixed;
-      top: 8.6rem;
+      top: 7rem;
       left: 0;
       width: 100%;
       height: 100%;
@@ -204,7 +202,7 @@
     }
 
     &.header--mobile-overlay-open {
-      @include respond(phone) {
+      @include respond(small-tab) {
         opacity: 1;
         pointer-events: auto;
       }
@@ -226,6 +224,10 @@
 .header--right {
   gap: $space-md;
   justify-content: space-between;
+
+  @include respond(small-tab) {
+    display: none;
+  }
 }
 
 .search {
@@ -567,12 +569,12 @@ label {
 }
 
 .tab-container {
-  @include respond(phone) {
+  @include respond(small-tab) {
     display: none;
   }
 
   &.header__mobile-tabs {
-    @include respond(phone) {
+    @include respond(small-tab) {
       display: flex;
       flex-direction: column;
       width: 100%;
