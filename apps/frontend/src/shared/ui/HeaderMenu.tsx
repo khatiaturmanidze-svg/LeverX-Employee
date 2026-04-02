@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import HeaderTabs from './HeaderTabs';
 import { IEmployee } from '../../types/type';
+import { BtnLogOff, BtnSupport, LoggedInUser } from '.';
 
 interface HeaderMenuProps {
   loggedInUser: IEmployee | null;
@@ -43,6 +44,12 @@ export function HeaderMenu({
           isAdmin={isAdmin}
           containerClassName="tab-container header__mobile-tabs"
         />
+
+        <div className="header--mobile-menu-footer">
+          <LoggedInUser loggedInUser={loggedInUser} />
+          <BtnSupport />
+          <BtnLogOff />
+        </div>
       </aside>
     </>
   );

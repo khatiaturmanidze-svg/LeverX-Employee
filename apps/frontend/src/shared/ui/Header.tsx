@@ -17,8 +17,9 @@ export function Header({
 }: HeaderProps): React.ReactElement {
   return (
     <header className="header flex--horizontal">
-      <HeaderMenu loggedInUser={loggedInUser} isAdmin={isAdmin} />
       <Logo />
+      <HeaderMenu loggedInUser={loggedInUser} isAdmin={isAdmin} />
+
       <HeaderTabs isAdmin={isAdmin} loggedInUser={loggedInUser} />
       <div className="header--right flex--horizontal">
         <BtnSupport />
