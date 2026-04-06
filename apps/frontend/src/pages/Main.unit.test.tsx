@@ -5,9 +5,9 @@ import Main from './Main';
 import type { AdvancedSearchCriteria, SearchCriteria } from '@features/search';
 import type { IEmployee } from '../types/type';
 
-const { useGetUsersQueryMock, getLoggedInUserMock } = vi.hoisted(() => ({
+const { useGetUsersQueryMock, useHeaderPropsMock } = vi.hoisted(() => ({
   useGetUsersQueryMock: vi.fn(),
-  getLoggedInUserMock: vi.fn(),
+  useHeaderPropsMock: vi.fn(),
 }));
 
 let basicCriteriaValue: SearchCriteria = { fullname: '' };
@@ -26,7 +26,7 @@ vi.mock('../features/usersApi', () => ({
 }));
 
 vi.mock('@shared/lib', () => ({
-  getLoggedInUser: getLoggedInUserMock,
+  useHeaderProps: useHeaderPropsMock,
 }));
 
 vi.mock('@shared/ui', async (importOriginal) => {
@@ -170,7 +170,10 @@ describe('pages/Main', () => {
     };
 
     useGetUsersQueryMock.mockReturnValue({ data: users });
-    getLoggedInUserMock.mockReturnValue(null);
+    useHeaderPropsMock.mockReturnValue({
+      loggedInUser: null,
+      isAdmin: false,
+    });
   });
 
   it('renders basic search by default and shows employees in grid mode', async () => {

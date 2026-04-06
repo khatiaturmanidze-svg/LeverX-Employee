@@ -4,7 +4,7 @@ import {
   useGetUsersQuery,
   useUpdateEmployeeRoleMutation,
 } from '../../features/usersApi';
-import { getErrorMessage } from './core';
+import { getErrorMessage, getLoggedInUser } from './core';
 
 export function useFilteredItems<TItem, TValue>(
   items: TItem[],
@@ -45,4 +45,17 @@ export function useGetManager(employeeId: string) {
   const employeeObj = allUsers.find((u) => u._id === employeeId);
 
   return employeeObj?.manager;
+}
+
+export function useHeaderProps() {
+  const { data: allUsers = [] } = useGetUsersQuery();
+  const loggedUser = useMemo(() => {
+    return getLoggedInUser(allUsers) || null;
+  }, [allUsers]);
+
+  const isAdmin = useMemo(() => loggedUser?.role === 'Admin', [loggedUser]);
+
+  return isAdmin
+    ? { loggedInUser: loggedUser, isAdmin }
+    : { loggedInUser: loggedUser, isAdmin: false };
 }

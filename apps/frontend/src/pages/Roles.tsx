@@ -1,20 +1,15 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Header } from '@shared/ui';
 import { RolesEmployee } from '@features/role-change';
-import { useGetUsersQuery } from '../features/usersApi';
-import { useFilteredItems, useRoleChange, getLoggedInUser } from '@shared/lib';
+import { useFilteredItems, useRoleChange, useHeaderProps } from '@shared/lib';
+import { useGetUsersQuery } from '@/features/usersApi';
 
 export default function Roles(): React.ReactElement {
   const [searchTerm, setSearchTerm] = useState('');
   const { data: allUsers = [] } = useGetUsersQuery();
+  const { loggedInUser, isAdmin } = useHeaderProps();
 
-  const loggedUser = useMemo(() => {
-    return getLoggedInUser(allUsers) || null;
-  }, [allUsers]);
-
-  const isAdmin = useMemo(() => loggedUser?.role === 'Admin', [loggedUser]);
-
-  const { handleRoleChange, error } = useRoleChange(loggedUser);
+  const { handleRoleChange, error } = useRoleChange(loggedInUser);
 
   const filteredUsers = useFilteredItems(
     allUsers,
@@ -26,7 +21,7 @@ export default function Roles(): React.ReactElement {
 
   return (
     <>
-      <Header loggedInUser={loggedUser} isAdmin={isAdmin} />
+      <Header loggedInUser={loggedInUser} isAdmin={isAdmin} />
       <main>
         <section className="section-roles">
           <p className="section-roles__paragraph">Roles & permissions</p>

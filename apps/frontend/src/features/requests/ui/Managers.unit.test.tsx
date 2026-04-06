@@ -10,7 +10,7 @@ vi.mock('./ManagerCard', () => ({
 describe('Managers', () => {
   it('renders support header and manager card placeholder when no manager', () => {
     const html = renderToStaticMarkup(
-      React.createElement(Managers, { loggedInUser: undefined }),
+      React.createElement(Managers, { loggedInUser: null }),
     );
 
     expect(html).toContain('Leave Request Support');

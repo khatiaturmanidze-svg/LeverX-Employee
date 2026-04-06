@@ -3,7 +3,7 @@ import { IEmployee } from '../../../types/type';
 import ManagerCard from './ManagerCard';
 
 interface ManagersProps {
-  loggedInUser: IEmployee | undefined;
+  loggedInUser: IEmployee | null;
 }
 
 export default function Managers({

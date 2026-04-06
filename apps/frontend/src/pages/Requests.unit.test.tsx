@@ -5,17 +5,12 @@ import { createRoot } from 'react-dom/client';
 import Requests from './Requests';
 import type { IEmployee } from '../types/type';
 
-const { useGetUsersQueryMock, getLoggedInUserMock } = vi.hoisted(() => ({
-  useGetUsersQueryMock: vi.fn(),
-  getLoggedInUserMock: vi.fn(),
-}));
-
-vi.mock('../features/usersApi', () => ({
-  useGetUsersQuery: useGetUsersQueryMock,
+const { useHeaderPropsMock } = vi.hoisted(() => ({
+  useHeaderPropsMock: vi.fn(),
 }));
 
 vi.mock('@shared/lib', () => ({
-  getLoggedInUser: getLoggedInUserMock,
+  useHeaderProps: useHeaderPropsMock,
 }));
 
 vi.mock('@shared/ui', () => ({
@@ -35,8 +30,8 @@ vi.mock('@shared/ui', () => ({
     ),
 }));
 
-vi.mock(import('@features/requests'), async (importOriginal) => {
-  const actual = await importOriginal();
+vi.mock('@features/requests', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@features/requests')>();
   return {
     ...actual,
     Managers: ({ loggedInUser }: { loggedInUser: IEmployee | undefined }) =>
@@ -74,16 +69,17 @@ describe('pages/Requests', () => {
   ];
 
   beforeEach(() => {
-    useGetUsersQueryMock.mockReset();
-    getLoggedInUserMock.mockReset();
+    useHeaderPropsMock.mockReset();
     localStorage.clear();
     sessionStorage.clear();
   });
 
   it('renders with Header isAdmin=true for Admin role', async () => {
     const loggedUser: IEmployee = allUsers[0];
-    useGetUsersQueryMock.mockReturnValue({ data: allUsers });
-    getLoggedInUserMock.mockReturnValue(loggedUser);
+    useHeaderPropsMock.mockReturnValue({
+      loggedInUser: loggedUser,
+      isAdmin: true,
+    });
 
     const container = document.createElement('div');
     const root = createRoot(container);
@@ -116,8 +112,10 @@ describe('pages/Requests', () => {
       role: 'Employee',
       email: 'user@example.com',
     };
-    useGetUsersQueryMock.mockReturnValue({ data: allUsers });
-    getLoggedInUserMock.mockReturnValue(nonAdminUser);
+    useHeaderPropsMock.mockReturnValue({
+      loggedInUser: nonAdminUser,
+      isAdmin: false,
+    });
 
     const container = document.createElement('div');
     const root = createRoot(container);

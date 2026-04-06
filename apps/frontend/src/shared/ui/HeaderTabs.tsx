@@ -48,6 +48,17 @@ export default function HeaderTabs({
       onClick: () => navigate(`/requests/${loggedInUser?._id}`),
       className: 'header__requests-btn',
     },
+    ...(isAdmin
+      ? [
+          {
+            id: 'create-user',
+            label: 'Create User',
+            isActive: location.pathname.startsWith('/create-user'),
+            onClick: () => navigate('/create-user'),
+            className: 'header__create-user-btn',
+          },
+        ]
+      : []),
   ];
 
   return (

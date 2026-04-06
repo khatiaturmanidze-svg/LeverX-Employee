@@ -12,10 +12,10 @@ const { useParamsMock, useGetUsersQueryMock, useGetEmployeeDetailsQueryMock } =
     useGetEmployeeDetailsQueryMock: vi.fn(),
   }));
 
-const { useUpdateEmployeeMutationMock, getLoggedInUserMock, canEditMock } =
+const { useUpdateEmployeeMutationMock, useHeaderPropsMock, canEditMock } =
   vi.hoisted(() => ({
     useUpdateEmployeeMutationMock: vi.fn(),
-    getLoggedInUserMock: vi.fn(),
+    useHeaderPropsMock: vi.fn(),
     canEditMock: vi.fn(),
   }));
 
@@ -32,7 +32,7 @@ vi.mock('../features/usersApi', () => ({
 }));
 
 vi.mock('@shared/lib', () => ({
-  getLoggedInUser: getLoggedInUserMock,
+  useHeaderProps: useHeaderPropsMock,
   canEdit: canEditMock,
 }));
 
@@ -161,7 +161,10 @@ describe('pages/Details', () => {
   const setupBaseMocks = () => {
     useParamsMock.mockReturnValue({ id: viewedEmployee._id });
     useGetUsersQueryMock.mockReturnValue({ data: [loggedUser] });
-    getLoggedInUserMock.mockReturnValue(loggedUser);
+    useHeaderPropsMock.mockReturnValue({
+      loggedInUser: loggedUser,
+      isAdmin: true,
+    });
     useGetEmployeeDetailsQueryMock.mockReturnValue({
       data: viewedEmployee,
       isLoading: false,
@@ -184,17 +187,19 @@ describe('pages/Details', () => {
     });
     useUpdateEmployeeMutationMock.mockReturnValue([updateEmployeeMock]);
     canEditMock.mockReset();
-    getLoggedInUserMock.mockReset();
+    useHeaderPropsMock.mockReset();
     useParamsMock.mockReset();
     useGetUsersQueryMock.mockReset();
     useGetEmployeeDetailsQueryMock.mockReset();
-    // useUpdateEmployeeMutationMock is set above to avoid crashes on destructuring.
   });
 
   it('renders loading state while employee details are loading', async () => {
     useParamsMock.mockReturnValue({ id: viewedEmployee._id });
     useGetUsersQueryMock.mockReturnValue({ data: [loggedUser] });
-    getLoggedInUserMock.mockReturnValue(loggedUser);
+    useHeaderPropsMock.mockReturnValue({
+      loggedInUser: loggedUser,
+      isAdmin: true,
+    });
 
     useGetEmployeeDetailsQueryMock.mockReturnValue({
       data: undefined,
@@ -220,7 +225,10 @@ describe('pages/Details', () => {
   it('renders "Employee not found" when employee details query errors', async () => {
     useParamsMock.mockReturnValue({ id: viewedEmployee._id });
     useGetUsersQueryMock.mockReturnValue({ data: [loggedUser] });
-    getLoggedInUserMock.mockReturnValue(loggedUser);
+    useHeaderPropsMock.mockReturnValue({
+      loggedInUser: loggedUser,
+      isAdmin: true,
+    });
 
     useGetEmployeeDetailsQueryMock.mockReturnValue({
       data: undefined,

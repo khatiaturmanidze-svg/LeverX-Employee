@@ -5,11 +5,11 @@ import { createRoot } from 'react-dom/client';
 import Roles from './Roles';
 import type { IEmployee } from '../types/type';
 
-const { useGetUsersQueryMock, getLoggedInUserMock, useRoleChangeMock } =
+const { useGetUsersQueryMock, useRoleChangeMock, useHeaderPropsMock } =
   vi.hoisted(() => ({
     useGetUsersQueryMock: vi.fn(),
-    getLoggedInUserMock: vi.fn(),
     useRoleChangeMock: vi.fn(),
+    useHeaderPropsMock: vi.fn(),
   }));
 
 vi.mock('../features/usersApi', () => ({
@@ -20,8 +20,8 @@ vi.mock('@shared/lib', () => {
   const actual = vi.importActual('@shared/lib') as unknown;
   return {
     ...(actual as object),
-    getLoggedInUser: getLoggedInUserMock,
     useRoleChange: useRoleChangeMock,
+    useHeaderProps: useHeaderPropsMock,
     useFilteredItems: (
       users: IEmployee[],
       value: string,
@@ -115,10 +115,13 @@ describe('pages/Roles', () => {
 
   beforeEach(() => {
     useGetUsersQueryMock.mockReset();
-    getLoggedInUserMock.mockReset();
     useRoleChangeMock.mockReset();
+    useHeaderPropsMock.mockReset();
     useGetUsersQueryMock.mockReturnValue({ data: allUsers });
-    getLoggedInUserMock.mockReturnValue(allUsers[0]);
+    useHeaderPropsMock.mockReturnValue({
+      loggedInUser: allUsers[0],
+      isAdmin: true,
+    });
     useRoleChangeMock.mockReturnValue({
       handleRoleChange: vi.fn(),
       error: null,
@@ -187,6 +190,10 @@ describe('pages/Roles', () => {
   });
 
   it('renders error text when useRoleChange returns an error', async () => {
+    useHeaderPropsMock.mockReturnValue({
+      loggedInUser: allUsers[1],
+      isAdmin: false,
+    });
     useRoleChangeMock.mockReturnValue({
       handleRoleChange: vi.fn(),
       error: 'permission denied. only Admins can change roles.',
