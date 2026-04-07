@@ -3,122 +3,40 @@ import { act } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createRoot } from 'react-dom/client';
 import Roles from './Roles';
-import type { IEmployee } from '../types/type';
+import {
+  getLoggedInUserMock,
+  rolesAllUsers,
+  useGetUsersQueryMock,
+  useRoleChangeMock,
+} from './test-mocks';
 
-const { useGetUsersQueryMock, getLoggedInUserMock, useRoleChangeMock } =
-  vi.hoisted(() => ({
-    useGetUsersQueryMock: vi.fn(),
-    getLoggedInUserMock: vi.fn(),
-    useRoleChangeMock: vi.fn(),
-  }));
+vi.mock(
+  '../features/usersApi',
+  async () => (await import('./test-mocks')).pagesUsersApiModule,
+);
 
-vi.mock('../features/usersApi', () => ({
-  useGetUsersQuery: useGetUsersQueryMock,
-}));
+vi.mock(
+  '@shared/lib',
+  async () => (await import('./test-mocks')).rolesSharedLibModule,
+);
 
-vi.mock('@shared/lib', () => {
-  const actual = vi.importActual('@shared/lib') as unknown;
-  return {
-    ...(actual as object),
-    getLoggedInUser: getLoggedInUserMock,
-    useRoleChange: useRoleChangeMock,
-    useFilteredItems: (
-      users: IEmployee[],
-      value: string,
-      filterFn: (user: IEmployee, term: string) => boolean,
-    ) => users.filter((u) => filterFn(u, value)),
-  };
-});
+vi.mock(
+  '@shared/ui',
+  async () => (await import('./test-mocks')).rolesSharedUiModule,
+);
 
-vi.mock('@shared/ui', () => ({
-  Header: ({
-    loggedInUser,
-    isAdmin,
-  }: {
-    loggedInUser: IEmployee | null;
-    isAdmin?: boolean;
-  }) =>
-    React.createElement(
-      'div',
-      { 'data-testid': 'header' },
-      `header:${loggedInUser ? loggedInUser.role : 'no-user'}:${String(
-        isAdmin,
-      )}`,
-    ),
-}));
-
-vi.mock('@features/role-change', () => ({
-  RolesEmployee: ({
-    user,
-    isAdmin,
-    onRoleChange,
-  }: {
-    user: IEmployee;
-    isAdmin: boolean;
-    onRoleChange: (id: string, newRole: string) => void;
-  }) =>
-    React.createElement('div', { 'data-testid': 'role-employee' }, [
-      `${user.first_name} ${user.last_name}:admin=${String(isAdmin)}`,
-      React.createElement(
-        'button',
-        {
-          key: 'btn',
-          type: 'button',
-          onClick: () => onRoleChange(user._id, 'HR'),
-        },
-        'change',
-      ),
-    ]),
-}));
+vi.mock(
+  '@features/role-change',
+  async () => (await import('./test-mocks')).rolesFeatureModule,
+);
 
 describe('pages/Roles', () => {
-  const allUsers: IEmployee[] = [
-    {
-      _id: 'u-1',
-      role: 'Admin',
-      user_avatar: '',
-      first_name: 'Jane',
-      last_name: 'Doe',
-      department: 'IT',
-      building: 'B',
-      room: '1',
-      desk_number: 1,
-      isRemoteWork: false,
-      phone: '+1',
-      email: 'jane@example.com',
-      zoom_id: 'z1',
-      zoom_link: 'link',
-      citizenship: 'US',
-      manager: undefined,
-      visa: [],
-    },
-    {
-      _id: 'u-2',
-      role: 'Employee',
-      user_avatar: '',
-      first_name: 'John',
-      last_name: 'Smith',
-      department: 'HR',
-      building: 'B',
-      room: '2',
-      desk_number: 2,
-      isRemoteWork: false,
-      phone: '+2',
-      email: 'john@example.com',
-      zoom_id: 'z2',
-      zoom_link: 'link',
-      citizenship: 'US',
-      manager: undefined,
-      visa: [],
-    },
-  ];
-
   beforeEach(() => {
     useGetUsersQueryMock.mockReset();
     getLoggedInUserMock.mockReset();
     useRoleChangeMock.mockReset();
-    useGetUsersQueryMock.mockReturnValue({ data: allUsers });
-    getLoggedInUserMock.mockReturnValue(allUsers[0]);
+    useGetUsersQueryMock.mockReturnValue({ data: rolesAllUsers });
+    getLoggedInUserMock.mockReturnValue(rolesAllUsers[0]);
     useRoleChangeMock.mockReturnValue({
       handleRoleChange: vi.fn(),
       error: null,

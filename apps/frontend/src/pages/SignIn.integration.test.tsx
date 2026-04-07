@@ -4,32 +4,27 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createRoot } from 'react-dom/client';
 
 import SignIn from './SignIn';
+import { getErrorMessageMock, navigateMock, signInMock } from './test-mocks';
 
-const { signInMock, navigateMock, getErrorMessageMock } = vi.hoisted(() => ({
-  signInMock: vi.fn(),
-  navigateMock: vi.fn(),
-  getErrorMessageMock: vi.fn(() => 'Sign in failed'),
-}));
+vi.mock(
+  '@shared/ui',
+  async () => (await import('./test-mocks')).authPagesSharedUiModule,
+);
 
-vi.mock('@shared/ui', () => ({
-  SignHeader: () =>
-    React.createElement('div', { 'data-testid': 'sign-header' }),
+vi.mock(
+  'react-router-dom',
+  async () => (await import('./test-mocks')).authPagesRouterModule,
+);
 
-  SignMain: ({ children }: { children?: React.ReactNode }) =>
-    React.createElement('div', { 'data-testid': 'sign-main' }, children),
-}));
+vi.mock(
+  '../features/authApi',
+  async () => (await import('./test-mocks')).signInPageAuthApiModule,
+);
 
-vi.mock('react-router-dom', () => ({
-  useNavigate: () => navigateMock,
-}));
-
-vi.mock('../features/authApi', () => ({
-  useSignInMutation: () => [signInMock],
-}));
-
-vi.mock('@shared/lib', () => ({
-  getErrorMessage: getErrorMessageMock,
-}));
+vi.mock(
+  '@shared/lib',
+  async () => (await import('./test-mocks')).authPagesSharedLibModule,
+);
 
 describe('pages/SignIn (integration)', () => {
   const setInputValue = (input: HTMLInputElement, value: string) => {

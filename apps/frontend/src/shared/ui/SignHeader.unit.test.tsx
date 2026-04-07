@@ -6,19 +6,12 @@ import { MemoryRouter } from 'react-router-dom'; // Import this
 import * as Router from 'react-router-dom';
 import type { Location } from 'react-router-dom';
 import '@testing-library/jest-dom/vitest';
-
-const mockNavigate = vi.fn();
+import { sharedUiNavigateMock } from './test-mocks';
 
 // Mock useNavigate globally for this file
 vi.mock('react-router-dom', async () => {
-  const actual =
-    await vi.importActual<typeof import('react-router-dom')>(
-      'react-router-dom',
-    );
-  return {
-    ...actual,
-    useNavigate: () => mockNavigate,
-  };
+  const { signHeaderRouterFactory } = await import('./test-mocks');
+  return signHeaderRouterFactory();
 });
 
 describe('SignHeader', () => {
@@ -50,7 +43,7 @@ describe('SignHeader', () => {
     ).not.toBeInTheDocument();
 
     fireEvent.click(signUpButton);
-    expect(mockNavigate).toHaveBeenCalledWith('/signup');
+    expect(sharedUiNavigateMock).toHaveBeenCalledWith('/signup');
   });
 
   it('renders "Sign In" button on signup page', () => {
@@ -75,6 +68,6 @@ describe('SignHeader', () => {
     ).not.toBeInTheDocument();
 
     fireEvent.click(signInButton);
-    expect(mockNavigate).toHaveBeenCalledWith('/signin');
+    expect(sharedUiNavigateMock).toHaveBeenCalledWith('/signin');
   });
 });

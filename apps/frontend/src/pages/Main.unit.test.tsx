@@ -2,174 +2,39 @@ import React, { act } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createRoot } from 'react-dom/client';
 import Main from './Main';
-import type { AdvancedSearchCriteria, SearchCriteria } from '@features/search';
-import type { IEmployee } from '../types/type';
+import {
+  advancedCriteriaValue,
+  basicCriteriaValue,
+  getLoggedInUserMock,
+  mainUsers,
+  resetMainSearchCriteria,
+  useGetUsersQueryMock,
+} from './test-mocks';
 
-const { useGetUsersQueryMock, getLoggedInUserMock } = vi.hoisted(() => ({
-  useGetUsersQueryMock: vi.fn(),
-  getLoggedInUserMock: vi.fn(),
-}));
+vi.mock(
+  '../features/usersApi',
+  async () => (await import('./test-mocks')).pagesUsersApiModule,
+);
 
-let basicCriteriaValue: SearchCriteria = { fullname: '' };
-let advancedCriteriaValue: AdvancedSearchCriteria = {
-  name: '',
-  email: '',
-  phone: '',
-  zoom: '',
-  building: 'any',
-  room: '',
-  department: 'any',
-};
-
-vi.mock('../features/usersApi', () => ({
-  useGetUsersQuery: useGetUsersQueryMock,
-}));
-
-vi.mock('@shared/lib', () => ({
-  getLoggedInUser: getLoggedInUserMock,
-}));
+vi.mock(
+  '@shared/lib',
+  async () => (await import('./test-mocks')).pagesSharedLibModule,
+);
 
 vi.mock('@shared/ui', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@shared/ui')>();
-
-  return {
-    ...actual,
-
-    Header: () => React.createElement('header', null, 'Header'),
-
-    EmployeeHeader: ({
-      users,
-      onViewChange,
-    }: {
-      users: IEmployee[];
-      onViewChange: (mode: 'grid' | 'list') => void;
-    }) =>
-      React.createElement('div', { 'data-testid': 'employee-header' }, [
-        React.createElement(
-          'span',
-          { key: 'count' },
-          `employees:${users.length}`,
-        ),
-        React.createElement(
-          'button',
-          {
-            key: 'toggle',
-            type: 'button',
-            onClick: () => onViewChange('list'),
-          },
-          'toggle-view',
-        ),
-      ]),
-
-    EmployeeContainer: ({
-      users,
-      viewMode,
-    }: {
-      users: IEmployee[];
-      viewMode: 'grid' | 'list';
-    }) =>
-      React.createElement(
-        'div',
-        { 'data-testid': 'employee-container' },
-        `container:${users.length}:${viewMode}`,
-      ),
-  };
+  const { mainSharedUiFactory } = await import('./test-mocks');
+  return mainSharedUiFactory(importOriginal);
 });
 
 vi.mock('@features/search', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@features/search')>();
-
-  return {
-    ...actual,
-    __esModule: true,
-
-    SearchBasic: ({
-      onSearchSubmit,
-    }: {
-      onSearchSubmit: (criteria: SearchCriteria) => void;
-    }) =>
-      React.createElement('div', { 'data-testid': 'basic-search' }, [
-        React.createElement(
-          'button',
-          {
-            key: 'submit-basic',
-            type: 'button',
-            onClick: () => onSearchSubmit(basicCriteriaValue),
-          },
-          'submit-basic',
-        ),
-      ]),
-
-    SearchAdvanced: ({
-      onSearchSubmit,
-    }: {
-      onSearchSubmit: (criteria: AdvancedSearchCriteria) => void;
-    }) =>
-      React.createElement('div', { 'data-testid': 'advanced-search' }, [
-        React.createElement(
-          'button',
-          {
-            key: 'submit-advanced',
-            type: 'button',
-            onClick: () => onSearchSubmit(advancedCriteriaValue),
-          },
-          'submit-advanced',
-        ),
-      ]),
-  };
+  const { mainSearchFeatureFactory } = await import('./test-mocks');
+  return mainSearchFeatureFactory(importOriginal);
 });
 
 describe('pages/Main', () => {
-  const users: IEmployee[] = [
-    {
-      _id: 'u-1',
-      role: 'Employee',
-      user_avatar: '',
-      first_name: 'Jane',
-      last_name: 'Doe',
-      department: 'IT',
-      building: 'A',
-      room: '101',
-      desk_number: 1,
-      isRemoteWork: false,
-      phone: '+1',
-      email: 'jane@example.com',
-      zoom_id: 'zoom1',
-      zoom_link: 'link',
-      citizenship: 'US',
-    },
-    {
-      _id: 'u-2',
-      role: 'Employee',
-      user_avatar: '',
-      first_name: 'John',
-      last_name: 'Smith',
-      department: 'HR',
-      building: 'B',
-      room: '102',
-      desk_number: 2,
-      isRemoteWork: false,
-      phone: '+2',
-      email: 'john@example.com',
-      zoom_id: 'zoom2',
-      zoom_link: 'link',
-      citizenship: 'US',
-    },
-  ];
-
   beforeEach(() => {
-    basicCriteriaValue = { fullname: '' };
-    advancedCriteriaValue = {
-      name: '',
-      email: '',
-      phone: '',
-      zoom: '',
-      building: 'any',
-      room: '',
-      department: 'any',
-    };
-
-    useGetUsersQueryMock.mockReturnValue({ data: users });
+    resetMainSearchCriteria();
+    useGetUsersQueryMock.mockReturnValue({ data: mainUsers });
     getLoggedInUserMock.mockReturnValue(null);
   });
 
@@ -206,7 +71,7 @@ describe('pages/Main', () => {
   });
 
   it('switches filtered results when submitting basic search', async () => {
-    basicCriteriaValue = { fullname: 'Jane Doe' };
+    basicCriteriaValue.fullname = 'Jane Doe';
 
     const container = document.createElement('div');
     const root = createRoot(container);
@@ -232,15 +97,7 @@ describe('pages/Main', () => {
   });
 
   it('switches to advanced search and shows empty state when advanced criteria matches nothing', async () => {
-    advancedCriteriaValue = {
-      name: 'Nobody Matches',
-      email: '',
-      phone: '',
-      zoom: '',
-      building: 'any',
-      room: '',
-      department: 'any',
-    };
+    advancedCriteriaValue.name = 'Nobody Matches';
 
     const container = document.createElement('div');
     const root = createRoot(container);

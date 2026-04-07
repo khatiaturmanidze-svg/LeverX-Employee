@@ -2,46 +2,29 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import EmployeeHeader from './EmployeeHeader';
-import { IEmployee } from '../../types/type';
+import { employeeHeaderMockUsers } from './test-mocks';
 
-type Tab = {
-  id: string;
-  onClick: () => void;
-  isActive: boolean;
-  className?: string;
-  label?: React.ReactNode;
-};
-
-vi.mock('@shared/ui', () => ({
-  TabGroup: ({ tabs }: { tabs: Tab[] }) => (
-    <div>
-      {tabs.map((tab: any) => (
-        <button
-          key={tab.id}
-          data-testid={`tab-${tab.id}`}
-          onClick={tab.onClick}
-        >
-          {tab.id}
-        </button>
-      ))}
-    </div>
-  ),
-}));
-
-const mockUsers: IEmployee[] = [
-  { _id: '1', first_name: 'John', last_name: 'Doe' } as IEmployee,
-  { _id: '2', first_name: 'Jane', last_name: 'Smith' } as IEmployee,
-];
+vi.mock(
+  '@shared/ui',
+  async () => (await import('./test-mocks')).employeeHeaderSharedUiModule,
+);
 
 describe('EmployeeHeader', () => {
   it('renders correct employee count', () => {
-    render(<EmployeeHeader users={mockUsers} onViewChange={vi.fn()} />);
+    render(
+      <EmployeeHeader users={employeeHeaderMockUsers} onViewChange={vi.fn()} />,
+    );
     expect(screen.getByText('2 employees displayed')).toBeInTheDocument();
   });
 
   it('calls onViewChange when grid tab is clicked', () => {
     const onViewChange = vi.fn();
-    render(<EmployeeHeader users={mockUsers} onViewChange={onViewChange} />);
+    render(
+      <EmployeeHeader
+        users={employeeHeaderMockUsers}
+        onViewChange={onViewChange}
+      />,
+    );
 
     fireEvent.click(screen.getByTestId('tab-grid'));
     expect(onViewChange).toHaveBeenCalledWith('grid');
@@ -49,7 +32,12 @@ describe('EmployeeHeader', () => {
 
   it('calls onViewChange when list tab is clicked', () => {
     const onViewChange = vi.fn();
-    render(<EmployeeHeader users={mockUsers} onViewChange={onViewChange} />);
+    render(
+      <EmployeeHeader
+        users={employeeHeaderMockUsers}
+        onViewChange={onViewChange}
+      />,
+    );
 
     fireEvent.click(screen.getByTestId('tab-list'));
     expect(onViewChange).toHaveBeenCalledWith('list');

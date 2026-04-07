@@ -5,25 +5,12 @@ import { createRoot } from 'react-dom/client';
 import { renderToStaticMarkup } from 'react-dom/server';
 import BtnRole from './BtnRole';
 import { RolesEmployee } from './RolesEmployee';
-import { IEmployee } from '../../../types/type';
-
-const createUser = (role: string): IEmployee => ({
-  _id: 'emp-1',
-  role,
-  user_avatar: '/avatar.png',
-  first_name: 'John',
-  last_name: 'Doe',
-  department: 'Engineering',
-  building: 'A',
-  room: '101',
-  isRemoteWork: false,
-  email: 'john@company.com',
-});
+import { createRoleChangeUser } from './test-mocks';
 
 describe('role-change ui', () => {
   describe('BtnRole', () => {
     it('adds active class and disables button for active admin role', () => {
-      const user = createUser('HR');
+      const user = createRoleChangeUser('HR');
       const html = renderToStaticMarkup(
         React.createElement(BtnRole, {
           roleName: 'HR',
@@ -38,7 +25,7 @@ describe('role-change ui', () => {
     });
 
     it('does not disable active button for non-admin viewer', () => {
-      const user = createUser('HR');
+      const user = createRoleChangeUser('HR');
       const html = renderToStaticMarkup(
         React.createElement(BtnRole, {
           roleName: 'HR',
@@ -53,7 +40,7 @@ describe('role-change ui', () => {
     });
 
     it('calls onRoleChange with target user id and role', () => {
-      const user = createUser('Employee');
+      const user = createRoleChangeUser('Employee');
       const onRoleChange = vi.fn();
       const container = document.createElement('div');
       const root = createRoot(container);
@@ -85,7 +72,7 @@ describe('role-change ui', () => {
 
   describe('RolesEmployee', () => {
     it('renders employee full name, role buttons and non-active admin label', () => {
-      const user = createUser('Employee');
+      const user = createRoleChangeUser('Employee');
       const html = renderToStaticMarkup(
         React.createElement(RolesEmployee, {
           user,
@@ -103,7 +90,7 @@ describe('role-change ui', () => {
     });
 
     it('renders active class for admin label when user role is Admin', () => {
-      const user = createUser('Admin');
+      const user = createRoleChangeUser('Admin');
       const html = renderToStaticMarkup(
         React.createElement(RolesEmployee, {
           user,

@@ -4,75 +4,33 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createRoot } from 'react-dom/client';
 import Requests from './Requests';
 import type { IEmployee } from '../types/type';
+import {
+  getLoggedInUserMock,
+  requestsAllUsers,
+  useGetUsersQueryMock,
+} from './test-mocks';
 
-const { useGetUsersQueryMock, getLoggedInUserMock } = vi.hoisted(() => ({
-  useGetUsersQueryMock: vi.fn(),
-  getLoggedInUserMock: vi.fn(),
-}));
+vi.mock(
+  '../features/usersApi',
+  async () => (await import('./test-mocks')).pagesUsersApiModule,
+);
 
-vi.mock('../features/usersApi', () => ({
-  useGetUsersQuery: useGetUsersQueryMock,
-}));
+vi.mock('@shared/lib', async () => {
+  const { getLoggedInUserMock } = await import('./test-mocks');
+  return { getLoggedInUser: getLoggedInUserMock };
+});
 
-vi.mock('@shared/lib', () => ({
-  getLoggedInUser: getLoggedInUserMock,
-}));
-
-vi.mock('@shared/ui', () => ({
-  Header: ({
-    loggedInUser,
-    isAdmin,
-  }: {
-    loggedInUser: IEmployee | null;
-    isAdmin?: boolean;
-  }) =>
-    React.createElement(
-      'div',
-      { 'data-testid': 'header' },
-      `header:${loggedInUser ? loggedInUser.role : 'no-user'}:${String(
-        isAdmin,
-      )}`,
-    ),
-}));
+vi.mock(
+  '@shared/ui',
+  async () => (await import('./test-mocks')).requestsSharedUiModule,
+);
 
 vi.mock(import('@features/requests'), async (importOriginal) => {
-  const actual = await importOriginal();
-  return {
-    ...actual,
-    Managers: ({ loggedInUser }: { loggedInUser: IEmployee | undefined }) =>
-      React.createElement(
-        'div',
-        { 'data-testid': 'managers' },
-        loggedInUser ? `managers:${loggedInUser.email}` : 'managers:no-user',
-      ),
-    RequestForm: () =>
-      React.createElement('div', { 'data-testid': 'request-form' }),
-    RequestList: () =>
-      React.createElement('div', { 'data-testid': 'request-list' }),
-  };
+  const { requestsFeatureFactory } = await import('./test-mocks');
+  return requestsFeatureFactory(importOriginal);
 });
 
 describe('pages/Requests', () => {
-  const allUsers: IEmployee[] = [
-    {
-      _id: 'u-1',
-      role: 'Admin',
-      user_avatar: '',
-      first_name: 'Admin',
-      last_name: 'User',
-      department: 'IT',
-      building: 'B',
-      room: '1',
-      desk_number: 1,
-      isRemoteWork: false,
-      phone: '+1',
-      email: 'admin@example.com',
-      zoom_id: 'z',
-      zoom_link: 'link',
-      citizenship: 'US',
-    },
-  ];
-
   beforeEach(() => {
     useGetUsersQueryMock.mockReset();
     getLoggedInUserMock.mockReset();
@@ -81,8 +39,8 @@ describe('pages/Requests', () => {
   });
 
   it('renders with Header isAdmin=true for Admin role', async () => {
-    const loggedUser: IEmployee = allUsers[0];
-    useGetUsersQueryMock.mockReturnValue({ data: allUsers });
+    const loggedUser: IEmployee = requestsAllUsers[0];
+    useGetUsersQueryMock.mockReturnValue({ data: requestsAllUsers });
     getLoggedInUserMock.mockReturnValue(loggedUser);
 
     const container = document.createElement('div');
@@ -112,11 +70,11 @@ describe('pages/Requests', () => {
 
   it('renders with Header isAdmin=false for non-admin role', async () => {
     const nonAdminUser: IEmployee = {
-      ...allUsers[0],
+      ...requestsAllUsers[0],
       role: 'Employee',
       email: 'user@example.com',
     };
-    useGetUsersQueryMock.mockReturnValue({ data: allUsers });
+    useGetUsersQueryMock.mockReturnValue({ data: requestsAllUsers });
     getLoggedInUserMock.mockReturnValue(nonAdminUser);
 
     const container = document.createElement('div');

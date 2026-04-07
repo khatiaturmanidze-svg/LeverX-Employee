@@ -2,30 +2,23 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import EmployeeCard from './EmployeeCard';
-import { IEmployee } from '../../types/type';
 import '@testing-library/jest-dom/vitest';
+import { employeeCardMockUser } from './test-mocks';
 
-vi.mock('./Wrapper', () => ({
-  default: () => <div data-testid="wrapper" />,
-}));
-
-const mockUser: IEmployee = {
-  _id: '123',
-  first_name: 'John',
-  last_name: 'Doe',
-  department: 'Engineering',
-  room: '101',
-  user_avatar: '',
-  role: 'Engineer',
-  building: '',
-  email: '',
-  isRemoteWork: false,
-} as IEmployee;
+vi.mock(
+  './Wrapper',
+  async () => (await import('./test-mocks')).employeeCardWrapperModule,
+);
 
 describe('EmployeeCard', () => {
   it('renders full name', () => {
     render(
-      <EmployeeCard user={mockUser} variant="grid" onClick={vi.fn()} key="1" />,
+      <EmployeeCard
+        user={employeeCardMockUser}
+        variant="grid"
+        onClick={vi.fn()}
+        key="1"
+      />,
     );
 
     expect(screen.getByText('John Doe')).toBeInTheDocument();
@@ -36,7 +29,7 @@ describe('EmployeeCard', () => {
 
     render(
       <EmployeeCard
-        user={mockUser}
+        user={employeeCardMockUser}
         variant="grid"
         onClick={handleClick}
         key="1"
@@ -49,7 +42,12 @@ describe('EmployeeCard', () => {
 
   it('renders grid variant correctly', () => {
     render(
-      <EmployeeCard user={mockUser} variant="grid" onClick={vi.fn()} key="1" />,
+      <EmployeeCard
+        user={employeeCardMockUser}
+        variant="grid"
+        onClick={vi.fn()}
+        key="1"
+      />,
     );
 
     expect(screen.getByAltText('briefcase icon')).toBeInTheDocument();
@@ -60,7 +58,12 @@ describe('EmployeeCard', () => {
 
   it('renders menu variant correctly', () => {
     render(
-      <EmployeeCard user={mockUser} variant="menu" onClick={vi.fn()} key="1" />,
+      <EmployeeCard
+        user={employeeCardMockUser}
+        variant="menu"
+        onClick={vi.fn()}
+        key="1"
+      />,
     );
 
     expect(screen.getByText('Engineering')).toBeInTheDocument();

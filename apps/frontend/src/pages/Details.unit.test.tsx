@@ -3,167 +3,50 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import Details from './Details';
-import { EmployeeUpdate, IEmployee } from '../types/type';
+import {
+  canEditMock,
+  detailsLoggedUser,
+  detailsViewedEmployee,
+  getLoggedInUserMock,
+  updateEmployeeMock,
+  useGetEmployeeDetailsQueryMock,
+  useGetUsersQueryMock,
+  useParamsMock,
+  useUpdateEmployeeMutationMock,
+} from './test-mocks';
 
-const { useParamsMock, useGetUsersQueryMock, useGetEmployeeDetailsQueryMock } =
-  vi.hoisted(() => ({
-    useParamsMock: vi.fn(),
-    useGetUsersQueryMock: vi.fn(),
-    useGetEmployeeDetailsQueryMock: vi.fn(),
-  }));
+vi.mock(
+  'react-router-dom',
+  async () => (await import('./test-mocks')).detailsRouterModule,
+);
 
-const { useUpdateEmployeeMutationMock, getLoggedInUserMock, canEditMock } =
-  vi.hoisted(() => ({
-    useUpdateEmployeeMutationMock: vi.fn(),
-    getLoggedInUserMock: vi.fn(),
-    canEditMock: vi.fn(),
-  }));
+vi.mock(
+  '../features/usersApi',
+  async () => (await import('./test-mocks')).detailsUsersApiModule,
+);
 
-const updateEmployeeMock = vi.fn();
-
-vi.mock('react-router-dom', () => ({
-  useParams: useParamsMock,
-}));
-
-vi.mock('../features/usersApi', () => ({
-  useGetUsersQuery: useGetUsersQueryMock,
-  useGetEmployeeDetailsQuery: useGetEmployeeDetailsQueryMock,
-  useUpdateEmployeeMutation: useUpdateEmployeeMutationMock,
-}));
-
-vi.mock('@shared/lib', () => ({
-  getLoggedInUser: getLoggedInUserMock,
-  canEdit: canEditMock,
-}));
+vi.mock(
+  '@shared/lib',
+  async () => (await import('./test-mocks')).detailsSharedLibModule,
+);
 
 vi.mock('@shared/ui', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@shared/ui')>();
-
-  return {
-    ...actual,
-
-    Header: () => React.createElement('header', null, 'Header'),
-
-    AvatarSection: ({
-      canEdit,
-      onEditClick,
-      onCopyLink,
-    }: {
-      canEdit: boolean;
-      onEditClick: () => void;
-      onCopyLink: () => void;
-    }) =>
-      React.createElement('section', { 'data-testid': 'avatar' }, [
-        canEdit
-          ? React.createElement(
-              'button',
-              {
-                key: 'edit',
-                type: 'button',
-                className: 'avatar-section__edit',
-                onClick: onEditClick,
-              },
-              'edit',
-            )
-          : null,
-        React.createElement(
-          'button',
-          {
-            key: 'copy',
-            type: 'button',
-            className: 'avatar-section__copy',
-            onClick: onCopyLink,
-          },
-          'Copy link',
-        ),
-      ]),
-
-    EmployeeView: () =>
-      React.createElement(
-        'div',
-        { 'data-testid': 'employee-view' },
-        'EmployeeView',
-      ),
-  };
+  const { detailsSharedUiFactory } = await import('./test-mocks');
+  return detailsSharedUiFactory(importOriginal);
 });
 
-vi.mock('@features/edit', () => ({
-  EmployeeEditForm: ({
-    onCancel,
-    onSaveSuccess,
-  }: {
-    onCancel: () => void;
-    onSaveSuccess: (updated: EmployeeUpdate) => Promise<void> | void;
-  }) =>
-    React.createElement('div', { 'data-testid': 'employee-edit-form' }, [
-      React.createElement(
-        'button',
-        { key: 'cancel', type: 'button', onClick: onCancel },
-        'Cancel',
-      ),
-      React.createElement(
-        'button',
-        {
-          key: 'save-success',
-          type: 'button',
-          onClick: () =>
-            onSaveSuccess({
-              department: 'IT-Updated',
-            }),
-        },
-        'Save success',
-      ),
-    ]),
-}));
+vi.mock(
+  '@features/edit',
+  async () => (await import('./test-mocks')).detailsFeatureModule,
+);
 
 describe('pages/Details', () => {
-  const loggedUser: IEmployee = {
-    _id: 'logged-1',
-    role: 'Admin',
-    user_avatar: '',
-    first_name: 'Admin',
-    last_name: 'User',
-    department: 'IT',
-    building: 'B',
-    room: '1',
-    desk_number: 1,
-    isRemoteWork: false,
-    phone: '+1',
-    email: 'admin@example.com',
-    zoom_id: 'z',
-    zoom_link: 'link',
-    citizenship: 'US',
-  };
-
-  const viewedEmployee: IEmployee = {
-    _id: 'emp-1',
-    role: 'employee',
-    user_avatar: '',
-    first_name: 'Jane',
-    last_name: 'Doe',
-    department: 'IT',
-    building: 'B',
-    room: '101',
-    desk_number: 7,
-    isRemoteWork: false,
-    phone: '+123',
-    email: 'jane@example.com',
-    zoom_id: 'zoom123',
-    zoom_link: 'https://zoom.us/j/123',
-    citizenship: 'US',
-    first_native_name: 'Jane',
-    last_native_name: 'Doe',
-    date_birth: { year: 1990, month: 5, day: 15 },
-    manager: { id: 'm-1', first_name: 'A', last_name: 'B' },
-    visa: [],
-  };
-
   const setupBaseMocks = () => {
-    useParamsMock.mockReturnValue({ id: viewedEmployee._id });
-    useGetUsersQueryMock.mockReturnValue({ data: [loggedUser] });
-    getLoggedInUserMock.mockReturnValue(loggedUser);
+    useParamsMock.mockReturnValue({ id: detailsViewedEmployee._id });
+    useGetUsersQueryMock.mockReturnValue({ data: [detailsLoggedUser] });
+    getLoggedInUserMock.mockReturnValue(detailsLoggedUser);
     useGetEmployeeDetailsQueryMock.mockReturnValue({
-      data: viewedEmployee,
+      data: detailsViewedEmployee,
       isLoading: false,
       isError: false,
     });
@@ -192,9 +75,9 @@ describe('pages/Details', () => {
   });
 
   it('renders loading state while employee details are loading', async () => {
-    useParamsMock.mockReturnValue({ id: viewedEmployee._id });
-    useGetUsersQueryMock.mockReturnValue({ data: [loggedUser] });
-    getLoggedInUserMock.mockReturnValue(loggedUser);
+    useParamsMock.mockReturnValue({ id: detailsViewedEmployee._id });
+    useGetUsersQueryMock.mockReturnValue({ data: [detailsLoggedUser] });
+    getLoggedInUserMock.mockReturnValue(detailsLoggedUser);
 
     useGetEmployeeDetailsQueryMock.mockReturnValue({
       data: undefined,
@@ -218,9 +101,9 @@ describe('pages/Details', () => {
   });
 
   it('renders "Employee not found" when employee details query errors', async () => {
-    useParamsMock.mockReturnValue({ id: viewedEmployee._id });
-    useGetUsersQueryMock.mockReturnValue({ data: [loggedUser] });
-    getLoggedInUserMock.mockReturnValue(loggedUser);
+    useParamsMock.mockReturnValue({ id: detailsViewedEmployee._id });
+    useGetUsersQueryMock.mockReturnValue({ data: [detailsLoggedUser] });
+    getLoggedInUserMock.mockReturnValue(detailsLoggedUser);
 
     useGetEmployeeDetailsQueryMock.mockReturnValue({
       data: undefined,
@@ -324,7 +207,7 @@ describe('pages/Details', () => {
     });
 
     expect(updateEmployeeMock).toHaveBeenCalledWith({
-      id: viewedEmployee._id,
+      id: detailsViewedEmployee._id,
       update: { department: 'IT-Updated' },
     });
 

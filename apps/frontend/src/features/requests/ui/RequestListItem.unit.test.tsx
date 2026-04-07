@@ -4,54 +4,35 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { renderToStaticMarkup } from 'react-dom/server';
 import RequestListItem from './RequestListItem';
-import { IRequestData } from '../model/state.types';
-
-const {
-  useGetManagerMock,
-  useDispatchMock,
-  useUpdateRequestMutationMock,
-  invalidateTagsMock,
-  updateRequestMock,
+import {
+  baseRequest,
   getDisplayStatusMock,
-} = vi.hoisted(() => ({
-  useGetManagerMock: vi.fn(),
-  useDispatchMock: vi.fn(),
-  useUpdateRequestMutationMock: vi.fn(),
-  invalidateTagsMock: vi.fn(() => ({ type: 'invalidate-users' })),
-  updateRequestMock: vi.fn(),
-  getDisplayStatusMock: vi.fn(() => 'pending'),
-}));
+  invalidateUsersTagsMock,
+  updateRequestMock,
+  useDispatchMock,
+  useGetManagerMock,
+  useUpdateRequestMutationMock,
+} from './test-mocks';
 
-vi.mock('react-redux', () => ({
-  useDispatch: useDispatchMock,
-}));
+vi.mock(
+  'react-redux',
+  async () => (await import('./test-mocks')).requestListItemReduxModule,
+);
 
-vi.mock('../api/RequestsApi', () => ({
-  useUpdateRequestMutation: useUpdateRequestMutationMock,
-}));
+vi.mock(
+  '../api/RequestsApi',
+  async () => (await import('./test-mocks')).requestListItemApiModule,
+);
 
-vi.mock('../../usersApi', () => ({
-  usersApi: {
-    util: {
-      invalidateTags: invalidateTagsMock,
-    },
-  },
-}));
+vi.mock(
+  '../../usersApi',
+  async () => (await import('./test-mocks')).requestListItemUsersApiModule,
+);
 
-vi.mock('@shared/lib', () => ({
-  getDisplayStatus: getDisplayStatusMock,
-  useGetManager: useGetManagerMock,
-}));
-
-const baseRequest: IRequestData = {
-  id: 'req-1',
-  employeeId: 'emp-1',
-  type: 'Vacation',
-  start_date: '2026-06-01',
-  end_date: '2026-06-05',
-  note: 'Trip',
-  status: 'pending',
-};
+vi.mock(
+  '@shared/lib',
+  async () => (await import('./test-mocks')).requestListItemSharedLibModule,
+);
 
 describe('RequestListItem', () => {
   it('renders personal mode with manager info label', () => {
@@ -111,7 +92,7 @@ describe('RequestListItem', () => {
       requestId: 'req-1',
       newStatus: 'approved',
     });
-    expect(invalidateTagsMock).toHaveBeenCalledWith(['users']);
+    expect(invalidateUsersTagsMock).toHaveBeenCalledWith(['users']);
     expect(dispatch).toHaveBeenCalledWith({ type: 'invalidate-users' });
 
     await act(async () => {

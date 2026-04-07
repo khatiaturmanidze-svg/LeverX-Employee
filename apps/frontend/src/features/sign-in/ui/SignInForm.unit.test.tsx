@@ -3,12 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import SignInForm from './SignInForm';
-
-const { signInMock, navigateMock, getErrorMessageMock } = vi.hoisted(() => ({
-  signInMock: vi.fn(),
-  navigateMock: vi.fn(),
-  getErrorMessageMock: vi.fn(() => 'Sign in failed'),
-}));
+import { getErrorMessageMock, navigateMock, signInMock } from './test-mocks';
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => navigateMock,
@@ -19,6 +14,7 @@ vi.mock('../../authApi', () => ({
 }));
 vi.mock('@shared/lib', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@shared/lib')>();
+  const { getErrorMessageMock } = await import('./test-mocks');
 
   return {
     ...actual,

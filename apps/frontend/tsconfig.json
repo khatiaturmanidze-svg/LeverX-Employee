@@ -6,13 +6,13 @@
     "moduleResolution": "bundler",
     "outDir": "dist",
     "jsx": "react-jsx",
-    "baseUrl": ".",
+
     "paths": {
-      "@/*": ["src/*"],
-      "@app/*": ["src/app/*"],
-      "@pages/*": ["src/pages/*"],
-      "@features/*": ["src/features/*"],
-      "@shared/*": ["src/shared/*"]
+      "@/*": ["./src/*"],
+      "@app/*": ["./src/app/*"],
+      "@pages/*": ["./src/pages/*"],
+      "@features/*": ["./src/features/*"],
+      "@shared/*": ["./src/shared/*"]
     },
     "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"]
   }

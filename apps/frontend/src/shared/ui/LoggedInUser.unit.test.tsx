@@ -1,20 +1,17 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import LoggedInUser from './LoggedInUser';
-import { IEmployee } from '../../types/type';
 import { describe, it, expect, vi, afterEach } from 'vitest';
+import { loggedInUserMockUser, sharedUiNavigateMock } from './test-mocks';
 
-const { mockNavigate } = vi.hoisted(() => ({
-  mockNavigate: vi.fn(),
-}));
 vi.mock('react-router-dom', async () => {
+  const { loggedInUserRouterModule } = await import('./test-mocks');
   const actual =
     await vi.importActual<typeof import('react-router-dom')>(
       'react-router-dom',
     );
   return {
     ...actual,
-    useNavigate: () => mockNavigate,
-    useLocation: () => ({ pathname: '/main' }),
+    ...loggedInUserRouterModule,
   };
 });
 describe('LoggedInUser', () => {
@@ -22,15 +19,8 @@ describe('LoggedInUser', () => {
     vi.clearAllMocks();
   });
 
-  const mockUser: IEmployee = {
-    _id: '1',
-    first_name: 'John',
-    last_name: 'Doe',
-    user_avatar: '/avatar.png',
-  } as IEmployee;
-
   it('renders user info when logged in', () => {
-    render(<LoggedInUser loggedInUser={mockUser} />);
+    render(<LoggedInUser loggedInUser={loggedInUserMockUser} />);
     expect(screen.getByText('John Doe')).toBeInTheDocument();
     expect(screen.getByAltText('employee')).toBeInTheDocument();
   });
@@ -41,14 +31,14 @@ describe('LoggedInUser', () => {
   });
 
   it('calls navigate on click when user is logged in', () => {
-    render(<LoggedInUser loggedInUser={mockUser} />);
+    render(<LoggedInUser loggedInUser={loggedInUserMockUser} />);
     fireEvent.click(screen.getByRole('button'));
-    expect(mockNavigate).toHaveBeenCalledWith('/details/1');
+    expect(sharedUiNavigateMock).toHaveBeenCalledWith('/details/1');
   });
 
   it('does not call navigate when no user', () => {
     render(<LoggedInUser loggedInUser={null} />);
     fireEvent.click(screen.getByText('Not Logged In'));
-    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(sharedUiNavigateMock).not.toHaveBeenCalled();
   });
 });

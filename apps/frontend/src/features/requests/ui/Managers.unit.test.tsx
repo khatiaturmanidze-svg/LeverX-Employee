@@ -3,9 +3,10 @@ import { describe, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import Managers from './Managers';
 
-vi.mock('./ManagerCard', () => ({
-  default: () => React.createElement('div', null, 'No manager assigned.'),
-}));
+vi.mock(
+  './ManagerCard',
+  async () => (await import('./test-mocks')).managersManagerCardModule,
+);
 
 describe('Managers', () => {
   it('renders support header and manager card placeholder when no manager', () => {

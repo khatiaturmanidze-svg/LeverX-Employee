@@ -2,12 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import React, { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import SignUpForm from './SignUpForm';
-
-const { signUpMock, navigateMock, getErrorMessageMock } = vi.hoisted(() => ({
-  signUpMock: vi.fn(),
-  navigateMock: vi.fn(),
-  getErrorMessageMock: vi.fn(() => 'Sign up failed'),
-}));
+import { getErrorMessageMock, navigateMock, signUpMock } from './test-mocks';
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => navigateMock,
@@ -17,9 +12,12 @@ vi.mock('../../authApi', () => ({
   useSignUpMutation: () => [signUpMock],
 }));
 
-vi.mock('@shared/lib', () => ({
-  getErrorMessage: getErrorMessageMock,
-}));
+vi.mock('@shared/lib', async () => {
+  const { getErrorMessageMock } = await import('./test-mocks');
+  return {
+    getErrorMessage: getErrorMessageMock,
+  };
+});
 
 describe('SignUpForm', () => {
   const setInputValue = (input: HTMLInputElement, value: string) => {

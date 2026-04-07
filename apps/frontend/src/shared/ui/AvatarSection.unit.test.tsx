@@ -1,29 +1,14 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { IEmployee } from '../../types/type';
 import AvatarSection from './AvatarSection';
 import React from 'react';
-
-const mockUser: IEmployee = {
-  _id: '1',
-  first_name: 'John',
-  last_name: 'Doe',
-  first_native_name: 'John',
-  last_native_name: 'Doe',
-  role: 'Engineer',
-  user_avatar: '/avatar.png',
-  isRemoteWork: true,
-  department: 'Engineering',
-  building: 'Building 1',
-  room: 'Room 101',
-  email: 'john.doe@example.com',
-} as IEmployee;
+import { avatarSectionMockUser } from './test-mocks';
 
 describe('AvatarSection', () => {
   it('renders full name and native name', () => {
     render(
       <AvatarSection
-        user={mockUser}
+        user={avatarSectionMockUser}
         canEdit={false}
         onEditClick={vi.fn()}
         onCopyLink={vi.fn()}
@@ -47,7 +32,7 @@ describe('AvatarSection', () => {
   it('does NOT render remote work icon when user.isRemoteWork is false', () => {
     render(
       <AvatarSection
-        user={{ ...mockUser, isRemoteWork: false }}
+        user={{ ...avatarSectionMockUser, isRemoteWork: false }}
         canEdit={false}
         onEditClick={vi.fn()}
         onCopyLink={vi.fn()}
@@ -60,7 +45,7 @@ describe('AvatarSection', () => {
   it('renders edit button only when canEdit is true', () => {
     const { rerender } = render(
       <AvatarSection
-        user={mockUser}
+        user={avatarSectionMockUser}
         canEdit={false}
         onEditClick={vi.fn()}
         onCopyLink={vi.fn()}
@@ -71,7 +56,7 @@ describe('AvatarSection', () => {
 
     rerender(
       <AvatarSection
-        user={mockUser}
+        user={avatarSectionMockUser}
         canEdit={true}
         onEditClick={vi.fn()}
         onCopyLink={vi.fn()}
@@ -86,7 +71,7 @@ describe('AvatarSection', () => {
 
     render(
       <AvatarSection
-        user={mockUser}
+        user={avatarSectionMockUser}
         canEdit={true}
         onEditClick={onEditClick}
         onCopyLink={vi.fn()}
@@ -102,7 +87,7 @@ describe('AvatarSection', () => {
 
     render(
       <AvatarSection
-        user={mockUser}
+        user={avatarSectionMockUser}
         canEdit={false}
         onEditClick={vi.fn()}
         onCopyLink={onCopyLink}

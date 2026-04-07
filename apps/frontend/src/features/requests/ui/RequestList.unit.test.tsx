@@ -3,81 +3,49 @@ import { describe, expect, it, vi } from 'vitest';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import RequestList from './RequestList';
-
-const {
+import {
+  getManagedEmployeesMock,
+  invalidateTagsMock,
+  useDispatchMock,
   useGetRequestsQueryMock,
   useGetUsersQueryMock,
   useParamsMock,
-  useDispatchMock,
-  getManagedEmployeesMock,
-  invalidateTagsMock,
-} = vi.hoisted(() => ({
-  useGetRequestsQueryMock: vi.fn(),
-  useGetUsersQueryMock: vi.fn(),
-  useParamsMock: vi.fn(),
-  useDispatchMock: vi.fn(),
-  getManagedEmployeesMock: vi.fn(),
-  invalidateTagsMock: vi.fn(() => ({ type: 'invalidate' })),
-}));
+} from './test-mocks';
 
-vi.mock('../api/RequestsApi', () => ({
-  useGetRequestsQuery: useGetRequestsQueryMock,
-}));
+vi.mock(
+  '../api/RequestsApi',
+  async () => (await import('./test-mocks')).requestListApiModule,
+);
 
-vi.mock('../../usersApi', () => ({
-  useGetUsersQuery: useGetUsersQueryMock,
-  usersApi: {
-    util: {
-      invalidateTags: invalidateTagsMock,
-    },
-  },
-}));
+vi.mock(
+  '../../usersApi',
+  async () => (await import('./test-mocks')).requestListUsersApiModule,
+);
 
-vi.mock('react-router-dom', () => ({
-  useParams: useParamsMock,
-}));
+vi.mock(
+  'react-router-dom',
+  async () => (await import('./test-mocks')).requestListRouterModule,
+);
 
-vi.mock('react-redux', () => ({
-  useDispatch: useDispatchMock,
-}));
+vi.mock(
+  'react-redux',
+  async () => (await import('./test-mocks')).requestListReduxModule,
+);
 
-vi.mock('@shared/lib', () => ({
-  getManagedEmployees: getManagedEmployeesMock,
-}));
+vi.mock(
+  '@shared/lib',
+  async () => (await import('./test-mocks')).requestListSharedLibModule,
+);
 
-vi.mock('@shared/ui', () => ({
-  TabGroup: ({
-    tabs,
-  }: {
-    tabs: { id: string; label: string; onClick: () => void }[];
-  }) =>
-    React.createElement(
-      'div',
-      null,
-      tabs.map((tab) =>
-        React.createElement(
-          'button',
-          { key: tab.id, type: 'button', onClick: tab.onClick },
-          tab.label,
-        ),
-      ),
-    ),
-}));
+vi.mock(
+  '@shared/ui',
+  async () => (await import('./test-mocks')).requestListSharedUiModule,
+);
 
-vi.mock('./RequestListItem', () => ({
-  default: ({
-    request,
-    isPersonal,
-  }: {
-    request: { id: string; type: string };
-    isPersonal: boolean;
-  }) =>
-    React.createElement(
-      'div',
-      { className: 'request-item-mock' },
-      `${request.id}:${request.type}:${isPersonal ? 'personal' : 'team'}`,
-    ),
-}));
+vi.mock(
+  './RequestListItem',
+  async () => (await import('./test-mocks')).requestListItemModule,
+);
 
 describe('RequestList', () => {
   it('renders personal requests by default and dispatches users invalidation on mount', async () => {

@@ -3,33 +3,28 @@ import { describe, expect, it, vi } from 'vitest';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import RequestForm from './RequestForm';
-
-const {
-  useGetUsersQueryMock,
-  useAddRequestMutationMock,
-  validateRequestMock,
-  getLoggedInUserMock,
+import {
   addRequestMock,
-} = vi.hoisted(() => ({
-  useGetUsersQueryMock: vi.fn(),
-  useAddRequestMutationMock: vi.fn(),
-  validateRequestMock: vi.fn(),
-  getLoggedInUserMock: vi.fn(),
-  addRequestMock: vi.fn(),
-}));
+  getLoggedInUserMock,
+  useAddRequestMutationMock,
+  useGetUsersQueryMock,
+  validateRequestMock,
+} from './test-mocks';
 
-vi.mock('../../usersApi', () => ({
-  useGetUsersQuery: useGetUsersQueryMock,
-}));
+vi.mock(
+  '../../usersApi',
+  async () => (await import('./test-mocks')).requestFormUsersApiModule,
+);
 
-vi.mock('../api/RequestsApi', () => ({
-  useAddRequestMutation: useAddRequestMutationMock,
-}));
+vi.mock(
+  '../api/RequestsApi',
+  async () => (await import('./test-mocks')).requestFormApiModule,
+);
 
-vi.mock('@shared/lib', () => ({
-  validateRequest: validateRequestMock,
-  getLoggedInUser: getLoggedInUserMock,
-}));
+vi.mock(
+  '@shared/lib',
+  async () => (await import('./test-mocks')).requestFormSharedLibModule,
+);
 
 describe('RequestForm', () => {
   it('shows validation errors and does not call submit mutation', async () => {
