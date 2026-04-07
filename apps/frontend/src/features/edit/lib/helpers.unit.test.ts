@@ -38,7 +38,31 @@ describe('validateEmployeeForm', () => {
   });
 
   it('should validate email format', () => {
-    const invalidEmails = ['invalid', 'test@', '@example.com', 'test@example'];
+    const invalidEmails = [
+      'invalid',
+      'test@',
+      '@example.com',
+      'test@example',
+      'test @example.com',
+      ' test@example.com',
+      'test@example.com ',
+      'te st@example.com',
+      'test^@example.com',
+      '^test@example.com',
+      'te^st@example.com',
+      'test@exa^mple.com',
+      'test@example.c^om',
+      'test;@example.com',
+      ';test@example.com',
+      'te;st@example.com',
+      'test@exa;mple.com',
+      'test@example.c;om',
+      'test*@example.com',
+      '*test@example.com',
+      'te*st@example.com',
+      'test@exa*mple.com',
+      'test@example.c*om',
+    ];
     invalidEmails.forEach((email) => {
       const formData = { ...validFormData, email };
       const errors = validateEmployeeForm(formData);

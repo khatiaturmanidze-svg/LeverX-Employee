@@ -37,10 +37,11 @@ export const getEmployeeFormState = (user: IEmployee) => ({
 
 export const validateEmployeeForm = (formData: EmployeeFormState) => {
   const errors: Record<string, string> = {};
+  const emailPattern = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 
   if (!formData.department) errors.department = 'Department is required';
   if (!formData.email) errors.email = 'Email is required';
-  else if (!/\S+@\S+\.\S+/.test(formData.email)) errors.email = 'Invalid email';
+  else if (!emailPattern.test(formData.email)) errors.email = 'Invalid email';
   if (formData.desk_number && isNaN(Number(formData.desk_number)))
     errors.desk_number = 'Desk number must be a number';
 

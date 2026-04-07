@@ -46,10 +46,10 @@ describe('DetailRow', () => {
       HTMLInputElement.prototype,
       'value',
     )?.set;
-    if (!setter) throw new Error('Input value setter not found');
+    expect(setter).toBeDefined();
 
     await act(async () => {
-      setter.call(input, 'new@example.com');
+      setter!.call(input, 'new@example.com');
       input.dispatchEvent(new Event('input', { bubbles: true }));
     });
 
