@@ -41,5 +41,8 @@
     "apps/**/*.{scss,sass,css}": [
       "prettier --write"
     ]
+  },
+  "dependencies": {
+    "ci": "^2.3.0"
   }
 }
