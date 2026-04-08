@@ -88,7 +88,7 @@ export default function RequestList(): React.ReactElement {
               />
             ))
         ) : (
-          <div>
+          <div className="request-list__empty">
             <img
               src="/assets/nothing-found.jpg"
               alt="nothing found"

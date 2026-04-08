@@ -9,29 +9,36 @@
 1em = 16px
 */
 
+$breakpoint-phone: 600px;
+$breakpoint-smaller-tab: 717px;
+$breakpoint-small-tab: 880px;
+$breakpoint-tab-port: 900px;
+$breakpoint-tab-land: 1200px;
+$breakpoint-big-desktop: 1800px;
+
 @mixin respond($breakpoint) {
   @if $breakpoint == phone {
-    @media (max-width: 600px) {
+    @media (max-width: $breakpoint-phone) {
       @content;
     }
   } @else if $breakpoint == smaller-tab {
-    @media (max-width: 717px) {
+    @media (max-width: $breakpoint-smaller-tab) {
       @content;
     }
   } @else if $breakpoint == small-tab {
-    @media (max-width: 880px) {
+    @media (max-width: $breakpoint-small-tab) {
       @content;
     }
   } @else if $breakpoint == tab-port {
-    @media (max-width: 900px) {
+    @media (max-width: $breakpoint-tab-port) {
       @content;
     }
   } @else if $breakpoint == tab-land {
-    @media (max-width: 1200px) {
+    @media (max-width: $breakpoint-tab-land) {
       @content;
     }
   } @else if $breakpoint == big-desktop {
-    @media (min-width: 1800px) {
+    @media (min-width: $breakpoint-big-desktop) {
       @content;
     }
   }

@@ -1,5 +1,6 @@
 @use '../abstracts/variables' as *;
 @use '../abstracts/mixins' as *;
+@use '../abstracts/elevations' as *;
 .page {
   margin-top: 7rem;
 }
@@ -12,7 +13,7 @@
   width: 100%;
   top: 0;
   left: 0;
-  z-index: 1000;
+  z-index: $z-header;
 
   &__brand {
     text-decoration: none;
@@ -124,11 +125,6 @@
     position: relative;
   }
 
-  @include respond(small-tab) {
-    // justify-content: space-around;
-    // gap: $space-sm;
-  }
-
   &--menu-btn {
     display: none;
     cursor: pointer;
@@ -155,7 +151,7 @@
       height: calc(100vh - 7rem);
       background-color: $color-700;
       padding: $space-md 0;
-      z-index: 1001;
+      z-index: $z-header-menu;
       transform: translateX(-100%);
       visibility: hidden;
 
@@ -195,7 +191,7 @@
       backdrop-filter: blur(3px);
       border: none;
       padding: 0;
-      z-index: 999;
+      z-index: $z-overlay;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.3s ease;
