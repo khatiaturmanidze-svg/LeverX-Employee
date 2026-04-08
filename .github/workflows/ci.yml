@@ -6,7 +6,7 @@ on:
     branches: [develop, main]
 
 jobs:
-  validate:
+  lint:
     runs-on: self-hosted
 
     steps:
@@ -19,6 +19,45 @@ jobs:
 
       - run: npm ci --include=optional
       - run: npm run lint:check
+
+  typecheck:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci --include=optional
       - run: npm run typecheck
+
+  build:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci --include=optional
       - run: npm run build
+
+  test:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci --include=optional
       - run: npm run test
