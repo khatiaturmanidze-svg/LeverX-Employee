@@ -350,14 +350,15 @@ export default function CreateUserForm(): React.ReactElement {
           onChange={(e) => dispatch(setField('isRemoteWork', e.target.checked))}
         />
       </FormGroup>
-
-      <button
-        type="submit"
-        className="btn-submit create-user-form__submit"
-        disabled={state.isSubmitting || isLoading}
-      >
-        {state.isSubmitting || isLoading ? 'Creating...' : 'Create Employee'}
-      </button>
+      <div className="wrapper-btn">
+        <button
+          type="submit"
+          className="btn-submit create-user-form__submit"
+          disabled={state.isSubmitting || isLoading}
+        >
+          {state.isSubmitting || isLoading ? 'Creating...' : 'Create Employee'}
+        </button>
+      </div>
 
       {statusMessage && <p className="form-error">{statusMessage}</p>}
       {temporaryPassword && (

@@ -139,6 +139,11 @@
         color: $color-lighter-grey;
       }
     }
+
+    @include respond(phone) {
+      grid-template-columns: 1fr;
+      gap: $space-sm;
+    }
   }
   &__general {
     text-transform: uppercase;

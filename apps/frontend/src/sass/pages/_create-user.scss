@@ -1,4 +1,5 @@
 @use '../abstracts/variables' as *;
+@use '../abstracts//mixins' as *;
 
 .create-user {
   &-page {
@@ -9,6 +10,10 @@
     gap: 2rem;
     justify-items: center;
     justify-content: center;
+
+    @include respond(tab-port) {
+      grid-template-columns: 1fr;
+    }
   }
 
   &-form {
@@ -49,4 +54,9 @@
 
 .role-select {
   padding: $space-xs;
+}
+
+.wrapper-btn {
+  display: flex;
+  justify-content: center;
 }
