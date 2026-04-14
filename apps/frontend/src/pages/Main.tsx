@@ -1,15 +1,20 @@
 import React, { useState, useMemo } from 'react';
-import { Header } from '../components/reusable/Header';
-import BasicSearchForm from '../components/Main/SearchBasic';
-import SearchAdvanced from '../components/Main/SearchAdvanced';
-import EmployeeHeader from '../components/Main/EmployeeHeader';
-import EmployeeContainer from '../components/Main/EmployeeContainer';
-import { getLoggedInUser } from '../utils/core';
-import { AdvancedSearchCriteria } from '../components/Main/SearchAdvanced';
+import {
+  Header,
+  TabGroup,
+  EmployeeContainer,
+  EmployeeHeader,
+} from '@shared/ui';
+import {
+  SearchBasic,
+  SearchAdvanced,
+  AdvancedSearchCriteria,
+  SearchCriteria,
+  filterUsers,
+  filterAdvancedUsers,
+} from '@features/search';
+import { getLoggedInUser } from '@shared/lib';
 import { useGetUsersQuery } from '../features/usersApi';
-import { SearchCriteria } from '../components/Main/SearchBasic';
-import { filterUsers, filterAdvancedUsers } from '../utils/userFilters';
-import TabGroup from '../components/reusable/TabGroup';
 
 export default function Main(): React.ReactElement {
   const [isBasicSearch, setIsBasicSearch] = useState(true);
@@ -79,7 +84,7 @@ export default function Main(): React.ReactElement {
           />
           <EmployeeHeader users={filteredUsers} onViewChange={setViewMode} />
           {isBasicSearch ? (
-            <BasicSearchForm onSearchSubmit={handleBasicSearch} />
+            <SearchBasic onSearchSubmit={handleBasicSearch} />
           ) : (
             <SearchAdvanced onSearchSubmit={handleAdvancedSearch} />
           )}

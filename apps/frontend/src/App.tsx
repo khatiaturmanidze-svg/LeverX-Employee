@@ -1,11 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import SignIn from './pages/SignIn';
-import SignUp from './pages/SignUp';
-import Main from './pages/Main';
-import Details from './pages/Details';
-import Roles from './pages/Roles';
-import Requests from './pages/Requests';
+import { SignIn, SignUp, Main, Details, Roles, Requests } from '@/pages';
+
 const isAuthenticated = () => {
   return (
     localStorage.getItem('loggedInUser') ||

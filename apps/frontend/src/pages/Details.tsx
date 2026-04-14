@@ -1,10 +1,8 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { Header } from '../components/reusable/Header';
-import { getLoggedInUser, canEdit } from '../utils/core';
+import { Header, AvatarSection, EmployeeView } from '@shared/ui';
+import { getLoggedInUser, canEdit } from '@shared/lib';
 import { useParams } from 'react-router-dom';
-import AvatarSection from '../components/Details/AvatarSection';
-import { EmployeeView } from '../components/Details/EmployeeView';
-import { EmployeeEditForm } from '../components/Details/EmployeeEditForm';
+import { EmployeeEditForm } from '@features/edit';
 import {
   useGetEmployeeDetailsQuery,
   useGetUsersQuery,
