@@ -1,4 +1,5 @@
 @use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
 
 .card {
   border: 1px solid $color-lighter-grey;
@@ -19,6 +20,16 @@
   padding: 2rem;
   gap: $space-md;
   height: auto;
+
+  @include respond(tab-port) {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    place-content: center;
+  }
+}
+
+.requests-grid > * {
+  min-width: 0;
 }
 
 .manager-wrapper {
@@ -88,7 +99,13 @@
   grid-row: 1/-1;
   grid-column: 2/-1;
 
-  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  @include respond(tab-port) {
+    grid-row: 2/3;
+    grid-column: 1/-1;
+  }
 }
 
 .request-list {
@@ -96,6 +113,7 @@
   flex-direction: column;
   gap: $space-md;
   min-height: 0;
+  min-width: 0;
 
   &__header {
     font-size: $space-md;
@@ -119,15 +137,45 @@
     text-align: center;
     color: $color-darker-grey;
   }
+  &__header {
+    justify-content: space-between;
+    @include respond(tab-port) {
+    }
+  }
 }
+
 .request-list__items {
   display: flex;
   flex-direction: column;
   gap: $space-md;
   flex: 1;
+  min-width: 0;
   max-height: 400px;
   overflow-y: auto;
+
+  @include respond(phone) {
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    max-height: none;
+    flex-wrap: nowrap;
+    padding-bottom: $space-xs;
+    overscroll-behavior-x: contain;
+  }
 }
+
+.request-list__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 0;
+
+  .request-form__img {
+    flex-shrink: 1;
+    max-height: min(420px, calc(400px - 6rem));
+  }
+}
+
 .request-list__item {
   padding: $space-md;
   background-color: $color-lighter-grey;
@@ -137,6 +185,11 @@
   flex-direction: column;
   gap: $space-sm;
   transition: all 0.3s;
+
+  @include respond(phone) {
+    flex: 0 0 300px;
+    width: 300px;
+  }
 
   &:hover {
     background-color: $color-white;
@@ -161,6 +214,10 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: $space-sm;
+
+    @include respond(phone) {
+      grid-template-columns: 1fr;
+    }
 
     .detail-group {
       display: flex;
@@ -190,6 +247,10 @@
     height: auto;
     object-fit: contain;
     margin-bottom: $space-md;
+
+    @include respond(tab-port) {
+      max-height: 200px;
+    }
   }
 
   &__title {
@@ -239,6 +300,10 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: $space-md;
+
+    @include respond(phone) {
+      grid-template-columns: 1fr;
+    }
   }
 }
 

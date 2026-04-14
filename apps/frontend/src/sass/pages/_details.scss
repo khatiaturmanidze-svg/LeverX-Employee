@@ -1,4 +1,6 @@
 @use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
 .user-details {
   display: grid;
   grid-template-columns: 1fr 2fr;
@@ -6,6 +8,11 @@
   background-color: $color-white;
   border-radius: 2px;
   margin-top: 10rem;
+
+  @include respond(phone) {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
 }
 
 .avatar-section {
@@ -13,7 +20,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: $space-xs;
   border-right: 1px solid $color-lighter-grey;
 
   &__img {
@@ -79,11 +86,16 @@
     margin-top: 1rem;
   }
 
-  &__general {
-    text-transform: uppercase;
-    font-size: 2rem;
-    padding: 1rem;
-    border-bottom: 2px solid $color-lighter-grey;
+  @include respond(smaller-tab) {
+    padding: $space-md;
+  }
+
+  @include respond(phone) {
+    border: none;
+    &__img {
+      width: 15rem;
+      height: 15rem;
+    }
   }
 }
 
@@ -128,11 +140,34 @@
       }
     }
   }
-
+  &__general {
+    text-transform: uppercase;
+    font-size: 2rem;
+    padding: 1rem;
+    border-bottom: 1px solid $color-lighter-grey;
+    margin-top: $space-sm;
+  }
   &__btns {
     display: flex;
     justify-content: center;
-    margin: 1.5rem;
+    margin: $space-lg;
+  }
+
+  @include respond(smaller-tab) {
+    padding: $space-lg;
+  }
+
+  @include respond(phone) {
+    border-top: 2px solid $color-lighter-grey;
+
+    &__btns {
+      margin: $space-md;
+    }
+
+    &__row-save,
+    &__row-cancel {
+      padding: $space-sm;
+    }
   }
 }
 

@@ -102,7 +102,7 @@ export function EmployeeView({ user }: EmployeeViewProps) {
 
       {user.visa && user.visa.length > 0 && (
         <>
-          <h3 className="details-section__subheading">Visas</h3>
+          <h3 className="details-section__general">Visas</h3>
           {user.visa?.map((v, i) => {
             const startDate = v.start_date
               ? new Date(v.start_date).toLocaleDateString()

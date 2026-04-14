@@ -6,11 +6,13 @@ import TabGroup from './TabGroup';
 interface HeaderTabsProps {
   isAdmin?: boolean;
   loggedInUser: IEmployee | null;
+  containerClassName?: string;
 }
 
 export default function HeaderTabs({
   isAdmin,
   loggedInUser,
+  containerClassName = 'tab-container',
 }: HeaderTabsProps): React.ReactElement {
   const navigate = useNavigate();
   const location = useLocation();
@@ -50,7 +52,7 @@ export default function HeaderTabs({
 
   return (
     <TabGroup
-      containerClassName="tab-container"
+      containerClassName={containerClassName}
       tabBaseClassName=""
       activeModifierClassName="active-tab"
       tabs={tabs}

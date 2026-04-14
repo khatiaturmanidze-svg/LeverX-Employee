@@ -1,4 +1,5 @@
 @use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
 
 .sign {
   display: grid;
@@ -7,8 +8,21 @@
   align-items: start;
   justify-content: center;
   align-content: center;
+  min-height: calc(100dvh - 5.5rem);
+  padding: $space-xl $space-lg;
 
-  height: 100vh;
+  @include respond(tab-port) {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    align-content: start;
+    min-height: auto;
+    padding: $space-lg $space-md;
+  }
+
+  @include respond(phone) {
+    padding: $space-md;
+    row-gap: $space-md;
+  }
 }
 
 .header-sign {
@@ -16,6 +30,12 @@
   background-color: $color-700;
   display: flex;
   justify-content: space-between;
+
+  @include respond(phone) {
+    padding: $space-sm;
+    align-items: center;
+    gap: $space-sm;
+  }
 }
 
 .header {
@@ -27,6 +47,12 @@
     color: $color-white;
     transition: all 0.5s;
     margin-right: $space-md;
+
+    @include respond(phone) {
+      margin-right: 0;
+      padding: $space-sm $space-md;
+      font-size: $font-small;
+    }
   }
   &__btn-signup:hover,
   &__btn-signin:hover {
@@ -37,12 +63,25 @@
 
 .signup__form {
   height: 32rem;
+
+  @include respond(phone) {
+    height: auto;
+  }
 }
 
 .signin__form,
 .signup__form {
   justify-content: center;
   margin: $space-lg;
+
+  @include respond(tab-port) {
+    width: min(100%, 36rem);
+    margin: 0;
+  }
+
+  @include respond(phone) {
+    width: 50%;
+  }
 }
 
 .signin__error {
@@ -60,21 +99,44 @@
 }
 
 .sign {
-  padding: $space-md;
   &__message {
     gap: $space-md;
     margin: $space-lg;
+
+    @include respond(tab-port) {
+      width: min(100%, 36rem);
+      margin: 0;
+      text-align: center;
+    }
+
+    @include respond(phone) {
+      display: none;
+    }
   }
   &__welcome {
     font-size: $font-largest;
     color: $color-900;
+
+    @include respond(phone) {
+      font-size: $font-large;
+    }
   }
 
   &__paragraph {
     font-size: $font-large;
+
+    @include respond(phone) {
+      font-size: 1.4rem;
+    }
   }
 
   &__label {
     color: $color-darker-grey;
+  }
+
+  &__form-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
   }
 }

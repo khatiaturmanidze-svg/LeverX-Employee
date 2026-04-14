@@ -27,16 +27,32 @@ describe('Header Integration', () => {
     render(<Header loggedInUser={headerMockUser} isAdmin />);
 
     expect(screen.getByTestId('logo')).toBeInTheDocument();
-    expect(screen.getByTestId('header-tabs')).toHaveTextContent('Admin Tabs');
-    expect(screen.getByTestId('logged-user')).toHaveTextContent('John');
-    expect(screen.getByText('Support')).toBeInTheDocument();
-    expect(screen.getByText('Log Off')).toBeInTheDocument();
+    expect(screen.getByAltText('open menu')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'close menu overlay' }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByTestId('header-tabs')).toHaveLength(2);
+    expect(screen.getAllByTestId('header-tabs')[0]).toHaveTextContent(
+      'Admin Tabs',
+    );
+    expect(screen.getAllByTestId('logged-user')).toHaveLength(2);
+    expect(screen.getAllByTestId('logged-user')[0]).toHaveTextContent('John');
+    expect(screen.getAllByText('Support')).toHaveLength(2);
+    expect(screen.getAllByText('Log Off')).toHaveLength(2);
   });
 
   it('renders fallback for no logged in user', () => {
     render(<Header loggedInUser={null} />);
 
-    expect(screen.getByTestId('logged-user')).toHaveTextContent('Guest');
-    expect(screen.getByTestId('header-tabs')).toHaveTextContent('User Tabs');
+    expect(screen.getByAltText('open menu')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'close menu overlay' }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByTestId('logged-user')).toHaveLength(2);
+    expect(screen.getAllByTestId('logged-user')[0]).toHaveTextContent('Guest');
+    expect(screen.getAllByTestId('header-tabs')).toHaveLength(2);
+    expect(screen.getAllByTestId('header-tabs')[0]).toHaveTextContent(
+      'User Tabs',
+    );
   });
 });

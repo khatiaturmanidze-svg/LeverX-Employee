@@ -62,7 +62,7 @@ export default function RequestList(): React.ReactElement {
         tabs={tabs}
         activeModifierClassName="request-list__tab-active"
       />
-      <div className="flex--horizontal ">
+      <div className="flex--horizontal request-list__header">
         <p className="request-list__header">
           {isPersonal ? 'My leave requests' : 'Team leave requests'}
         </p>
@@ -88,7 +88,7 @@ export default function RequestList(): React.ReactElement {
               />
             ))
         ) : (
-          <div>
+          <div className="request-list__empty">
             <img
               src="/assets/nothing-found.jpg"
               alt="nothing found"

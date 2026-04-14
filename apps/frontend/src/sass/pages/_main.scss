@@ -1,5 +1,6 @@
 @use '../abstracts/variables' as *;
-
+@use '../abstracts/mixins' as *;
+@use '../abstracts/elevations' as *;
 .page {
   margin-top: 7rem;
 }
@@ -10,14 +11,11 @@
   justify-content: space-between;
   position: fixed;
   width: 100%;
-  top: -1%;
-  z-index: 1000;
+  top: 0;
+  left: 0;
+  z-index: $z-header;
 
   &__brand {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    color: $color-white;
     text-decoration: none;
     font-size: 1.3rem;
     padding: $space-sm 0 $space-md $space-lg;
@@ -39,6 +37,13 @@
     &-main {
       text-transform: uppercase;
     }
+
+    @include respond(phone) {
+      font-size: $font-small;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
   }
 
   &__address-book,
@@ -51,7 +56,12 @@
 
     &.active-tab {
       color: $color-lighter-grey;
-      border-bottom: 2px solid $color-white;
+      border-bottom: 2px solid $color-lighter-grey;
+
+      @include respond(small-tab) {
+        border-bottom: none;
+        border-left: 3px solid $color-lighter-grey;
+      }
     }
   }
 
@@ -96,7 +106,7 @@
     height: $space-lg;
     border-radius: 50%;
     position: absolute;
-    left: -3%;
+    left: 2%;
   }
   &__logoff-wrap {
     position: relative;
@@ -114,11 +124,106 @@
     padding: $space-sm $space-sm $space-sm 3.5rem;
     position: relative;
   }
+
+  &--menu-btn {
+    display: none;
+    cursor: pointer;
+
+    @include respond(small-tab) {
+      display: block;
+    }
+  }
+
+  &--mobile-menu {
+    display: none;
+
+    @include respond(small-tab) {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      gap: $space-md;
+
+      position: fixed;
+      top: 7rem;
+      left: 0;
+      width: min(28rem, 80vw);
+      height: calc(100vh - 7rem);
+      background-color: $color-700;
+      padding: $space-md 0;
+      z-index: $z-header-menu;
+      transform: translateX(-100%);
+      visibility: hidden;
+
+      transition:
+        transform 0.3s ease,
+        visibility 0.3s ease;
+    }
+
+    &.header--mobile-menu-open {
+      @include respond(small-tab) {
+        transform: translateX(0);
+        visibility: visible;
+      }
+    }
+
+    &-footer {
+      display: flex;
+      flex-direction: column;
+      gap: $space-sm;
+      align-items: center;
+    }
+  }
+
+  &--mobile-overlay {
+    display: none;
+
+    @include respond(small-tab) {
+      display: block;
+      position: fixed;
+      top: 7rem;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(3px);
+      border: none;
+      padding: 0;
+      z-index: $z-overlay;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    &.header--mobile-overlay-open {
+      @include respond(small-tab) {
+        opacity: 1;
+        pointer-events: auto;
+      }
+    }
+  }
+
+  &__mobile-tabs {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+
+    button {
+      width: 100%;
+      text-align: left;
+    }
+  }
 }
 
 .header--right {
   gap: $space-md;
   justify-content: space-between;
+
+  @include respond(small-tab) {
+    display: none;
+  }
 }
 
 .search {
@@ -137,6 +242,12 @@
       color: $color-darker-grey;
       border-bottom: 2px solid $color-darker-grey;
     }
+
+    @include respond(phone) {
+      padding: $space-sm;
+
+      grid-column: 1/-1;
+    }
   }
 
   &-form__advanced *,
@@ -146,6 +257,7 @@
 
   &-form__basic {
     height: 14rem;
+    grid-row: 2/3;
   }
 
   &-form__advanced {
@@ -263,6 +375,11 @@ label {
   column-gap: $space-lg;
 
   padding: $space-lg;
+
+  @include respond(phone) {
+    grid-template-columns: 1fr;
+    row-gap: $space-lg;
+  }
 }
 
 .grid-container > * {
@@ -273,6 +390,10 @@ label {
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
   gap: $space-sm;
+
+  @include respond(small-tab) {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .employee-menu {
@@ -281,6 +402,11 @@ label {
     width: 8rem;
     border-radius: 50%;
     margin-left: $space-sm;
+
+    @include respond(small-tab) {
+      height: 6rem;
+      width: 6rem;
+    }
   }
 
   &__name {
@@ -291,6 +417,12 @@ label {
   &__room {
     color: $color-darker-grey;
     font-size: 1.5rem;
+  }
+
+  &__room {
+    @include respond(smaller-tab) {
+      display: none;
+    }
   }
 }
 .employee-grid {
@@ -314,6 +446,12 @@ label {
     font-size: 1.8rem;
     margin-bottom: 3.7rem;
     font-weight: 600;
+  }
+
+  @include respond(smaller-tab) {
+    &__name {
+      margin-bottom: 2.5rem;
+    }
   }
 }
 
@@ -353,6 +491,17 @@ label {
 .nothing-found {
   grid-column: 2/3;
   grid-row: 2/3;
+
+  @include respond(phone) {
+    grid-column: 1/-1;
+    grid-row: auto;
+  }
+}
+
+.nothing-found {
+  @include respond(smaller-tab) {
+    width: 100%;
+  }
 }
 /* menu view */
 
@@ -371,11 +520,21 @@ label {
 
   font-size: 1.5rem;
   font-weight: 400;
+
+  @include respond(smaller-tab) {
+    grid-template-columns: 1fr 3fr 1fr;
+  }
 }
 
 .first-row {
   margin-bottom: $space-sm;
   padding: $space-sm;
+}
+
+.last-child {
+  @include respond(smaller-tab) {
+    display: none;
+  }
 }
 
 .employee-menu {
@@ -403,4 +562,18 @@ label {
 
 .wrapper {
   position: relative;
+}
+
+.tab-container {
+  @include respond(small-tab) {
+    display: none;
+  }
+
+  &.header__mobile-tabs {
+    @include respond(small-tab) {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+  }
 }
