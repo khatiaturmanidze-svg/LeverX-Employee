@@ -8,6 +8,8 @@ import dotenv from 'dotenv';
 import { v4 as uuidv4 } from 'uuid';
 import type {
   IAuthUser,
+  CreateUserRequest,
+  CreateUserResponse,
   SignInRequest,
   SignUpRequest,
   UpdateRoleRequest,
@@ -30,6 +32,14 @@ app.use(express.static(path.join(__dirname, '../dist')));
 
 const db = await initDatabase();
 const DUMMY_TOKEN = process.env.VITE_AUTH_TOKEN || 'secret-token';
+
+function generateTemporaryPassword(length = 12): string {
+  const chars =
+    'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%^&*';
+  return Array.from({ length }, () =>
+    chars.charAt(Math.floor(Math.random() * chars.length)),
+  ).join('');
+}
 
 function authMiddleware(
   req: Request,
@@ -289,6 +299,111 @@ app.put('/requests/:employeeId', async (req, res) => {
   await db.write();
   return res.status(200).json(request);
 });
+
+app.post(
+  '/users',
+  authMiddleware,
+  async (
+    req: Request<
+      Record<string, never>,
+      CreateUserResponse | ErrorResponse,
+      CreateUserRequest
+    >,
+    res: Response<CreateUserResponse | ErrorResponse>,
+  ) => {
+    if (!db.data) return res.status(500).json({ error: 'Database not loaded' });
+    const {
+      first_name,
+      last_name,
+      role,
+      user_avatar,
+      first_native_name,
+      middle_native_name,
+      last_native_name,
+      department,
+      email,
+      phone,
+      building,
+      room,
+      desk_number,
+      isRemoteWork,
+      zoom_id,
+      zoom_link,
+      citizenship,
+      date_birth,
+      manager,
+      visa,
+    } = req.body;
+
+    if (
+      !first_name ||
+      !last_name ||
+      !email ||
+      !department ||
+      !building ||
+      !room
+    ) {
+      res.status(400).json({ error: 'missing required employee fields' });
+      return;
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const emailExists =
+      db.data.authUsers.some((u: IAuthUser) => u.email === normalizedEmail) ||
+      db.data.employees.some((e: IEmployee) => e.email === normalizedEmail);
+
+    if (emailExists) {
+      res.status(400).json({ error: 'email already exists' });
+      return;
+    }
+
+    const temporaryPassword = generateTemporaryPassword();
+    const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS) || 13;
+    const hashed_password = await bcrypt.hash(temporaryPassword, saltRounds);
+
+    const newAuthUser: IAuthUser = {
+      email: normalizedEmail,
+      hashed_password,
+      must_change_password: true,
+    };
+
+    const newEmployee: IEmployee = {
+      _id: (db.data.employees.length + 1).toString(),
+      role: role || 'Employee',
+      user_avatar: user_avatar || '/users/default.jpg',
+      first_name,
+      last_name,
+      first_native_name: first_native_name || '',
+      middle_native_name: middle_native_name || '',
+      last_native_name: last_native_name || '',
+      department,
+      building,
+      room,
+      desk_number: desk_number ?? null,
+      isRemoteWork: isRemoteWork ?? false,
+      phone: phone || '',
+      email: normalizedEmail,
+      zoom_id: zoom_id || '',
+      zoom_link: zoom_link || '',
+      citizenship: citizenship || '',
+      date_birth: date_birth || { year: null, month: null, day: null },
+      manager: manager || { id: '', first_name: '', last_name: '' },
+      visa: visa || [],
+      requests: [],
+    };
+
+    db.data.authUsers.push(newAuthUser);
+    db.data.employees.push(newEmployee);
+    await db.write();
+
+    res.status(201).json({
+      message: 'employee created successfully',
+      employee: newEmployee,
+      temporaryPassword,
+    });
+  },
+);
 
 const PORT = process.env.PORT || 3000;
 

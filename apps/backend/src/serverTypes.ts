@@ -3,6 +3,7 @@ import type { IEmployee } from './employeeTypes.js';
 export interface IAuthUser {
   email: string;
   hashed_password: string;
+  must_change_password?: boolean;
 }
 
 export interface DatabaseSchema {
@@ -27,6 +28,29 @@ export interface UpdateRoleRequest {
   newRole: string;
 }
 
+export interface CreateUserRequest {
+  first_name: string;
+  last_name: string;
+  role?: string;
+  user_avatar?: string;
+  first_native_name?: string;
+  middle_native_name?: string;
+  last_native_name?: string;
+  department: string;
+  building: string;
+  room: string;
+  desk_number?: number | null;
+  isRemoteWork?: boolean;
+  phone?: string;
+  email: string;
+  zoom_id?: string;
+  zoom_link?: string;
+  citizenship?: string;
+  date_birth?: IEmployee['date_birth'];
+  manager?: IEmployee['manager'];
+  visa?: IEmployee['visa'];
+}
+
 // Response types
 export interface SignInResponse {
   message: string;
@@ -42,6 +66,12 @@ export interface SignUpResponse {
 export interface UpdateRoleResponse {
   message: string;
   employee: IEmployee;
+}
+
+export interface CreateUserResponse {
+  message: string;
+  employee: IEmployee;
+  temporaryPassword: string;
 }
 
 export interface ErrorResponse {

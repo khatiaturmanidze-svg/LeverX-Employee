@@ -1,5 +1,7 @@
 import React, { useReducer, useState } from 'react';
+import { getErrorMessage } from '@shared/lib';
 import { FormGroup, InputField } from '@shared/ui';
+import { useAddUserMutation } from '../api/createUserApi';
 import { initialState, validateCreateUserForm } from '../lib/helpers';
 import {
   createReducer,
@@ -12,11 +14,14 @@ import {
 export default function CreateUserForm(): React.ReactElement {
   const [state, dispatch] = useReducer(createReducer, initialState);
   const [statusMessage, setStatusMessage] = useState<string>('');
+  const [temporaryPassword, setTemporaryPassword] = useState<string>('');
+  const [addUser, { isLoading }] = useAddUserMutation();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     dispatch(submitStart());
     setStatusMessage('');
+    setTemporaryPassword('');
 
     const validationErrors = validateCreateUserForm(state.formData);
     if (Object.keys(validationErrors).length > 0) {
@@ -24,8 +29,44 @@ export default function CreateUserForm(): React.ReactElement {
       return;
     }
 
-    dispatch(submitSuccess());
-    setStatusMessage('Form is ready for create-user API integration.');
+    const payload = {
+      first_name: state.formData.first_name.trim(),
+      last_name: state.formData.last_name.trim(),
+      role: state.formData.role,
+      department: state.formData.department.trim(),
+      building: state.formData.building.trim(),
+      room: state.formData.room.trim(),
+      desk_number: state.formData.desk_number
+        ? Number(state.formData.desk_number)
+        : null,
+      isRemoteWork: state.formData.isRemoteWork,
+      phone: state.formData.phone.trim() || undefined,
+      email: state.formData.email.trim(),
+      zoom_id: state.formData.zoom_id.trim() || undefined,
+      zoom_link: state.formData.zoom_link.trim() || undefined,
+      citizenship: state.formData.citizenship.trim() || undefined,
+      first_native_name: state.formData.first_native_name.trim() || undefined,
+      last_native_name: state.formData.last_native_name.trim() || undefined,
+      date_birth: state.formData.date_birth
+        ? (() => {
+            const [year, month, day] = state.formData.date_birth
+              .split('-')
+              .map(Number);
+            return { year, month, day };
+          })()
+        : undefined,
+      visa: state.formData.visas,
+    };
+
+    try {
+      const result = await addUser(payload).unwrap();
+      dispatch(submitSuccess());
+      setTemporaryPassword(result.temporaryPassword);
+      setStatusMessage('Employee created successfully.');
+    } catch (err) {
+      dispatch(submitError({ submit: getErrorMessage(err) }));
+      setStatusMessage(getErrorMessage(err));
+    }
   };
 
   return (
@@ -313,12 +354,17 @@ export default function CreateUserForm(): React.ReactElement {
       <button
         type="submit"
         className="btn-submit create-user-form__submit"
-        disabled={state.isSubmitting}
+        disabled={state.isSubmitting || isLoading}
       >
-        {state.isSubmitting ? 'Checking...' : 'Create Employee'}
+        {state.isSubmitting || isLoading ? 'Creating...' : 'Create Employee'}
       </button>
 
       {statusMessage && <p className="form-error">{statusMessage}</p>}
+      {temporaryPassword && (
+        <p className="create-user-form__temporary-password">
+          Temporary password: {temporaryPassword}
+        </p>
+      )}
     </form>
   );
 }

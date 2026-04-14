@@ -60,3 +60,32 @@ export interface IEmployee {
 export type EmployeeUpdate = Partial<Omit<IEmployee, 'manager'>> & {
   manager?: string | null;
 };
+
+export type CreateUserPayload = {
+  first_name: string;
+  last_name: string;
+  role?: string;
+  user_avatar?: string;
+  first_native_name?: string;
+  middle_native_name?: string;
+  last_native_name?: string;
+  department: string;
+  building: string;
+  room: string;
+  desk_number?: number | null;
+  isRemoteWork?: boolean;
+  phone?: string;
+  email: string;
+  zoom_id?: string;
+  zoom_link?: string;
+  citizenship?: string;
+  date_birth?: IDateOfBirth;
+  manager?: IManager;
+  visa?: IVisa[];
+};
+
+export type CreateUserResponse = {
+  message: string;
+  employee: IEmployee;
+  temporaryPassword: string;
+};
