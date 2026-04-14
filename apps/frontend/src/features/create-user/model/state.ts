@@ -1,6 +1,6 @@
 import {
-  EmployeeEditAction,
-  EmployeeEditActionType,
+  EmployeeCreateAction,
+  EmployeeCreateActionType,
   EmployeeFormState,
   FormState,
   SetFieldAction,
@@ -19,17 +19,17 @@ const defaultVisa: IVisa = {
   end_date: '',
 };
 
-export function editReducer(
+export function createReducer(
   state: FormState,
-  action: EmployeeEditAction,
+  action: EmployeeCreateAction,
 ): FormState {
   switch (action.type) {
-    case EmployeeEditActionType.SET_FIELD:
+    case EmployeeCreateActionType.SET_FIELD:
       return {
         ...state,
         formData: { ...state.formData, [action.field]: action.value },
       };
-    case EmployeeEditActionType.SET_VISA: {
+    case EmployeeCreateActionType.SET_VISA: {
       const visas = [...(state.formData.visas || [])];
       visas[action.index] = {
         ...(visas[action.index] || defaultVisa),
@@ -40,11 +40,11 @@ export function editReducer(
         formData: { ...state.formData, visas },
       };
     }
-    case EmployeeEditActionType.SUBMIT_START:
+    case EmployeeCreateActionType.SUBMIT_START:
       return { ...state, isSubmitting: true };
-    case EmployeeEditActionType.SUBMIT_SUCCESS:
+    case EmployeeCreateActionType.SUBMIT_SUCCESS:
       return { ...state, isSubmitting: false, errors: {} };
-    case EmployeeEditActionType.SUBMIT_ERROR:
+    case EmployeeCreateActionType.SUBMIT_ERROR:
       return { ...state, isSubmitting: false, errors: action.errors };
     default:
       return state;
@@ -55,16 +55,9 @@ export const setField = <K extends keyof EmployeeFormState>(
   field: K,
   value: EmployeeFormState[K],
 ): SetFieldAction<K> => ({
-  type: EmployeeEditActionType.SET_FIELD,
+  type: EmployeeCreateActionType.SET_FIELD,
   field,
   value,
-});
-
-export const submitError = (
-  errors: Record<string, string>,
-): SubmitErrorAction => ({
-  type: EmployeeEditActionType.SUBMIT_ERROR,
-  errors,
 });
 
 export const setVisa = <K extends keyof IVisa>(
@@ -72,16 +65,23 @@ export const setVisa = <K extends keyof IVisa>(
   field: K,
   value: IVisa[K],
 ): SetVisaAction<K> => ({
-  type: EmployeeEditActionType.SET_VISA,
+  type: EmployeeCreateActionType.SET_VISA,
   index,
   field,
   value,
 });
 
 export const submitStart = (): SubmitStartAction => ({
-  type: EmployeeEditActionType.SUBMIT_START,
+  type: EmployeeCreateActionType.SUBMIT_START,
 });
 
 export const submitSuccess = (): SubmitSuccessAction => ({
-  type: EmployeeEditActionType.SUBMIT_SUCCESS,
+  type: EmployeeCreateActionType.SUBMIT_SUCCESS,
+});
+
+export const submitError = (
+  errors: Record<string, string>,
+): SubmitErrorAction => ({
+  type: EmployeeCreateActionType.SUBMIT_ERROR,
+  errors,
 });

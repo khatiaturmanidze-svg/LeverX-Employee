@@ -1,6 +1,14 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { SignIn, SignUp, Main, Details, Roles, Requests } from '@/pages';
+import {
+  SignIn,
+  SignUp,
+  Main,
+  Details,
+  Roles,
+  Requests,
+  Create,
+} from '@/pages';
 
 const isAuthenticated = () => {
   return (
@@ -53,6 +61,15 @@ export default function App() {
           element={
             <PrivateRoute>
               <Requests />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/create"
+          element={
+            <PrivateRoute>
+              <Create />
             </PrivateRoute>
           }
         />

@@ -7,4 +7,5 @@ export const mockPagesModule = {
   Details: () => <div data-testid="details-page">Details</div>,
   Roles: () => <div data-testid="roles-page">Roles</div>,
   Requests: () => <div data-testid="requests-page">Requests</div>,
+  Create: () => <div data-testid="create-page">Create</div>,
 };

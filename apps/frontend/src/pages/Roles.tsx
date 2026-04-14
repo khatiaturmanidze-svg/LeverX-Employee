@@ -1,18 +1,17 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Header } from '@shared/ui';
 import { RolesEmployee } from '@features/role-change';
 import { useGetUsersQuery } from '../features/usersApi';
-import { useFilteredItems, useRoleChange, getLoggedInUser } from '@shared/lib';
+import {
+  useFilteredItems,
+  useRoleChange,
+  useGetHeaderProps,
+} from '@shared/lib';
 
 export default function Roles(): React.ReactElement {
   const [searchTerm, setSearchTerm] = useState('');
   const { data: allUsers = [] } = useGetUsersQuery();
-
-  const loggedUser = useMemo(() => {
-    return getLoggedInUser(allUsers) || null;
-  }, [allUsers]);
-
-  const isAdmin = useMemo(() => loggedUser?.role === 'Admin', [loggedUser]);
+  const { loggedUser, isAdmin } = useGetHeaderProps();
 
   const { handleRoleChange, error } = useRoleChange(loggedUser);
 

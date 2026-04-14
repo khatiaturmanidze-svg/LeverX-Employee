@@ -7,6 +7,7 @@ import type { IEmployee } from '../types/type';
 import {
   getLoggedInUserMock,
   requestsAllUsers,
+  useGetHeaderPropsMock,
   useGetUsersQueryMock,
 } from './test-mocks';
 
@@ -16,8 +17,12 @@ vi.mock(
 );
 
 vi.mock('@shared/lib', async () => {
-  const { getLoggedInUserMock } = await import('./test-mocks');
-  return { getLoggedInUser: getLoggedInUserMock };
+  const { getLoggedInUserMock, useGetHeaderPropsMock } =
+    await import('./test-mocks');
+  return {
+    getLoggedInUser: getLoggedInUserMock,
+    useGetHeaderProps: useGetHeaderPropsMock,
+  };
 });
 
 vi.mock(
@@ -34,6 +39,7 @@ describe('pages/Requests', () => {
   beforeEach(() => {
     useGetUsersQueryMock.mockReset();
     getLoggedInUserMock.mockReset();
+    useGetHeaderPropsMock.mockReset();
     localStorage.clear();
     sessionStorage.clear();
   });
@@ -42,6 +48,10 @@ describe('pages/Requests', () => {
     const loggedUser: IEmployee = requestsAllUsers[0];
     useGetUsersQueryMock.mockReturnValue({ data: requestsAllUsers });
     getLoggedInUserMock.mockReturnValue(loggedUser);
+    useGetHeaderPropsMock.mockReturnValue({
+      loggedUser,
+      isAdmin: true,
+    });
 
     const container = document.createElement('div');
     const root = createRoot(container);
@@ -76,6 +86,10 @@ describe('pages/Requests', () => {
     };
     useGetUsersQueryMock.mockReturnValue({ data: requestsAllUsers });
     getLoggedInUserMock.mockReturnValue(nonAdminUser);
+    useGetHeaderPropsMock.mockReturnValue({
+      loggedUser: nonAdminUser,
+      isAdmin: false,
+    });
 
     const container = document.createElement('div');
     const root = createRoot(container);

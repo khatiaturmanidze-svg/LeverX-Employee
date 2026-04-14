@@ -13,7 +13,7 @@ import {
   filterUsers,
   filterAdvancedUsers,
 } from '@features/search';
-import { getLoggedInUser } from '@shared/lib';
+import { useGetHeaderProps } from '@shared/lib';
 import { useGetUsersQuery } from '../features/usersApi';
 
 export default function Main(): React.ReactElement {
@@ -24,15 +24,8 @@ export default function Main(): React.ReactElement {
   const [advancedCriteria, setAdvancedCriteria] =
     useState<AdvancedSearchCriteria | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-
   const { data: allUsers = [] } = useGetUsersQuery();
-
-  const loggedUser = useMemo(
-    () => getLoggedInUser(allUsers) || null,
-    [allUsers],
-  );
-
-  const isAdmin = useMemo(() => loggedUser?.role === 'Admin', [loggedUser]);
+  const { loggedUser, isAdmin } = useGetHeaderProps();
 
   const filteredUsers = useMemo(() => {
     if (basicCriteria) {

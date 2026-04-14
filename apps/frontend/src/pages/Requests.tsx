@@ -1,20 +1,15 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Header } from '@shared/ui';
-import { getLoggedInUser } from '@shared/lib';
-import { useGetUsersQuery } from '../features/usersApi';
+import { useGetHeaderProps } from '@shared/lib';
 import { Managers, RequestForm, RequestList } from '@features/requests';
 
 export default function Requests(): React.ReactElement {
-  const { data: allUsers = [] } = useGetUsersQuery();
-  const loggedInUser = useMemo(() => {
-    return getLoggedInUser(allUsers);
-  }, [allUsers]);
-  const isAdmin = loggedInUser?.role === 'Admin';
+  const { loggedUser, isAdmin } = useGetHeaderProps();
   return (
     <div className="page">
-      <Header loggedInUser={loggedInUser || null} isAdmin={isAdmin} />{' '}
+      <Header loggedInUser={loggedUser || null} isAdmin={isAdmin} />{' '}
       <div className="requests-grid">
-        <Managers loggedInUser={loggedInUser} />
+        <Managers loggedInUser={loggedUser} />
         <RequestForm />
         <RequestList />
       </div>

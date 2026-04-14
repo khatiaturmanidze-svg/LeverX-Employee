@@ -8,6 +8,7 @@ import {
   getLoggedInUserMock,
   mainUsers,
   resetMainSearchCriteria,
+  useGetHeaderPropsMock,
   useGetUsersQueryMock,
 } from './test-mocks';
 
@@ -36,6 +37,10 @@ describe('pages/Main', () => {
     resetMainSearchCriteria();
     useGetUsersQueryMock.mockReturnValue({ data: mainUsers });
     getLoggedInUserMock.mockReturnValue(null);
+    useGetHeaderPropsMock.mockReturnValue({
+      loggedUser: null,
+      isAdmin: false,
+    });
   });
 
   it('renders basic search by default and shows employees in grid mode', async () => {
