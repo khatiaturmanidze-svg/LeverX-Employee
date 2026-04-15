@@ -44,6 +44,16 @@
     height: fit-content;
     width: 100%;
     padding: $space-xl;
+    transition:
+      border-color 0.2s ease,
+      background-color 0.2s ease,
+      transform 0.2s ease;
+
+    &--dragging {
+      border-color: $color-500;
+      background-color: rgba($color-100, 0.08);
+      transform: scale(1.01);
+    }
 
     &__results {
       width: 100%;

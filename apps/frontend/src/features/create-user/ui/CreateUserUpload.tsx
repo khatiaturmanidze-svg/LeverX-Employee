@@ -6,16 +6,13 @@ import { useUploadSpreadsheetMutation } from '../api/createUserApi';
 
 export default function CreateUserUpload(): React.ReactElement {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
   const [statusMessage, setStatusMessage] = useState<string>('');
   const [importedUsers, setImportedUsers] = useState<UploadedUserResult[]>([]);
   const [skippedRows, setSkippedRows] = useState<UploadSpreadsheetError[]>([]);
   const [uploadSpreadsheet, { isLoading }] = useUploadSpreadsheetMutation();
 
-  const handleFileSelect = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = event.target.files?.[0];
-
+  const uploadFile = async (file: File) => {
     if (!file) {
       return;
     }
@@ -31,13 +28,49 @@ export default function CreateUserUpload(): React.ReactElement {
       setImportedUsers([]);
       setSkippedRows([]);
       setStatusMessage(getErrorMessage(error));
-    } finally {
-      event.target.value = '';
+    }
+  };
+
+  const handleFileSelect = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+
+    if (file) {
+      await uploadFile(file);
+    }
+
+    event.target.value = '';
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = async (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragging(false);
+
+    const file = event.dataTransfer.files?.[0];
+
+    if (file) {
+      await uploadFile(file);
     }
   };
 
   return (
-    <div className="create-user-upload">
+    <div
+      className={`create-user-upload${isDragging ? ' create-user-upload--dragging' : ''}`}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
       <input
         ref={inputRef}
         type="file"
@@ -59,6 +92,7 @@ export default function CreateUserUpload(): React.ReactElement {
       >
         {isLoading ? 'Uploading...' : 'Upload a spreadsheet'}
       </button>
+
       {statusMessage && <p className="form-error">{statusMessage}</p>}
       {importedUsers.length > 0 && (
         <div className="create-user-upload__results">

@@ -15,5 +15,6 @@ describe('CreateUserUpload', () => {
     expect(html).toContain('/svgs/drag-icon.svg');
     expect(html).toContain('drag and drop icon');
     expect(html).toContain('Upload a spreadsheet');
+    expect(html).toContain('Drag and drop a spreadsheet here');
   });
 });
