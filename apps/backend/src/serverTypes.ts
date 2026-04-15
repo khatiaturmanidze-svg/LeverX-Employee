@@ -17,6 +17,11 @@ export interface SignInRequest {
   password: string;
 }
 
+export interface SetNewPasswordRequest {
+  email: string;
+  newPassword: string;
+}
+
 export interface SignUpRequest {
   first_name: string;
   last_name: string;
@@ -56,6 +61,7 @@ export interface SignInResponse {
   message: string;
   token: string;
   userId: string;
+  mustChangePassword: boolean;
 }
 
 export interface SignUpResponse {
@@ -72,6 +78,10 @@ export interface CreateUserResponse {
   message: string;
   employee: IEmployee;
   temporaryPassword: string;
+}
+
+export interface SetNewPasswordResponse {
+  message: string;
 }
 
 export type SpreadsheetRow = Record<string, string | number | boolean | null>;

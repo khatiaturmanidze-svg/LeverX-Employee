@@ -13,6 +13,8 @@ import type {
   CreateUserRequest,
   CreateUserResponse,
   SpreadsheetRow,
+  SetNewPasswordRequest,
+  SetNewPasswordResponse,
   SignInRequest,
   SignUpRequest,
   UpdateRoleRequest,
@@ -98,7 +100,7 @@ function createEmployeeFromSpreadsheetRow(
   return {
     _id: employeeId,
     role: getCellString(row.role) || 'Employee',
-    user_avatar: getCellString(row.user_avatar) || '/users/default.jpg',
+    user_avatar: getCellString(row.user_avatar) || '/users/dumplinh.jpg',
     first_name: getCellString(row.first_name),
     last_name: getCellString(row.last_name),
     first_native_name: getCellString(row.first_native_name),
@@ -190,7 +192,55 @@ app.post<Record<string, never>, SignInResponse | ErrorResponse, SignInRequest>(
       message: 'signed in!',
       token: DUMMY_TOKEN,
       userId: employee?._id ?? '',
+      mustChangePassword: user.must_change_password ?? false,
     });
+  },
+);
+
+app.post<
+  Record<string, never>,
+  SetNewPasswordResponse | ErrorResponse,
+  SetNewPasswordRequest
+>(
+  '/set-new-password',
+  authMiddleware,
+  async (
+    req: Request<
+      Record<string, never>,
+      SetNewPasswordResponse | ErrorResponse,
+      SetNewPasswordRequest
+    >,
+    res,
+  ) => {
+    const { email, newPassword } = req.body;
+
+    if (!email || !newPassword) {
+      res.status(400).json({ error: 'email and new password are required' });
+      return;
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = db.data.authUsers.find(
+      (authUser: IAuthUser) => authUser.email === normalizedEmail,
+    );
+
+    if (!user) {
+      res.status(404).json({ error: 'user not found' });
+      return;
+    }
+
+    if (!user.must_change_password) {
+      res.status(400).json({ error: 'password change is not required' });
+      return;
+    }
+
+    const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS) || 13;
+    user.hashed_password = await bcrypt.hash(newPassword, saltRounds);
+    user.must_change_password = false;
+
+    await db.write();
+
+    res.json({ message: 'password updated successfully' });
   },
 );
 
@@ -467,7 +517,7 @@ app.post(
     const newEmployee: IEmployee = {
       _id: (db.data.employees.length + 1).toString(),
       role: role || 'Employee',
-      user_avatar: user_avatar || '/users/default.jpg',
+      user_avatar: user_avatar || '/users/dumplinh.jpg',
       first_name,
       last_name,
       first_native_name: first_native_name || '',

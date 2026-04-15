@@ -23,7 +23,9 @@ export default function SignInForm(): React.ReactElement {
       const storage = rememberMe ? localStorage : sessionStorage;
       storage.setItem('loggedInUser', trimmedEmail);
       storage.setItem('result', JSON.stringify(result));
-      navigate('/main', { replace: true });
+      navigate(result.mustChangePassword ? '/new-password' : '/main', {
+        replace: true,
+      });
     } catch (err) {
       setErrorMessage(getErrorMessage(err));
     }

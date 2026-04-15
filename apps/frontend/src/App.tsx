@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import {
   SignIn,
   SignUp,
+  NewPassword,
   Main,
   Details,
   Roles,
@@ -31,6 +32,14 @@ export default function App() {
 
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route
+          path="/new-password"
+          element={
+            <PrivateRoute>
+              <NewPassword />
+            </PrivateRoute>
+          }
+        />
 
         <Route
           path="/main"
