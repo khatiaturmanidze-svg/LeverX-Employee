@@ -74,6 +74,27 @@ export interface CreateUserResponse {
   temporaryPassword: string;
 }
 
+export type SpreadsheetRow = Record<string, string | number | boolean | null>;
+
+export interface UploadedUserResult {
+  email: string;
+  temporaryPassword: string;
+  employeeId: string;
+}
+
+export interface UploadSpreadsheetError {
+  row: number;
+  email: string;
+  error: string;
+}
+
+export interface UploadSpreadsheetResponse {
+  message: string;
+  count: number;
+  importedUsers: UploadedUserResult[];
+  skippedRows: UploadSpreadsheetError[];
+}
+
 export interface ErrorResponse {
   error: string;
 }

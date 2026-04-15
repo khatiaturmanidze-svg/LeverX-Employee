@@ -1,21 +1,25 @@
 import bcrypt from 'bcrypt';
 import express from 'express';
 import cors from 'cors';
+import multer from 'multer';
 import type { Request, Response, NextFunction } from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { v4 as uuidv4 } from 'uuid';
+import xlsx from 'xlsx';
 import type {
   IAuthUser,
   CreateUserRequest,
   CreateUserResponse,
+  SpreadsheetRow,
   SignInRequest,
   SignUpRequest,
   UpdateRoleRequest,
   SignInResponse,
   SignUpResponse,
   ErrorResponse,
+  UploadSpreadsheetResponse,
   UpdateRoleResponse,
 } from './serverTypes.js';
 import type { IEmployee, IRequestData } from './employeeTypes.js';
@@ -29,9 +33,101 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../dist')));
+const upload = multer({ storage: multer.memoryStorage() });
 
 const db = await initDatabase();
 const DUMMY_TOKEN = process.env.VITE_AUTH_TOKEN || 'secret-token';
+
+function getCellString(value: SpreadsheetRow[string]): string {
+  if (typeof value === 'string') {
+    return value.trim();
+  }
+
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return String(value).trim();
+  }
+
+  return '';
+}
+
+function getOptionalNumber(value: SpreadsheetRow[string]): number | null {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : null;
+  }
+
+  if (typeof value === 'string' && value.trim() !== '') {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  return null;
+}
+
+function getBooleanValue(value: SpreadsheetRow[string]): boolean {
+  if (typeof value === 'boolean') {
+    return value;
+  }
+
+  if (typeof value === 'number') {
+    return value !== 0;
+  }
+
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    return normalized === 'true' || normalized === 'yes' || normalized === '1';
+  }
+
+  return false;
+}
+
+function getNextEmployeeId(): string {
+  const maxId = db.data.employees.reduce((currentMax, employee) => {
+    const parsedId = Number(employee._id);
+    return Number.isFinite(parsedId)
+      ? Math.max(currentMax, parsedId)
+      : currentMax;
+  }, 0);
+
+  return String(maxId + 1);
+}
+
+function createEmployeeFromSpreadsheetRow(
+  row: SpreadsheetRow,
+  employeeId: string,
+): IEmployee {
+  return {
+    _id: employeeId,
+    role: getCellString(row.role) || 'Employee',
+    user_avatar: getCellString(row.user_avatar) || '/users/default.jpg',
+    first_name: getCellString(row.first_name),
+    last_name: getCellString(row.last_name),
+    first_native_name: getCellString(row.first_native_name),
+    middle_native_name: getCellString(row.middle_native_name),
+    last_native_name: getCellString(row.last_native_name),
+    department: getCellString(row.department),
+    building: getCellString(row.building),
+    room: getCellString(row.room),
+    desk_number: getOptionalNumber(row.desk_number),
+    isRemoteWork: getBooleanValue(row.isRemoteWork),
+    phone: getCellString(row.phone),
+    email: getCellString(row.email).toLowerCase(),
+    zoom_id: getCellString(row.zoom_id),
+    zoom_link: getCellString(row.zoom_link),
+    citizenship: getCellString(row.citizenship),
+    date_birth: {
+      year: getOptionalNumber(row.date_birth_year),
+      month: getOptionalNumber(row.date_birth_month),
+      day: getOptionalNumber(row.date_birth_day),
+    },
+    manager: {
+      id: getCellString(row.manager_id),
+      first_name: getCellString(row.manager_first_name),
+      last_name: getCellString(row.manager_last_name),
+    },
+    visa: [],
+    requests: [],
+  };
+}
 
 function generateTemporaryPassword(length = 12): string {
   const chars =
@@ -402,6 +498,110 @@ app.post(
       employee: newEmployee,
       temporaryPassword,
     });
+  },
+);
+
+app.post<Record<string, never>, UploadSpreadsheetResponse | ErrorResponse>(
+  '/users/upload',
+  authMiddleware,
+  upload.single('file'),
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        res.status(400).json({ error: 'file is required' });
+        return;
+      }
+
+      const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+      const firstSheetName = workbook.SheetNames[0];
+
+      if (!firstSheetName) {
+        res.status(400).json({ error: 'spreadsheet is empty' });
+        return;
+      }
+
+      const sheet = workbook.Sheets[firstSheetName];
+      const data = xlsx.utils.sheet_to_json<SpreadsheetRow>(sheet, {
+        defval: null,
+      });
+
+      const importedUsers: UploadSpreadsheetResponse['importedUsers'] = [];
+      const skippedRows: UploadSpreadsheetResponse['skippedRows'] = [];
+      const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS) || 13;
+      const seenEmails = new Set([
+        ...db.data.authUsers.map((user) => user.email.toLowerCase()),
+        ...db.data.employees.map((employee) => employee.email.toLowerCase()),
+      ]);
+
+      for (const [index, row] of data.entries()) {
+        const first_name = getCellString(row.first_name);
+        const last_name = getCellString(row.last_name);
+        const email = getCellString(row.email).toLowerCase();
+        const department = getCellString(row.department);
+        const building = getCellString(row.building);
+        const room = getCellString(row.room);
+
+        if (
+          !first_name ||
+          !last_name ||
+          !email ||
+          !department ||
+          !building ||
+          !room
+        ) {
+          skippedRows.push({
+            row: index + 2,
+            email,
+            error: 'missing required fields',
+          });
+          continue;
+        }
+
+        if (seenEmails.has(email)) {
+          skippedRows.push({
+            row: index + 2,
+            email,
+            error: 'email already exists',
+          });
+          continue;
+        }
+
+        const employeeId = getNextEmployeeId();
+        const temporaryPassword = generateTemporaryPassword();
+        const hashed_password = await bcrypt.hash(
+          temporaryPassword,
+          saltRounds,
+        );
+
+        const employee = createEmployeeFromSpreadsheetRow(row, employeeId);
+        const authUser: IAuthUser = {
+          email,
+          hashed_password,
+          must_change_password: true,
+        };
+
+        db.data.authUsers.push(authUser);
+        db.data.employees.push(employee);
+        seenEmails.add(email);
+
+        importedUsers.push({
+          email,
+          temporaryPassword,
+          employeeId,
+        });
+      }
+
+      await db.write();
+
+      res.json({
+        message: 'spreadsheet imported successfully',
+        count: importedUsers.length,
+        importedUsers,
+        skippedRows,
+      });
+    } catch {
+      res.status(500).json({ error: 'failed to read spreadsheet' });
+    }
   },
 );
 

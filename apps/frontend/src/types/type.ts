@@ -89,3 +89,24 @@ export type CreateUserResponse = {
   employee: IEmployee;
   temporaryPassword: string;
 };
+
+export type SpreadsheetRow = Record<string, string | number | boolean | null>;
+
+export type UploadedUserResult = {
+  email: string;
+  temporaryPassword: string;
+  employeeId: string;
+};
+
+export type UploadSpreadsheetError = {
+  row: number;
+  email: string;
+  error: string;
+};
+
+export type UploadSpreadsheetResponse = {
+  message: string;
+  count: number;
+  importedUsers: UploadedUserResult[];
+  skippedRows: UploadSpreadsheetError[];
+};
