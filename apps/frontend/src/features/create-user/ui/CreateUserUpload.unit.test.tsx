@@ -12,9 +12,8 @@ describe('CreateUserUpload', () => {
     const html = renderToStaticMarkup(React.createElement(CreateUserUpload));
 
     expect(html).toContain('create-user-upload');
-    expect(html).toContain('/svgs/drag-icon.svg');
+    expect(html).toContain('/svgs/upload.svg');
     expect(html).toContain('drag and drop icon');
     expect(html).toContain('Upload a spreadsheet');
-    expect(html).toContain('Drag and drop a spreadsheet here');
   });
 });

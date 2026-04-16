@@ -79,7 +79,7 @@ export default function CreateUserUpload(): React.ReactElement {
         onChange={handleFileSelect}
       />
       <Icon
-        src="/svgs/drag-icon.svg"
+        src="/svgs/upload.svg"
         alt="drag and drop icon"
         width={100}
         height={100}

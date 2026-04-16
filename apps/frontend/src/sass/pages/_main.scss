@@ -15,9 +15,13 @@
   left: 0;
   z-index: $z-header;
 
+  &__employee {
+    font-size: $font-smallest;
+  }
+
   &__brand {
     text-decoration: none;
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     padding: $space-sm 0 $space-md $space-lg;
     background-color: inherit;
 
@@ -53,7 +57,7 @@
     color: $color-white;
     background-color: $color-700;
     border: none;
-    padding: $space-lg;
+    padding: $space-lg $space-md;
 
     &.active-tab {
       color: $color-lighter-grey;
@@ -103,8 +107,8 @@
   }
 
   &__employee-img {
-    width: $space-lg;
-    height: $space-lg;
+    width: 2.7rem;
+    height: 2.7rem;
     border-radius: 50%;
     position: absolute;
     left: 2%;
