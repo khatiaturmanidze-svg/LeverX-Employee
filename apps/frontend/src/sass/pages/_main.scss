@@ -14,6 +14,11 @@
   top: 0;
   left: 0;
   z-index: $z-header;
+  background: linear-gradient(
+    135deg,
+    rgba(19, 58, 121, 0.98),
+    rgba(30, 93, 190, 0.95)
+  );
 
   &__employee {
     font-size: $font-smallest;
@@ -55,7 +60,7 @@
   &__requests-btn,
   &__create-btn {
     color: $color-white;
-    background-color: $color-700;
+
     border: none;
     padding: $space-lg $space-md;
 
@@ -376,7 +381,6 @@ label {
 .grid-container {
   display: grid;
   grid-template-columns: 2fr 5fr;
-  background-color: $color-lighter-grey;
   column-gap: $space-lg;
 
   padding: $space-lg;
@@ -402,6 +406,8 @@ label {
 }
 
 .employee-menu {
+  border-radius: $radius-small;
+
   &__img {
     height: 8rem;
     width: 8rem;
@@ -438,6 +444,7 @@ label {
   flex-direction: column;
 
   align-items: center;
+  border-radius: $radius-small;
 
   &__img {
     width: 15rem;
@@ -521,7 +528,7 @@ label {
   grid-template-columns: 1fr 3fr 2fr 2fr;
   background-color: $color-white;
   align-items: center;
-  border-radius: 3%;
+  border-radius: $radius-small;
 
   font-size: 1.5rem;
   font-weight: 400;

@@ -33,25 +33,39 @@ export default function SignInForm(): React.ReactElement {
 
   return (
     <form className="signin__form" onSubmit={handleSumbit}>
-      <input
-        type="email"
-        name="user"
-        placeholder="Enter Email"
-        className="user-input signin__form-email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
+      <div className="sign__form-copy">
+        <p className="sign__form-kicker">Welcome back</p>
+        <h2 className="sign__form-title">Sign in to your workspace</h2>
+        <p className="sign__form-text">
+          Pick up where you left off and keep your employee operations moving.
+        </p>
+      </div>
 
-      <input
-        type="password"
-        placeholder="Enter password"
-        className="user-input signin__form-password"
-        name="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+      <label className="sign__field">
+        <span className="sign__field-label">Work email</span>
+        <input
+          type="email"
+          name="user"
+          placeholder="Enter Email"
+          className="user-input signin__form-email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+      </label>
 
-      <div className="flex--horizontal">
+      <label className="sign__field">
+        <span className="sign__field-label">Password</span>
+        <input
+          type="password"
+          placeholder="Enter password"
+          className="user-input signin__form-password"
+          name="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+      </label>
+
+      <div className="flex--horizontal sign__form-row">
         <input
           type="checkbox"
           id="signin__remember-me"

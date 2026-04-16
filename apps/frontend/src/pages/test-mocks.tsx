@@ -9,6 +9,7 @@ export const useGetHeaderPropsMock = vi.fn();
 export const useRoleChangeMock = vi.fn();
 export const signInMock = vi.fn();
 export const signUpMock = vi.fn();
+export const setNewPasswordMock = vi.fn();
 export const navigateMock = vi.fn();
 export const getErrorMessageMock = vi.fn();
 export const useParamsMock = vi.fn();
@@ -323,6 +324,10 @@ export const signInPageAuthApiModule = {
 
 export const signUpPageAuthApiModule = {
   useSignUpMutation: () => [signUpMock],
+};
+
+export const newPasswordPageAuthApiModule = {
+  useSetNewPasswordMutation: () => [setNewPasswordMock, { isLoading: false }],
 };
 
 export const authPagesSharedLibModule = {

@@ -10,7 +10,10 @@ export default function SignHeader(): React.ReactElement {
 
   return (
     <header className="header-sign">
-      <Logo />
+      <div className="header-sign__brand">
+        <Logo />
+        <p className="header-sign__tagline">People operations, simplified</p>
+      </div>
       {!isSignUpPage && !isNewPasswordPage && (
         <button
           className="header__btn-signup"
