@@ -1,20 +1,20 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { Header, AvatarSection, EmployeeView } from '@shared/ui';
-import { getLoggedInUser, canEdit } from '@shared/lib';
+import { canEdit } from '@shared/lib';
 import { useParams } from 'react-router-dom';
 import { EmployeeEditForm } from '@features/edit';
 import {
   useGetEmployeeDetailsQuery,
-  useGetUsersQuery,
   useUpdateEmployeeMutation,
 } from '../features/usersApi';
+import { useGetHeaderProps } from '@shared/lib';
 import { EmployeeUpdate } from '../types/type';
 
 export default function Details(): React.ReactElement {
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
+  const { loggedUser, isAdmin } = useGetHeaderProps();
   const { id } = useParams<{ id: string }>();
-  const { data: allUsers = [] } = useGetUsersQuery();
 
   const {
     data: viewedEmployee,
@@ -22,12 +22,6 @@ export default function Details(): React.ReactElement {
     isError,
   } = useGetEmployeeDetailsQuery(id!, { skip: !id });
   const [updateEmployee] = useUpdateEmployeeMutation();
-
-  const loggedUser = useMemo(() => {
-    return getLoggedInUser(allUsers) || null;
-  }, [allUsers]);
-
-  const isAdmin = useMemo(() => loggedUser?.role === 'Admin', [loggedUser]);
 
   const canUserEdit = useMemo(() => {
     if (!loggedUser || !viewedEmployee) return false;

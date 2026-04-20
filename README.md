@@ -26,3 +26,7 @@ Create a `.env` file in the root directory and define the following variables:
 - `npm run test` -> runs all unit and integration tests with Vitest
 - `npm run test:watch` -> runs tests in watch mode
 - `npm run test:coverage` -> runs tests with coverage report
+
+# test data
+
+I've included the test spreadsheet in the /docs/data folder for easy access.

@@ -1,6 +1,15 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { SignIn, SignUp, Main, Details, Roles, Requests } from '@/pages';
+import {
+  SignIn,
+  SignUp,
+  NewPassword,
+  Main,
+  Details,
+  Roles,
+  Requests,
+  Create,
+} from '@/pages';
 
 const isAuthenticated = () => {
   return (
@@ -23,6 +32,14 @@ export default function App() {
 
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route
+          path="/new-password"
+          element={
+            <PrivateRoute>
+              <NewPassword />
+            </PrivateRoute>
+          }
+        />
 
         <Route
           path="/main"
@@ -53,6 +70,15 @@ export default function App() {
           element={
             <PrivateRoute>
               <Requests />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/create"
+          element={
+            <PrivateRoute>
+              <Create />
             </PrivateRoute>
           }
         />

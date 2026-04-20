@@ -9,6 +9,7 @@ import {
   detailsViewedEmployee,
   getLoggedInUserMock,
   updateEmployeeMock,
+  useGetHeaderPropsMock,
   useGetEmployeeDetailsQueryMock,
   useGetUsersQueryMock,
   useParamsMock,
@@ -45,6 +46,10 @@ describe('pages/Details', () => {
     useParamsMock.mockReturnValue({ id: detailsViewedEmployee._id });
     useGetUsersQueryMock.mockReturnValue({ data: [detailsLoggedUser] });
     getLoggedInUserMock.mockReturnValue(detailsLoggedUser);
+    useGetHeaderPropsMock.mockReturnValue({
+      loggedUser: detailsLoggedUser,
+      isAdmin: true,
+    });
     useGetEmployeeDetailsQueryMock.mockReturnValue({
       data: detailsViewedEmployee,
       isLoading: false,
@@ -68,6 +73,7 @@ describe('pages/Details', () => {
     useUpdateEmployeeMutationMock.mockReturnValue([updateEmployeeMock]);
     canEditMock.mockReset();
     getLoggedInUserMock.mockReset();
+    useGetHeaderPropsMock.mockReset();
     useParamsMock.mockReset();
     useGetUsersQueryMock.mockReset();
     useGetEmployeeDetailsQueryMock.mockReset();
@@ -78,6 +84,10 @@ describe('pages/Details', () => {
     useParamsMock.mockReturnValue({ id: detailsViewedEmployee._id });
     useGetUsersQueryMock.mockReturnValue({ data: [detailsLoggedUser] });
     getLoggedInUserMock.mockReturnValue(detailsLoggedUser);
+    useGetHeaderPropsMock.mockReturnValue({
+      loggedUser: detailsLoggedUser,
+      isAdmin: true,
+    });
 
     useGetEmployeeDetailsQueryMock.mockReturnValue({
       data: undefined,
@@ -104,6 +114,10 @@ describe('pages/Details', () => {
     useParamsMock.mockReturnValue({ id: detailsViewedEmployee._id });
     useGetUsersQueryMock.mockReturnValue({ data: [detailsLoggedUser] });
     getLoggedInUserMock.mockReturnValue(detailsLoggedUser);
+    useGetHeaderPropsMock.mockReturnValue({
+      loggedUser: detailsLoggedUser,
+      isAdmin: true,
+    });
 
     useGetEmployeeDetailsQueryMock.mockReturnValue({
       data: undefined,

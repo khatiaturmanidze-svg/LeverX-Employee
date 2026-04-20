@@ -139,6 +139,11 @@
         color: $color-lighter-grey;
       }
     }
+
+    @include respond(phone) {
+      grid-template-columns: 1fr;
+      gap: $space-sm;
+    }
   }
   &__general {
     text-transform: uppercase;
@@ -224,5 +229,10 @@
 
 .form-error {
   color: $color-1000;
+  font-size: 1.6rem;
+}
+
+.form-success {
+  color: $color-purple;
   font-size: 1.6rem;
 }

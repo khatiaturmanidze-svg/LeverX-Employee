@@ -20,6 +20,8 @@ export default function HeaderTabs({
   const isAddressBook = location.pathname.startsWith('/main');
   const isSettings = location.pathname.startsWith('/roles');
   const isRequests = location.pathname.startsWith('/requests');
+  const isCreate = location.pathname.startsWith('/create');
+
   const tabs = [
     {
       id: 'address-book',
@@ -48,6 +50,18 @@ export default function HeaderTabs({
       onClick: () => navigate(`/requests/${loggedInUser?._id}`),
       className: 'header__requests-btn',
     },
+
+    ...(isAdmin
+      ? [
+          {
+            id: 'create',
+            label: 'Create',
+            isActive: isCreate,
+            onClick: () => navigate('/create'),
+            className: 'header__create-btn',
+          },
+        ]
+      : []),
   ];
 
   return (

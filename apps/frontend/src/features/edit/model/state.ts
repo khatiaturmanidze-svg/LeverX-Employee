@@ -10,7 +10,8 @@ import {
   SubmitSuccessAction,
 } from './state.types';
 
-import { IVisa } from '../../../types/type';
+import { IVisa } from '@/types/type';
+
 const defaultVisa: IVisa = {
   issuing_country: '',
   type: '',

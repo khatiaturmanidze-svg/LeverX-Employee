@@ -1,18 +1,14 @@
-// Elevation scale for layering UI elements.
-// Keep values sparse so new layers can be inserted without reshuffling
-// the whole stack.
-
 // Decorative pseudo-elements that should sit behind their parent content.
 $z-decorative-behind: -1;
 
 // Inline highlights or accents that should sit above surrounding content.
 $z-highlight: 1;
 
-// Full-screen overlays that dim the page while allowing higher-priority
+// Full screen overlays that dim the page
 // surfaces like drawers or menus to remain above them.
 $z-overlay: 999;
 
-// Persistent fixed chrome such as the global header.
+// global header.
 $z-header: 1000;
 
 // Temporary surfaces attached to the header, like the mobile navigation menu.

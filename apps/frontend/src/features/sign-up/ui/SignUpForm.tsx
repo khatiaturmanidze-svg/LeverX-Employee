@@ -37,46 +37,68 @@ export default function SignUpForm(): React.ReactElement {
 
   return (
     <form className="signup__form" onSubmit={handleSubmit}>
-      <input
-        type="text"
-        name="first_name"
-        placeholder="First Name"
-        className="signup__form-first user-input"
-        value={firstName}
-        onChange={(e) => setFirstName(e.target.value)}
-        required
-      />
+      <div className="sign__form-copy">
+        <p className="sign__form-kicker">Create your account</p>
+        <h2 className="sign__form-title">Join the LeverX workspace</h2>
+        <p className="sign__form-text">
+          Set up your profile once and keep employee services close at hand.
+        </p>
+      </div>
 
-      <input
-        type="text"
-        name="last_name"
-        placeholder="Last Name"
-        className="signup__form-last user-input"
-        value={lastName}
-        onChange={(e) => setLastName(e.target.value)}
-        required
-      />
+      <div className="sign__grid">
+        <label className="sign__field">
+          <span className="sign__field-label">First name</span>
+          <input
+            type="text"
+            name="first_name"
+            placeholder="First Name"
+            className="signup__form-first user-input"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            required
+          />
+        </label>
 
-      <input
-        type="email"
-        name="email"
-        placeholder="Email"
-        className="signup__form-email user-input"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-      />
+        <label className="sign__field">
+          <span className="sign__field-label">Last name</span>
+          <input
+            type="text"
+            name="last_name"
+            placeholder="Last Name"
+            className="signup__form-last user-input"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            required
+          />
+        </label>
+      </div>
 
-      <input
-        type="password"
-        name="password"
-        placeholder="Password"
-        className="signup__form-password user-input"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-      />
-      <div className="flex--horizontal">
+      <label className="sign__field">
+        <span className="sign__field-label">Work email</span>
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          className="signup__form-email user-input"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+      </label>
+
+      <label className="sign__field">
+        <span className="sign__field-label">Password</span>
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          className="signup__form-password user-input"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+      </label>
+      <div className="flex--horizontal sign__form-row">
         <input
           type="checkbox"
           id="signup__remember-me"

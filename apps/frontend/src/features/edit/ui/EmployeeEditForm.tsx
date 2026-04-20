@@ -1,5 +1,5 @@
 import React, { useReducer } from 'react';
-import { IEmployee, EmployeeUpdate, IVisa } from '../../../types/type';
+import { IEmployee, EmployeeUpdate, IVisa } from '@/types/type';
 import { DetailRow } from './DetailRow';
 import VisaEditorList from './VisaEditorList';
 import { getInitialState, validateEmployeeForm } from '../lib/helpers';

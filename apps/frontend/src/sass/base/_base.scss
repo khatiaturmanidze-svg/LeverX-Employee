@@ -31,7 +31,19 @@ html {
 
 body {
   font-family: sans-serif;
-  background-color: $color-lighter-grey;
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(165, 196, 253, 0.7),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at right center,
+      rgba(20, 80, 175, 0.12),
+      transparent 24%
+    ),
+    linear-gradient(135deg, #f5f9ff 0%, #edf3ff 48%, #f7f9fc 100%);
+  background-attachment: fixed;
 }
 
 button {

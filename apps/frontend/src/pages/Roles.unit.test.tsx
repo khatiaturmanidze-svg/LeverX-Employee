@@ -6,6 +6,7 @@ import Roles from './Roles';
 import {
   getLoggedInUserMock,
   rolesAllUsers,
+  useGetHeaderPropsMock,
   useGetUsersQueryMock,
   useRoleChangeMock,
 } from './test-mocks';
@@ -34,9 +35,14 @@ describe('pages/Roles', () => {
   beforeEach(() => {
     useGetUsersQueryMock.mockReset();
     getLoggedInUserMock.mockReset();
+    useGetHeaderPropsMock.mockReset();
     useRoleChangeMock.mockReset();
     useGetUsersQueryMock.mockReturnValue({ data: rolesAllUsers });
     getLoggedInUserMock.mockReturnValue(rolesAllUsers[0]);
+    useGetHeaderPropsMock.mockReturnValue({
+      loggedUser: rolesAllUsers[0],
+      isAdmin: true,
+    });
     useRoleChangeMock.mockReturnValue({
       handleRoleChange: vi.fn(),
       error: null,

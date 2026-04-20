@@ -61,3 +61,7 @@ export interface IEmployee {
 
   requests: IRequestData[];
 }
+
+export interface ICreatedEmployee extends IEmployee {
+  must_change_password: boolean;
+}

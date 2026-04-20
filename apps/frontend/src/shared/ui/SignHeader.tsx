@@ -6,11 +6,15 @@ export default function SignHeader(): React.ReactElement {
   const navigate = useNavigate();
 
   const isSignUpPage = location.pathname === '/signup';
+  const isNewPasswordPage = location.pathname === '/new-password';
 
   return (
     <header className="header-sign">
-      <Logo />
-      {!isSignUpPage && (
+      <div className="header-sign__brand">
+        <Logo />
+        <p className="header-sign__tagline">People operations, simplified</p>
+      </div>
+      {!isSignUpPage && !isNewPasswordPage && (
         <button
           className="header__btn-signup"
           onClick={() => navigate('/signup')}

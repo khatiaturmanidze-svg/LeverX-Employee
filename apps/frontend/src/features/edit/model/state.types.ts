@@ -1,5 +1,5 @@
 import { getEmployeeFormState } from '../lib/helpers';
-import { IVisa } from '../../../types/type';
+import { IVisa } from '@/types/type';
 
 export type EmployeeFormState = ReturnType<typeof getEmployeeFormState> & {
   visas: IVisa[];

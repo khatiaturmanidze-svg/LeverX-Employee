@@ -5,9 +5,11 @@ import type { EmployeeUpdate, IEmployee } from '../types/type';
 
 export const useGetUsersQueryMock = vi.fn();
 export const getLoggedInUserMock = vi.fn();
+export const useGetHeaderPropsMock = vi.fn();
 export const useRoleChangeMock = vi.fn();
 export const signInMock = vi.fn();
 export const signUpMock = vi.fn();
+export const setNewPasswordMock = vi.fn();
 export const navigateMock = vi.fn();
 export const getErrorMessageMock = vi.fn();
 export const useParamsMock = vi.fn();
@@ -46,10 +48,12 @@ export const pagesUsersApiModule = {
 
 export const pagesSharedLibModule = {
   getLoggedInUser: getLoggedInUserMock,
+  useGetHeaderProps: useGetHeaderPropsMock,
 };
 
 export const rolesSharedLibModule = {
   getLoggedInUser: getLoggedInUserMock,
+  useGetHeaderProps: useGetHeaderPropsMock,
   useRoleChange: useRoleChangeMock,
   useFilteredItems: (
     users: IEmployee[],
@@ -196,7 +200,7 @@ export const requestsFeatureFactory = async (
   const actual = await importOriginal();
   return {
     ...actual,
-    Managers: ({ loggedInUser }: { loggedInUser: IEmployee | undefined }) =>
+    Managers: ({ loggedInUser }: { loggedInUser: IEmployee | null }) =>
       React.createElement(
         'div',
         { 'data-testid': 'managers' },
@@ -221,6 +225,7 @@ export const detailsUsersApiModule = {
 
 export const detailsSharedLibModule = {
   getLoggedInUser: getLoggedInUserMock,
+  useGetHeaderProps: useGetHeaderPropsMock,
   canEdit: canEditMock,
 };
 
@@ -319,6 +324,10 @@ export const signInPageAuthApiModule = {
 
 export const signUpPageAuthApiModule = {
   useSignUpMutation: () => [signUpMock],
+};
+
+export const newPasswordPageAuthApiModule = {
+  useSetNewPasswordMutation: () => [setNewPasswordMock, { isLoading: false }],
 };
 
 export const authPagesSharedLibModule = {
