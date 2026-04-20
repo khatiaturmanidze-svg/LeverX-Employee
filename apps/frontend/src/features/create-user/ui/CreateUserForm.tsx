@@ -14,6 +14,9 @@ import {
 export default function CreateUserForm(): React.ReactElement {
   const [state, dispatch] = useReducer(createReducer, initialState);
   const [statusMessage, setStatusMessage] = useState<string>('');
+  const [statusType, setStatusType] = useState<'success' | 'error' | null>(
+    null,
+  );
   const [temporaryPassword, setTemporaryPassword] = useState<string>('');
   const [addUser, { isLoading }] = useAddUserMutation();
 
@@ -21,6 +24,7 @@ export default function CreateUserForm(): React.ReactElement {
     e.preventDefault();
     dispatch(submitStart());
     setStatusMessage('');
+    setStatusType(null);
     setTemporaryPassword('');
 
     const validationErrors = validateCreateUserForm(state.formData);
@@ -46,6 +50,7 @@ export default function CreateUserForm(): React.ReactElement {
       zoom_link: state.formData.zoom_link.trim() || undefined,
       citizenship: state.formData.citizenship.trim() || undefined,
       first_native_name: state.formData.first_native_name.trim() || undefined,
+      middle_native_name: state.formData.middle_native_name.trim() || undefined,
       last_native_name: state.formData.last_native_name.trim() || undefined,
       date_birth: state.formData.date_birth
         ? (() => {
@@ -63,9 +68,11 @@ export default function CreateUserForm(): React.ReactElement {
       dispatch(submitSuccess());
       setTemporaryPassword(result.temporaryPassword);
       setStatusMessage('Employee created successfully.');
+      setStatusType('success');
     } catch (err) {
       dispatch(submitError({ submit: getErrorMessage(err) }));
       setStatusMessage(getErrorMessage(err));
+      setStatusType('error');
     }
   };
 
@@ -287,6 +294,25 @@ export default function CreateUserForm(): React.ReactElement {
 
       <FormGroup
         className="details-section__row"
+        label="Middle Native Name"
+        htmlFor="middle_native_name"
+        icon="user-icon"
+      >
+        <InputField
+          id="middle_native_name"
+          name="middle_native_name"
+          type="text"
+          value={state.formData.middle_native_name}
+          placeholder="Optional"
+          onChange={(e) =>
+            dispatch(setField('middle_native_name', e.target.value))
+          }
+          error={state.errors.middle_native_name}
+        />
+      </FormGroup>
+
+      <FormGroup
+        className="details-section__row"
         label="Last Native Name"
         htmlFor="last_native_name"
         icon="user-icon"
@@ -360,7 +386,11 @@ export default function CreateUserForm(): React.ReactElement {
         </button>
       </div>
 
-      {statusMessage && <p className="form-error">{statusMessage}</p>}
+      {statusMessage && (
+        <p className={statusType === 'success' ? 'form-success' : 'form-error'}>
+          {statusMessage}
+        </p>
+      )}
       {temporaryPassword && (
         <p className="create-user-form__temporary-password">
           Temporary password: {temporaryPassword}

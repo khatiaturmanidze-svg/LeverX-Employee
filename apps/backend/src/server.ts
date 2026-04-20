@@ -515,7 +515,7 @@ app.post(
     };
 
     const newEmployee: IEmployee = {
-      _id: (db.data.employees.length + 1).toString(),
+      _id: uuidv4(),
       role: role || 'Employee',
       user_avatar: user_avatar || '/users/dumplinh.jpg',
       first_name,

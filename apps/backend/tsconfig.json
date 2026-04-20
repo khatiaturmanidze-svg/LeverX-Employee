@@ -5,7 +5,6 @@
     "moduleResolution": "NodeNext",
     "target": "ES2022",
     "rootDir": "src",
-
     "outDir": "dist",
     "allowJs": true,
     "checkJs": false

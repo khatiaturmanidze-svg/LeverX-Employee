@@ -15,6 +15,7 @@ export type EmployeeFormState = {
   zoom_link: string;
   citizenship: string;
   first_native_name: string;
+  middle_native_name: string;
   last_native_name: string;
   date_birth: string;
   manager_id: string;

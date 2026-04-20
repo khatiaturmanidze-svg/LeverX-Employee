@@ -16,6 +16,7 @@ export const initialState: FormState = {
     zoom_link: '',
     citizenship: '',
     first_native_name: '',
+    middle_native_name: '',
     last_native_name: '',
     date_birth: '',
     manager_id: '',

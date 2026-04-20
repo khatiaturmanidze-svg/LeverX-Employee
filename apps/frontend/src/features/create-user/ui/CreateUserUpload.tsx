@@ -8,6 +8,9 @@ export default function CreateUserUpload(): React.ReactElement {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [statusMessage, setStatusMessage] = useState<string>('');
+  const [statusType, setStatusType] = useState<'success' | 'error' | null>(
+    null,
+  );
   const [importedUsers, setImportedUsers] = useState<UploadedUserResult[]>([]);
   const [skippedRows, setSkippedRows] = useState<UploadSpreadsheetError[]>([]);
   const [uploadSpreadsheet, { isLoading }] = useUploadSpreadsheetMutation();
@@ -24,10 +27,12 @@ export default function CreateUserUpload(): React.ReactElement {
       setStatusMessage(
         `Imported ${result.count} user${result.count === 1 ? '' : 's'}${result.skippedRows.length > 0 ? `, skipped ${result.skippedRows.length}` : ''}.`,
       );
+      setStatusType('success');
     } catch (error) {
       setImportedUsers([]);
       setSkippedRows([]);
       setStatusMessage(getErrorMessage(error));
+      setStatusType('error');
     }
   };
 
@@ -93,7 +98,11 @@ export default function CreateUserUpload(): React.ReactElement {
         {isLoading ? 'Uploading...' : 'Upload a spreadsheet'}
       </button>
 
-      {statusMessage && <p className="form-error">{statusMessage}</p>}
+      {statusMessage && (
+        <p className={statusType === 'success' ? 'form-success' : 'form-error'}>
+          {statusMessage}
+        </p>
+      )}
       {importedUsers.length > 0 && (
         <div className="create-user-upload__results">
           <h3 className="create-user-upload__results-title">Imported Users</h3>

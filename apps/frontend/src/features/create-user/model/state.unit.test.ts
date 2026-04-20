@@ -29,6 +29,7 @@ const createInitialState = (): FormState => ({
     zoom_link: 'https://zoom.us/j/123',
     citizenship: 'GE',
     first_native_name: 'John',
+    middle_native_name: 'Middle',
     last_native_name: 'Doe',
     date_birth: '1992-05-10',
     manager_id: '1',
