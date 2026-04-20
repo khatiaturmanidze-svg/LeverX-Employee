@@ -62,33 +62,6 @@ export interface IEmployee {
   requests: IRequestData[];
 }
 
-export interface ICreatedEmployee {
-  _id: string;
-  role: string;
-  user_avatar: string;
+export interface ICreatedEmployee extends IEmployee {
   must_change_password: boolean;
-
-  first_name: string;
-  last_name: string;
-  first_native_name?: string;
-  middle_native_name?: string;
-  last_native_name?: string;
-
-  department: string;
-  building: string;
-  room: string;
-  desk_number?: number | null;
-  isRemoteWork: boolean;
-
-  phone?: string;
-  email: string;
-  zoom_id?: string;
-  zoom_link?: string;
-
-  citizenship?: string;
-  date_birth?: IDateOfBirth;
-  manager?: IManager;
-  visa?: IVisa[];
-
-  requests: IRequestData[];
 }
