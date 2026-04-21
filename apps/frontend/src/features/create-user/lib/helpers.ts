@@ -1,4 +1,11 @@
-import { FormState } from '../model/state.types';
+import { CreateUserPayload } from '@/types/type';
+import {
+  EmployeeFormState,
+  FormState,
+  SubmitState,
+} from '../model/state.types';
+import { getErrorMessage } from '@/shared';
+import { useAddUserMutation } from '../api/createUserApi';
 
 export const initialState: FormState = {
   formData: {
@@ -22,8 +29,13 @@ export const initialState: FormState = {
     manager_id: '',
     visas: [],
   },
-  isSubmitting: false,
+};
+
+export const initialSubmitState: SubmitState = {
   errors: {},
+  statusMessage: '',
+  statusType: null,
+  temporaryPassword: '',
 };
 
 export const validateCreateUserForm = (
@@ -68,3 +80,66 @@ export const validateCreateUserForm = (
 
   return errors;
 };
+
+export const buildCreateUserPayload = (
+  formData: EmployeeFormState,
+): CreateUserPayload => ({
+  first_name: formData.first_name.trim(),
+  last_name: formData.last_name.trim(),
+  role: formData.role,
+  department: formData.department.trim(),
+  building: formData.building.trim(),
+  room: formData.room.trim(),
+  desk_number: formData.desk_number ? Number(formData.desk_number) : null,
+  isRemoteWork: formData.isRemoteWork,
+  phone: formData.phone.trim() || undefined,
+  email: formData.email.trim(),
+  zoom_id: formData.zoom_id.trim() || undefined,
+  zoom_link: formData.zoom_link.trim() || undefined,
+  citizenship: formData.citizenship.trim() || undefined,
+  first_native_name: formData.first_native_name.trim() || undefined,
+  middle_native_name: formData.middle_native_name.trim() || undefined,
+  last_native_name: formData.last_native_name.trim() || undefined,
+  date_birth: formData.date_birth
+    ? (() => {
+        const [year, month, day] = formData.date_birth.split('-').map(Number);
+        return { year, month, day };
+      })()
+    : undefined,
+  visa: formData.visas,
+});
+
+export async function submitCreateUser(
+  formState: EmployeeFormState,
+  addUser: ReturnType<typeof useAddUserMutation>[0],
+): Promise<SubmitState> {
+  const validationErrors = validateCreateUserForm(formState);
+
+  if (Object.keys(validationErrors).length > 0) {
+    return {
+      ...initialSubmitState,
+      errors: validationErrors,
+    };
+  }
+
+  try {
+    const result = await addUser(buildCreateUserPayload(formState)).unwrap();
+
+    return {
+      ...initialSubmitState,
+      statusMessage: 'Employee created successfully.',
+      statusType: 'success',
+      temporaryPassword: result.temporaryPassword,
+    };
+  } catch (err) {
+    const message = getErrorMessage(err);
+
+    return {
+      ...initialSubmitState,
+      errors: { submit: message },
+      statusMessage: message,
+      statusType: 'error',
+      temporaryPassword: '',
+    };
+  }
+}

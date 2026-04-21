@@ -1,12 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  createReducer,
-  setField,
-  setVisa,
-  submitError,
-  submitStart,
-  submitSuccess,
-} from './state';
+import { createReducer, setField, setVisa } from './state';
 import {
   EmployeeCreateAction,
   EmployeeCreateActionType,
@@ -42,8 +35,6 @@ const createInitialState = (): FormState => ({
       },
     ],
   },
-  isSubmitting: false,
-  errors: {},
 });
 
 describe('create-user state reducer/actions', () => {
@@ -61,24 +52,6 @@ describe('create-user state reducer/actions', () => {
       index: 0,
       field: 'type',
       value: 'Business',
-    });
-  });
-
-  it('submitStart and submitSuccess action creators return expected types', () => {
-    expect(submitStart()).toEqual({
-      type: EmployeeCreateActionType.SUBMIT_START,
-    });
-    expect(submitSuccess()).toEqual({
-      type: EmployeeCreateActionType.SUBMIT_SUCCESS,
-    });
-  });
-
-  it('submitError action creator stores errors', () => {
-    const errors = { email: 'Already used' };
-
-    expect(submitError(errors)).toEqual({
-      type: EmployeeCreateActionType.SUBMIT_ERROR,
-      errors,
     });
   });
 
@@ -111,39 +84,6 @@ describe('create-user state reducer/actions', () => {
       start_date: '',
       end_date: '',
     });
-  });
-
-  it('SUBMIT_START sets submitting state', () => {
-    const state = createReducer(createInitialState(), submitStart());
-
-    expect(state.isSubmitting).toBe(true);
-  });
-
-  it('SUBMIT_SUCCESS clears submitting state and errors', () => {
-    const state = createReducer(
-      {
-        ...createInitialState(),
-        isSubmitting: true,
-        errors: { email: 'Wrong' },
-      },
-      submitSuccess(),
-    );
-
-    expect(state.isSubmitting).toBe(false);
-    expect(state.errors).toEqual({});
-  });
-
-  it('SUBMIT_ERROR stores errors and clears submitting state', () => {
-    const state = createReducer(
-      {
-        ...createInitialState(),
-        isSubmitting: true,
-      },
-      submitError({ submit: 'Failed' }),
-    );
-
-    expect(state.isSubmitting).toBe(false);
-    expect(state.errors).toEqual({ submit: 'Failed' });
   });
 
   it('returns current state for unknown action types', () => {

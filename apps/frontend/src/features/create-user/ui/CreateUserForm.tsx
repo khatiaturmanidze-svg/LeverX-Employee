@@ -1,83 +1,24 @@
-import React, { useReducer, useState } from 'react';
-import { getErrorMessage } from '@shared/lib';
+import React, { useActionState, useReducer } from 'react';
 import { FormGroup, InputField } from '@shared/ui';
 import { useAddUserMutation } from '../api/createUserApi';
-import { initialState, validateCreateUserForm } from '../lib/helpers';
 import {
-  createReducer,
-  setField,
-  submitError,
-  submitStart,
-  submitSuccess,
-} from '../model/state';
+  initialState,
+  initialSubmitState,
+  submitCreateUser,
+} from '../lib/helpers';
+import { createReducer, setField } from '../model/state';
+import { SubmitState } from '../model/state.types';
 
 export default function CreateUserForm(): React.ReactElement {
   const [state, dispatch] = useReducer(createReducer, initialState);
-  const [statusMessage, setStatusMessage] = useState<string>('');
-  const [statusType, setStatusType] = useState<'success' | 'error' | null>(
-    null,
-  );
-  const [temporaryPassword, setTemporaryPassword] = useState<string>('');
   const [addUser, { isLoading }] = useAddUserMutation();
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    dispatch(submitStart());
-    setStatusMessage('');
-    setStatusType(null);
-    setTemporaryPassword('');
-
-    const validationErrors = validateCreateUserForm(state.formData);
-    if (Object.keys(validationErrors).length > 0) {
-      dispatch(submitError(validationErrors));
-      return;
-    }
-
-    const payload = {
-      first_name: state.formData.first_name.trim(),
-      last_name: state.formData.last_name.trim(),
-      role: state.formData.role,
-      department: state.formData.department.trim(),
-      building: state.formData.building.trim(),
-      room: state.formData.room.trim(),
-      desk_number: state.formData.desk_number
-        ? Number(state.formData.desk_number)
-        : null,
-      isRemoteWork: state.formData.isRemoteWork,
-      phone: state.formData.phone.trim() || undefined,
-      email: state.formData.email.trim(),
-      zoom_id: state.formData.zoom_id.trim() || undefined,
-      zoom_link: state.formData.zoom_link.trim() || undefined,
-      citizenship: state.formData.citizenship.trim() || undefined,
-      first_native_name: state.formData.first_native_name.trim() || undefined,
-      middle_native_name: state.formData.middle_native_name.trim() || undefined,
-      last_native_name: state.formData.last_native_name.trim() || undefined,
-      date_birth: state.formData.date_birth
-        ? (() => {
-            const [year, month, day] = state.formData.date_birth
-              .split('-')
-              .map(Number);
-            return { year, month, day };
-          })()
-        : undefined,
-      visa: state.formData.visas,
-    };
-
-    try {
-      const result = await addUser(payload).unwrap();
-      dispatch(submitSuccess());
-      setTemporaryPassword(result.temporaryPassword);
-      setStatusMessage('Employee created successfully.');
-      setStatusType('success');
-    } catch (err) {
-      dispatch(submitError({ submit: getErrorMessage(err) }));
-      setStatusMessage(getErrorMessage(err));
-      setStatusType('error');
-    }
-  };
+  const [submitState, submitAction, isPending] = useActionState<
+    SubmitState,
+    FormData
+  >(async () => submitCreateUser(state.formData, addUser), initialSubmitState);
 
   return (
-    <form className="create-user-form card" onSubmit={handleSubmit}>
+    <form className="create-user-form card" action={submitAction}>
       <h2 className="create-user-form__title">Employee Information</h2>
 
       <FormGroup
@@ -94,7 +35,7 @@ export default function CreateUserForm(): React.ReactElement {
           placeholder="Enter first name"
           autoComplete="given-name"
           onChange={(e) => dispatch(setField('first_name', e.target.value))}
-          error={state.errors.first_name}
+          error={submitState.errors.first_name}
         />
       </FormGroup>
 
@@ -112,7 +53,7 @@ export default function CreateUserForm(): React.ReactElement {
           placeholder="Enter last name"
           autoComplete="family-name"
           onChange={(e) => dispatch(setField('last_name', e.target.value))}
-          error={state.errors.last_name}
+          error={submitState.errors.last_name}
         />
       </FormGroup>
 
@@ -132,7 +73,9 @@ export default function CreateUserForm(): React.ReactElement {
           <option value="HR">HR</option>
           <option value="Admin">Admin</option>
         </select>
-        {state.errors.role && <p className="form-error">{state.errors.role}</p>}
+        {submitState.errors.role && (
+          <p className="form-error">{submitState.errors.role}</p>
+        )}
       </FormGroup>
 
       <FormGroup
@@ -148,7 +91,7 @@ export default function CreateUserForm(): React.ReactElement {
           value={state.formData.department}
           placeholder="Enter department"
           onChange={(e) => dispatch(setField('department', e.target.value))}
-          error={state.errors.department}
+          error={submitState.errors.department}
         />
       </FormGroup>
 
@@ -166,7 +109,7 @@ export default function CreateUserForm(): React.ReactElement {
           placeholder="name@company.com"
           autoComplete="email"
           onChange={(e) => dispatch(setField('email', e.target.value))}
-          error={state.errors.email}
+          error={submitState.errors.email}
         />
       </FormGroup>
 
@@ -184,7 +127,7 @@ export default function CreateUserForm(): React.ReactElement {
           placeholder="Enter phone number"
           autoComplete="tel"
           onChange={(e) => dispatch(setField('phone', e.target.value))}
-          error={state.errors.phone}
+          error={submitState.errors.phone}
         />
       </FormGroup>
 
@@ -201,7 +144,7 @@ export default function CreateUserForm(): React.ReactElement {
           value={state.formData.building}
           placeholder="Office building"
           onChange={(e) => dispatch(setField('building', e.target.value))}
-          error={state.errors.building}
+          error={submitState.errors.building}
         />
       </FormGroup>
 
@@ -218,7 +161,7 @@ export default function CreateUserForm(): React.ReactElement {
           value={state.formData.room}
           placeholder="Room number"
           onChange={(e) => dispatch(setField('room', e.target.value))}
-          error={state.errors.room}
+          error={submitState.errors.room}
         />
       </FormGroup>
 
@@ -235,7 +178,7 @@ export default function CreateUserForm(): React.ReactElement {
           value={state.formData.desk_number}
           placeholder="Desk number"
           onChange={(e) => dispatch(setField('desk_number', e.target.value))}
-          error={state.errors.desk_number}
+          error={submitState.errors.desk_number}
         />
       </FormGroup>
 
@@ -252,7 +195,7 @@ export default function CreateUserForm(): React.ReactElement {
           value={state.formData.zoom_id}
           placeholder="Zoom ID"
           onChange={(e) => dispatch(setField('zoom_id', e.target.value))}
-          error={state.errors.zoom_id}
+          error={submitState.errors.zoom_id}
         />
       </FormGroup>
 
@@ -269,7 +212,7 @@ export default function CreateUserForm(): React.ReactElement {
           value={state.formData.zoom_link}
           placeholder="https://..."
           onChange={(e) => dispatch(setField('zoom_link', e.target.value))}
-          error={state.errors.zoom_link}
+          error={submitState.errors.zoom_link}
         />
       </FormGroup>
 
@@ -288,7 +231,7 @@ export default function CreateUserForm(): React.ReactElement {
           onChange={(e) =>
             dispatch(setField('first_native_name', e.target.value))
           }
-          error={state.errors.first_native_name}
+          error={submitState.errors.first_native_name}
         />
       </FormGroup>
 
@@ -307,7 +250,7 @@ export default function CreateUserForm(): React.ReactElement {
           onChange={(e) =>
             dispatch(setField('middle_native_name', e.target.value))
           }
-          error={state.errors.middle_native_name}
+          error={submitState.errors.middle_native_name}
         />
       </FormGroup>
 
@@ -326,7 +269,7 @@ export default function CreateUserForm(): React.ReactElement {
           onChange={(e) =>
             dispatch(setField('last_native_name', e.target.value))
           }
-          error={state.errors.last_native_name}
+          error={submitState.errors.last_native_name}
         />
       </FormGroup>
 
@@ -343,7 +286,7 @@ export default function CreateUserForm(): React.ReactElement {
           value={state.formData.citizenship}
           placeholder="Optional"
           onChange={(e) => dispatch(setField('citizenship', e.target.value))}
-          error={state.errors.citizenship}
+          error={submitState.errors.citizenship}
         />
       </FormGroup>
 
@@ -359,7 +302,7 @@ export default function CreateUserForm(): React.ReactElement {
           type="date"
           value={state.formData.date_birth}
           onChange={(e) => dispatch(setField('date_birth', e.target.value))}
-          error={state.errors.date_birth}
+          error={submitState.errors.date_birth}
         />
       </FormGroup>
 
@@ -380,20 +323,24 @@ export default function CreateUserForm(): React.ReactElement {
         <button
           type="submit"
           className="btn-submit create-user-form__submit"
-          disabled={state.isSubmitting || isLoading}
+          disabled={isPending || isLoading}
         >
-          {state.isSubmitting || isLoading ? 'Creating...' : 'Create Employee'}
+          {isPending || isLoading ? 'Creating...' : 'Create Employee'}
         </button>
       </div>
 
-      {statusMessage && (
-        <p className={statusType === 'success' ? 'form-success' : 'form-error'}>
-          {statusMessage}
+      {submitState.statusMessage && (
+        <p
+          className={
+            submitState.statusType === 'success' ? 'form-success' : 'form-error'
+          }
+        >
+          {submitState.statusMessage}
         </p>
       )}
-      {temporaryPassword && (
+      {submitState.temporaryPassword && (
         <p className="create-user-form__temporary-password">
-          Temporary password: {temporaryPassword}
+          Temporary password: {submitState.temporaryPassword}
         </p>
       )}
     </form>

@@ -24,16 +24,18 @@ export type EmployeeFormState = {
 
 export interface FormState {
   formData: EmployeeFormState;
-  isSubmitting: boolean;
+}
+
+export interface SubmitState {
   errors: Record<string, string>;
+  statusMessage: string;
+  statusType: 'success' | 'error' | null;
+  temporaryPassword: string;
 }
 
 export enum EmployeeCreateActionType {
   SET_FIELD = 'SET_FIELD',
   SET_VISA = 'SET_VISA',
-  SUBMIT_START = 'SUBMIT_START',
-  SUBMIT_SUCCESS = 'SUBMIT_SUCCESS',
-  SUBMIT_ERROR = 'SUBMIT_ERROR',
 }
 
 export type SetFieldAction<
@@ -51,22 +53,4 @@ export type SetVisaAction<K extends keyof IVisa = keyof IVisa> = {
   value: IVisa[K];
 };
 
-export type SubmitStartAction = {
-  type: EmployeeCreateActionType.SUBMIT_START;
-};
-
-export type SubmitSuccessAction = {
-  type: EmployeeCreateActionType.SUBMIT_SUCCESS;
-};
-
-export type SubmitErrorAction = {
-  type: EmployeeCreateActionType.SUBMIT_ERROR;
-  errors: Record<string, string>;
-};
-
-export type EmployeeCreateAction =
-  | SetFieldAction
-  | SetVisaAction
-  | SubmitStartAction
-  | SubmitSuccessAction
-  | SubmitErrorAction;
+export type EmployeeCreateAction = SetFieldAction | SetVisaAction;
