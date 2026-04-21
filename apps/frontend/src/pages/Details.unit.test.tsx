@@ -8,12 +8,10 @@ import {
   detailsLoggedUser,
   detailsViewedEmployee,
   getLoggedInUserMock,
-  updateEmployeeMock,
   useGetHeaderPropsMock,
   useGetEmployeeDetailsQueryMock,
   useGetUsersQueryMock,
   useParamsMock,
-  useUpdateEmployeeMutationMock,
 } from './test-mocks';
 
 vi.mock(
@@ -55,29 +53,17 @@ describe('pages/Details', () => {
       isLoading: false,
       isError: false,
     });
-
-    updateEmployeeMock.mockReset();
-    updateEmployeeMock.mockReturnValue({
-      unwrap: () => Promise.resolve({}),
-    });
-    useUpdateEmployeeMutationMock.mockReturnValue([updateEmployeeMock]);
   };
 
   beforeEach(() => {
     localStorage.clear();
     sessionStorage.clear();
-    updateEmployeeMock.mockReset();
-    updateEmployeeMock.mockReturnValue({
-      unwrap: () => Promise.resolve({}),
-    });
-    useUpdateEmployeeMutationMock.mockReturnValue([updateEmployeeMock]);
     canEditMock.mockReset();
     getLoggedInUserMock.mockReset();
     useGetHeaderPropsMock.mockReset();
     useParamsMock.mockReset();
     useGetUsersQueryMock.mockReset();
     useGetEmployeeDetailsQueryMock.mockReset();
-    // useUpdateEmployeeMutationMock is set above to avoid crashes on destructuring.
   });
 
   it('renders loading state while employee details are loading', async () => {
@@ -175,7 +161,7 @@ describe('pages/Details', () => {
     });
   });
 
-  it('copies link when clicked and then saves successfully in edit mode', async () => {
+  it('copies link when clicked and then exits edit mode after save success', async () => {
     setupBaseMocks();
     canEditMock.mockReturnValue(true);
     localStorage.setItem('loggedInUser', 'admin@example.com');
@@ -218,11 +204,6 @@ describe('pages/Details', () => {
 
     await act(async () => {
       saveBtn.click();
-    });
-
-    expect(updateEmployeeMock).toHaveBeenCalledWith({
-      id: detailsViewedEmployee._id,
-      update: { department: 'IT-Updated' },
     });
 
     // After save succeeds, Details should exit edit mode.

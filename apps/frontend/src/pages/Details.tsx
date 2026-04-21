@@ -3,12 +3,8 @@ import { Header, AvatarSection, EmployeeView } from '@shared/ui';
 import { canEdit } from '@shared/lib';
 import { useParams } from 'react-router-dom';
 import { EmployeeEditForm } from '@features/edit';
-import {
-  useGetEmployeeDetailsQuery,
-  useUpdateEmployeeMutation,
-} from '../features/usersApi';
+import { useGetEmployeeDetailsQuery } from '../features/usersApi';
 import { useGetHeaderProps } from '@shared/lib';
-import { EmployeeUpdate } from '../types/type';
 
 export default function Details(): React.ReactElement {
   const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -21,7 +17,6 @@ export default function Details(): React.ReactElement {
     isLoading: employeeLoading,
     isError,
   } = useGetEmployeeDetailsQuery(id!, { skip: !id });
-  const [updateEmployee] = useUpdateEmployeeMutation();
 
   const canUserEdit = useMemo(() => {
     if (!loggedUser || !viewedEmployee) return false;
@@ -43,15 +38,6 @@ export default function Details(): React.ReactElement {
     ) {
       navigator.clipboard.writeText(window.location.href);
     }
-  };
-
-  const handleSaveSuccess = async (updated: EmployeeUpdate) => {
-    if (!viewedEmployee) return;
-    await updateEmployee({
-      id: viewedEmployee._id,
-      update: updated,
-    }).unwrap();
-    setIsEditing(false);
   };
 
   if (employeeLoading) {
@@ -89,11 +75,7 @@ export default function Details(): React.ReactElement {
         />
 
         {isEditing ? (
-          <EmployeeEditForm
-            user={viewedEmployee}
-            onCancel={handleExitEdit}
-            onSaveSuccess={handleSaveSuccess}
-          />
+          <EmployeeEditForm user={viewedEmployee} onCancel={handleExitEdit} />
         ) : (
           <EmployeeView user={viewedEmployee} />
         )}

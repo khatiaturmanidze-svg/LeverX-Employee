@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { validateEmployeeForm } from './helpers';
+import {
+  buildUpdatePayload,
+  initialSubmitState,
+  validateEmployeeForm,
+} from './helpers';
 import { EmployeeFormState } from '../model/state.types';
 
 describe('validateEmployeeForm', () => {
@@ -191,5 +195,29 @@ describe('validateEmployeeForm', () => {
     expect(errors.email).toBeDefined();
     expect(errors.desk_number).toBeDefined();
     expect(errors.date_birth).toBeDefined();
+  });
+
+  it('provides expected initial submit state', () => {
+    expect(initialSubmitState.errors).toEqual({});
+    expect(initialSubmitState.statusMessage).toBe('');
+    expect(initialSubmitState.statusType).toBeNull();
+  });
+
+  it('builds update payload from edit form data', () => {
+    expect(buildUpdatePayload(validFormData)).toEqual({
+      department: 'IT',
+      building: 'A',
+      room: '101',
+      desk_number: 5,
+      phone: '+1234567890',
+      email: 'test@example.com',
+      zoom_id: 'zoom123',
+      zoom_link: 'https://zoom.us/j/123',
+      citizenship: 'US',
+      first_native_name: 'John',
+      last_native_name: 'Doe',
+      date_birth: { year: 1990, month: 5, day: 15 },
+      manager: 'manager1',
+    });
   });
 });

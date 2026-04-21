@@ -3,7 +3,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { EmployeeEditForm } from './EmployeeEditForm';
-import { EmployeeUpdate, IEmployee } from '../../../types/type';
+import { IEmployee } from '../../../types/type';
+import * as usersApi from '@/features/usersApi';
 
 const baseUser: IEmployee = {
   _id: 'emp-1',
@@ -28,19 +29,24 @@ const baseUser: IEmployee = {
 };
 
 describe('EmployeeEditForm', () => {
+  const updateEmployeeMock = vi.fn();
+
   it('renders sections/buttons and calls onCancel', async () => {
     const onCancel = vi.fn();
-    const onSaveSuccess = vi.fn();
 
     const container = document.createElement('div');
     const root = createRoot(container);
+
+    vi.spyOn(usersApi, 'useUpdateEmployeeMutation').mockReturnValue([
+      updateEmployeeMock,
+      { isLoading: false },
+    ] as unknown as ReturnType<typeof usersApi.useUpdateEmployeeMutation>);
 
     await act(async () => {
       root.render(
         React.createElement(EmployeeEditForm, {
           user: baseUser,
           onCancel,
-          onSaveSuccess,
         }),
       );
     });
@@ -64,12 +70,17 @@ describe('EmployeeEditForm', () => {
     });
   });
 
-  it('shows validation error and does not call onSaveSuccess when email is invalid', async () => {
+  it('shows validation error and does not call updateEmployee when email is invalid', async () => {
     const onCancel = vi.fn();
-    const onSaveSuccess = vi.fn();
 
     const container = document.createElement('div');
     const root = createRoot(container);
+    updateEmployeeMock.mockReset();
+
+    vi.spyOn(usersApi, 'useUpdateEmployeeMutation').mockReturnValue([
+      updateEmployeeMock,
+      { isLoading: false },
+    ] as unknown as ReturnType<typeof usersApi.useUpdateEmployeeMutation>);
 
     const invalidEmailUser: IEmployee = {
       ...baseUser,
@@ -81,7 +92,6 @@ describe('EmployeeEditForm', () => {
         React.createElement(EmployeeEditForm, {
           user: invalidEmailUser,
           onCancel,
-          onSaveSuccess,
         }),
       );
     });
@@ -97,7 +107,7 @@ describe('EmployeeEditForm', () => {
       );
     });
 
-    expect(onSaveSuccess).not.toHaveBeenCalled();
+    expect(updateEmployeeMock).not.toHaveBeenCalled();
     expect(container.textContent).toContain('Email is required');
 
     await act(async () => {
@@ -105,35 +115,25 @@ describe('EmployeeEditForm', () => {
     });
   });
 
-  it('submits payload with correctly mapped fields', async () => {
+  it('submits payload with correctly mapped fields and closes on success', async () => {
     const onCancel = vi.fn();
-    const onSaveSuccess = vi.fn();
-
     const container = document.createElement('div');
     const root = createRoot(container);
+    updateEmployeeMock.mockReset();
+    updateEmployeeMock.mockReturnValue({
+      unwrap: () => Promise.resolve({}),
+    });
 
-    const expectedPayload: EmployeeUpdate = {
-      department: baseUser.department,
-      building: baseUser.building,
-      room: baseUser.room,
-      desk_number: 7,
-      phone: baseUser.phone,
-      email: baseUser.email,
-      zoom_id: baseUser.zoom_id,
-      zoom_link: baseUser.zoom_link,
-      citizenship: baseUser.citizenship,
-      first_native_name: baseUser.first_native_name,
-      last_native_name: baseUser.last_native_name,
-      date_birth: { year: 1990, month: 5, day: 15 },
-      manager: 'manager-1',
-    };
+    vi.spyOn(usersApi, 'useUpdateEmployeeMutation').mockReturnValue([
+      updateEmployeeMock,
+      { isLoading: false },
+    ] as unknown as ReturnType<typeof usersApi.useUpdateEmployeeMutation>);
 
     await act(async () => {
       root.render(
         React.createElement(EmployeeEditForm, {
           user: baseUser,
           onCancel,
-          onSaveSuccess,
         }),
       );
     });
@@ -149,8 +149,26 @@ describe('EmployeeEditForm', () => {
       );
     });
 
-    expect(onSaveSuccess).toHaveBeenCalledTimes(1);
-    expect(onSaveSuccess).toHaveBeenCalledWith(expectedPayload);
+    expect(updateEmployeeMock).toHaveBeenCalledTimes(1);
+    expect(updateEmployeeMock).toHaveBeenCalledWith({
+      id: 'emp-1',
+      update: {
+        department: baseUser.department,
+        building: baseUser.building,
+        room: baseUser.room,
+        desk_number: 7,
+        phone: baseUser.phone,
+        email: baseUser.email,
+        zoom_id: baseUser.zoom_id,
+        zoom_link: baseUser.zoom_link,
+        citizenship: baseUser.citizenship,
+        first_native_name: baseUser.first_native_name,
+        last_native_name: baseUser.last_native_name,
+        date_birth: { year: 1990, month: 5, day: 15 },
+        manager: 'manager-1',
+      },
+    });
+    expect(onCancel).toHaveBeenCalledTimes(1);
 
     await act(async () => {
       root.unmount();

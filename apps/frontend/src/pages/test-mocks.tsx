@@ -1,7 +1,7 @@
 import React from 'react';
 import { vi } from 'vitest';
 import type { AdvancedSearchCriteria, SearchCriteria } from '@features/search';
-import type { EmployeeUpdate, IEmployee } from '../types/type';
+import type { IEmployee } from '../types/type';
 
 export const useGetUsersQueryMock = vi.fn();
 export const getLoggedInUserMock = vi.fn();
@@ -279,13 +279,7 @@ export const detailsSharedUiFactory = async (
 };
 
 export const detailsFeatureModule = {
-  EmployeeEditForm: ({
-    onCancel,
-    onSaveSuccess,
-  }: {
-    onCancel: () => void;
-    onSaveSuccess: (updated: EmployeeUpdate) => Promise<void> | void;
-  }) =>
+  EmployeeEditForm: ({ onCancel }: { onCancel: () => void }) =>
     React.createElement('div', { 'data-testid': 'employee-edit-form' }, [
       React.createElement(
         'button',
@@ -297,10 +291,7 @@ export const detailsFeatureModule = {
         {
           key: 'save-success',
           type: 'button',
-          onClick: () =>
-            onSaveSuccess({
-              department: 'IT-Updated',
-            }),
+          onClick: onCancel,
         },
         'Save success',
       ),

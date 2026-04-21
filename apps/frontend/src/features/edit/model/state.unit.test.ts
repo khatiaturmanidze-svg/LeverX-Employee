@@ -1,12 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  editReducer,
-  setField,
-  setVisa,
-  submitError,
-  submitStart,
-  submitSuccess,
-} from './state';
+import { editReducer, setField, setVisa } from './state';
 import {
   EmployeeEditAction,
   EmployeeEditActionType,
@@ -37,8 +30,6 @@ const createInitialState = (): FormState => ({
       },
     ],
   },
-  isSubmitting: false,
-  errors: {},
 });
 
 describe('edit state reducer/actions', () => {
@@ -63,28 +54,6 @@ describe('edit state reducer/actions', () => {
     });
   });
 
-  it('submitStart action creator returns the correct type', () => {
-    expect(submitStart()).toEqual({
-      type: EmployeeEditActionType.SUBMIT_START,
-    });
-  });
-
-  it('submitSuccess action creator returns the correct type', () => {
-    expect(submitSuccess()).toEqual({
-      type: EmployeeEditActionType.SUBMIT_SUCCESS,
-    });
-  });
-
-  it('submitError action creator returns the correct shape', () => {
-    const errors = { email: 'Invalid email' };
-    const action = submitError(errors);
-
-    expect(action).toEqual({
-      type: EmployeeEditActionType.SUBMIT_ERROR,
-      errors,
-    });
-  });
-
   it('SET_FIELD updates only requested field in formData', () => {
     const initialState = createInitialState();
     const state = editReducer(
@@ -94,7 +63,6 @@ describe('edit state reducer/actions', () => {
 
     expect(state.formData.department).toBe('Marketing');
     expect(state.formData.email).toBe(initialState.formData.email);
-    expect(state.isSubmitting).toBe(initialState.isSubmitting);
   });
 
   it('SET_VISA updates existing visa entry', () => {
@@ -118,41 +86,6 @@ describe('edit state reducer/actions', () => {
       start_date: '',
       end_date: '',
     });
-  });
-
-  it('SUBMIT_START sets isSubmitting to true', () => {
-    const initialState = createInitialState();
-    const state = editReducer(initialState, submitStart());
-
-    expect(state.isSubmitting).toBe(true);
-  });
-
-  it('SUBMIT_SUCCESS clears submitting state and errors', () => {
-    const initialState = createInitialState();
-    const prevState: FormState = {
-      ...initialState,
-      isSubmitting: true,
-      errors: { department: 'Required' },
-    };
-
-    const state = editReducer(prevState, submitSuccess());
-
-    expect(state.isSubmitting).toBe(false);
-    expect(state.errors).toEqual({});
-  });
-
-  it('SUBMIT_ERROR stores errors and clears submitting flag', () => {
-    const initialState = createInitialState();
-    const prevState: FormState = {
-      ...initialState,
-      isSubmitting: true,
-    };
-    const errors = { email: 'Already used' };
-
-    const state = editReducer(prevState, submitError(errors));
-
-    expect(state.isSubmitting).toBe(false);
-    expect(state.errors).toEqual(errors);
   });
 
   it('returns current state for unknown action type', () => {

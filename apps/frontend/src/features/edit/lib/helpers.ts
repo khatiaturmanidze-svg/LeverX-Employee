@@ -1,16 +1,22 @@
-import { IEmployee } from '../../../types/type';
-import { EmployeeFormState, FormState } from '../model/state.types';
+import { useUpdateEmployeeMutation } from '@/features/usersApi';
+import { EmployeeUpdate, IEmployee } from '../../../types/type';
+import {
+  EmployeeFormState,
+  FormState,
+  SubmitState,
+} from '../model/state.types';
+import { getErrorMessage } from '@shared/lib';
 
-export const getEmployeeFormState = (user: IEmployee) => ({
+export const getEmployeeFormState = (user: IEmployee): EmployeeFormState => ({
   department: user.department,
   building: user.building,
   room: user.room,
   desk_number: user.desk_number?.toString() || '',
-  phone: user.phone,
+  phone: user.phone || '',
   email: user.email,
-  zoom_id: user.zoom_id,
-  zoom_link: user.zoom_link,
-  citizenship: user.citizenship,
+  zoom_id: user.zoom_id || '',
+  zoom_link: user.zoom_link || '',
+  citizenship: user.citizenship || '',
 
   first_native_name: user.first_native_name || '',
   last_native_name: user.last_native_name || '',
@@ -62,6 +68,70 @@ export const validateEmployeeForm = (formData: EmployeeFormState) => {
 
 export const getInitialState = (user: IEmployee): FormState => ({
   formData: getEmployeeFormState(user),
-  isSubmitting: false,
-  errors: {},
 });
+
+export const initialSubmitState: SubmitState = {
+  errors: {},
+  statusMessage: '',
+  statusType: null,
+};
+
+export const buildUpdatePayload = (
+  formData: EmployeeFormState,
+): EmployeeUpdate => ({
+  department: formData.department,
+  building: formData.building,
+  room: formData.room,
+  desk_number: formData.desk_number ? Number(formData.desk_number) : null,
+  phone: formData.phone || undefined,
+  email: formData.email,
+  zoom_id: formData.zoom_id || undefined,
+  zoom_link: formData.zoom_link || undefined,
+  citizenship: formData.citizenship || undefined,
+  first_native_name: formData.first_native_name || undefined,
+  last_native_name: formData.last_native_name || undefined,
+  date_birth: formData.date_birth
+    ? (() => {
+        const [year, month, day] = formData.date_birth.split('-').map(Number);
+        return { year, month, day };
+      })()
+    : undefined,
+  manager: formData.manager_id || undefined,
+});
+
+export async function submitEditUser(
+  formState: EmployeeFormState,
+  userId: string,
+  updateEmployee: ReturnType<typeof useUpdateEmployeeMutation>[0],
+): Promise<SubmitState> {
+  const validationErrors = validateEmployeeForm(formState);
+
+  if (Object.keys(validationErrors).length > 0) {
+    return {
+      ...initialSubmitState,
+      errors: validationErrors,
+    };
+  }
+
+  try {
+    await updateEmployee({
+      id: userId,
+      update: buildUpdatePayload(formState),
+    }).unwrap();
+
+    return {
+      ...initialSubmitState,
+      statusMessage: 'Employee updated successfully.',
+      statusType: 'success',
+    };
+  } catch (err) {
+    const message = getErrorMessage(err);
+
+    return {
+      ...initialSubmitState,
+      errors: { submit: message },
+      statusMessage: message,
+      statusType: 'error',
+    };
+  }
+}
