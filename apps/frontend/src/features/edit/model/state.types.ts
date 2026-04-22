@@ -20,6 +20,7 @@ export type EmployeeFormState = {
 export interface FormState {
   formData: EmployeeFormState;
 }
+
 export enum EmployeeEditActionType {
   SET_FIELD = 'SET_FIELD',
   SET_VISA = 'SET_VISA',

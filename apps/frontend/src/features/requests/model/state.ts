@@ -2,24 +2,19 @@ import {
   RequestActionType,
   RequestAction,
   IRequestData,
-  SubmitErrorAction,
   SetFieldAction,
   ResetFormAction,
 } from './state.types';
 import { FormState } from './state.types';
 
-export const initialState: FormState = {
-  data: {
-    id: '',
-    type: 'Vacation',
-    start_date: '',
-    end_date: '',
-    note: '',
-    status: 'pending',
-    employeeId: '',
-  },
-  isSubmitting: false,
-  errors: {},
+export const initialState: IRequestData = {
+  id: '',
+  type: 'Vacation',
+  start_date: '',
+  end_date: '',
+  note: '',
+  status: 'pending',
+  employeeId: '',
 };
 
 export function requestReducer(
@@ -30,33 +25,19 @@ export function requestReducer(
     case RequestActionType.SET_FIELD:
       return {
         ...state,
-        data: {
-          ...state.data,
+        formData: {
+          ...state.formData,
           [action.field]: action.value,
         },
       };
     case RequestActionType.RESET_FORM:
       return {
-        ...initialState,
+        formData: { ...initialState },
       };
-    case RequestActionType.SUBMIT_START:
-      return { ...state, isSubmitting: true };
-    case RequestActionType.SUBMIT_SUCCESS:
-      return { ...state, isSubmitting: false, errors: {} };
-    case RequestActionType.SUBMIT_ERROR:
-      return { ...state, isSubmitting: false, errors: action.errors };
-
     default:
       return state;
   }
 }
-
-export const submitError = (
-  errors: Record<string, string>,
-): SubmitErrorAction => ({
-  type: RequestActionType.SUBMIT_ERROR,
-  errors,
-});
 
 export const setField = <K extends keyof IRequestData>(
   field: K,

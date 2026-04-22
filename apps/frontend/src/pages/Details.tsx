@@ -45,7 +45,7 @@ export default function Details(): React.ReactElement {
       <>
         <Header loggedInUser={loggedUser} isAdmin={isAdmin} />
         <main>
-          <h1>Loading Employee Details...</h1>
+          <h1 className="details-loading">Loading Employee Details...</h1>
         </main>
       </>
     );

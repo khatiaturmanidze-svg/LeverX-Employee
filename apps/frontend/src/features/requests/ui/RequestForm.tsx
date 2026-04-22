@@ -1,55 +1,47 @@
-import React, { useReducer } from 'react';
-
+import React, { useActionState, useReducer } from 'react';
 import { useAddRequestMutation } from '../api/RequestsApi';
-import { getLoggedInUser, validateRequest } from '@shared/lib';
-import { useGetUsersQuery } from '../../usersApi';
 import { FormGroup } from './FormGroup';
 import {
   requestReducer,
   initialState,
   resetForm,
   setField,
-  submitError,
-} from '../../../features/requests/model/state';
+} from '../model/state';
 import { InputField } from './InputField';
+import { getInitialState, submitRequest } from '../lib/helpers';
+import { SubmitState } from '../model/state.types';
+import { initialSubmitState } from '@/features/edit';
+import { getLoggedInUser } from '@shared/lib';
+import { useGetUsersQuery } from '../../usersApi';
 
 export default function RequestForm(): React.ReactElement {
   const { data: allUsers = [] } = useGetUsersQuery();
+  const [state, dispatch] = useReducer(
+    requestReducer,
+    initialState,
+    getInitialState,
+  );
+  const [addRequest, { isLoading }] = useAddRequestMutation();
+  const { formData } = state;
 
-  const [state, dispatch] = useReducer(requestReducer, initialState);
-  const [addRequest, { isLoading, isError, error }] = useAddRequestMutation();
+  const [submitState, submitAction, isPending] = useActionState<
+    SubmitState,
+    FormData
+  >(async () => {
+    const loggedInUser = getLoggedInUser(allUsers);
+    const result = await submitRequest(
+      formData,
+      loggedInUser?._id ?? '',
+      addRequest,
+    );
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const validationErrors = validateRequest(state.data);
-    if (Object.keys(validationErrors).length > 0) {
-      dispatch(submitError(validationErrors));
-      return;
-    }
-    const loggedInId = getLoggedInUser(allUsers)?._id;
-
-    if (!loggedInId) {
-      console.error('User not found');
-      return;
-    }
-    try {
-      await addRequest({
-        employeeId: loggedInId,
-        body: {
-          employeeId: state.data.employeeId,
-          type: state.data.type,
-          start_date: state.data.start_date,
-          end_date: state.data.end_date,
-          note: state.data.note,
-          status: state.data.status,
-        },
-      }).unwrap();
-
+    if (result.statusType === 'success') {
       dispatch(resetForm());
-    } catch (err) {
-      console.error('Failed to save the request: ', err);
     }
-  };
+
+    return result;
+  }, initialSubmitState);
+
   return (
     <div className="request-form card">
       <img
@@ -59,12 +51,14 @@ export default function RequestForm(): React.ReactElement {
       />
       <h2 className="request-form__title">New Request</h2>
 
-      <form className="request-form__content" onSubmit={handleSubmit}>
+      <form className="request-form__content" action={submitAction}>
         <FormGroup label={'Type'}>
           <select
             id="type"
             className="request-list__select"
+            value={formData.type}
             onChange={(e) => dispatch(setField('type', e.target.value))}
+            name="type"
           >
             <option>Vacation</option>
             <option>Sick leave</option>
@@ -76,15 +70,19 @@ export default function RequestForm(): React.ReactElement {
           <FormGroup label={'Start Date'}>
             <InputField
               type={'date'}
+              value={formData.start_date}
               onChange={(e) => dispatch(setField('start_date', e.target.value))}
-              error={state.errors.start_date}
+              error={submitState.errors.start_date}
+              name="start_date"
             />
           </FormGroup>
           <FormGroup label={'End Date'}>
             <InputField
               type="date"
+              value={formData.end_date}
               onChange={(e) => dispatch(setField('end_date', e.target.value))}
-              error={state.errors.end_date}
+              error={submitState.errors.end_date}
+              name="end_date"
             />
           </FormGroup>
         </div>
@@ -92,19 +90,31 @@ export default function RequestForm(): React.ReactElement {
         <FormGroup label={'Note'}>
           <textarea
             placeholder="Reason for leave..."
+            value={formData.note}
             onChange={(e) => dispatch(setField('note', e.target.value))}
+            name="note"
           ></textarea>
-          {state.errors.note && (
-            <p className="form-error">{state.errors.note}</p>
+          {submitState.errors.note && (
+            <p className="form-error">{submitState.errors.note}</p>
           )}
         </FormGroup>
 
-        <button type="submit" className="btn-submit" disabled={isLoading}>
-          {isLoading ? 'Submitting...' : 'Submit Request'}
+        <button
+          type="submit"
+          className="btn-submit"
+          disabled={isPending || isLoading}
+        >
+          {isPending || isLoading ? 'Submitting...' : 'Submit Request'}
         </button>
 
-        {isError && (
-          <p className="error">Failed to submit: {JSON.stringify(error)}</p>
+        {submitState.statusMessage && (
+          <p
+            className={
+              submitState.statusType === 'success' ? 'form-success' : 'error'
+            }
+          >
+            {submitState.statusMessage}
+          </p>
         )}
       </form>
     </div>
