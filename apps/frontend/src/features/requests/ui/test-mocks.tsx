@@ -6,6 +6,7 @@ export const useGetUsersQueryMock = vi.fn();
 export const getUserByIdMock = vi.fn();
 export const useAddRequestMutationMock = vi.fn();
 export const validateRequestMock = vi.fn();
+export const getErrorMessageMock = vi.fn();
 export const getLoggedInUserMock = vi.fn();
 export const addRequestMock = vi.fn();
 export const useGetRequestsQueryMock = vi.fn();
@@ -43,6 +44,7 @@ export const requestFormApiModule = {
 
 export const requestFormSharedLibModule = {
   validateRequest: validateRequestMock,
+  getErrorMessage: getErrorMessageMock,
   getLoggedInUser: getLoggedInUserMock,
 };
 
