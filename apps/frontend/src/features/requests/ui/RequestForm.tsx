@@ -6,7 +6,7 @@ import {
   resetForm,
   setField,
 } from '../model/state';
-import { InputField, FormGroup } from '@shared/ui';
+import { InputField, FormGroup, BtnSubmit } from '@shared/ui';
 import { getInitialState, submitRequest } from '../lib/helpers';
 import { SubmitState } from '../model/state.types';
 import { initialSubmitState } from '@/features/edit';
@@ -98,13 +98,9 @@ export default function RequestForm(): React.ReactElement {
           )}
         </FormGroup>
 
-        <button
-          type="submit"
-          className="btn-submit"
-          disabled={isPending || isLoading}
-        >
+        <BtnSubmit className="btn-submit">
           {isPending || isLoading ? 'Submitting...' : 'Submit Request'}
-        </button>
+        </BtnSubmit>
 
         {submitState.statusMessage && (
           <p

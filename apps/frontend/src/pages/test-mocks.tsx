@@ -303,6 +303,13 @@ export const authPagesSharedUiModule = {
     React.createElement('div', { 'data-testid': 'sign-header' }),
   SignMain: ({ children }: { children?: React.ReactNode }) =>
     React.createElement('div', { 'data-testid': 'sign-main' }, children),
+  BtnSubmit: ({
+    className,
+    children,
+  }: {
+    className?: string;
+    children?: React.ReactNode;
+  }) => React.createElement('button', { type: 'submit', className }, children),
 };
 
 export const authPagesRouterModule = {

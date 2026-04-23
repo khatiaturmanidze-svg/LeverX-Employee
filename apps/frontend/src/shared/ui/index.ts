@@ -18,3 +18,4 @@ export { default as TabGroup } from './TabGroup';
 export { default as Wrapper } from './Wrapper';
 export { FormGroup } from './FormGroup';
 export { InputField } from './InputField';
+export { default as BtnSubmit } from './BtnSubmit';

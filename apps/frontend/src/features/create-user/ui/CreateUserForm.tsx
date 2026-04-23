@@ -1,5 +1,5 @@
 import React, { useActionState, useReducer } from 'react';
-import { FormGroup, InputField } from '@shared/ui';
+import { FormGroup, InputField, BtnSubmit } from '@shared/ui';
 import { useAddUserMutation } from '../api/createUserApi';
 import {
   initialState,
@@ -320,13 +320,9 @@ export default function CreateUserForm(): React.ReactElement {
         />
       </FormGroup>
       <div className="wrapper-btn">
-        <button
-          type="submit"
-          className="btn-submit create-user-form__submit"
-          disabled={isPending || isLoading}
-        >
+        <BtnSubmit className="btn-submit create-user-form__submit">
           {isPending || isLoading ? 'Creating...' : 'Create Employee'}
-        </button>
+        </BtnSubmit>
       </div>
 
       {submitState.statusMessage && (

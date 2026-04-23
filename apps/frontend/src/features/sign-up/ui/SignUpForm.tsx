@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSignUpMutation } from '../../authApi';
 import { getErrorMessage } from '@shared/lib';
+import { BtnSubmit } from '@/shared/ui';
 
 export default function SignUpForm(): React.ReactElement {
   const navigate = useNavigate();
@@ -112,9 +113,7 @@ export default function SignUpForm(): React.ReactElement {
       </div>
       {errorMessage && <p className="signup__form-error">{errorMessage}</p>}
 
-      <button type="submit" className="search__btn-submit signup__btn">
-        Sign Up
-      </button>
+      <BtnSubmit className="search__btn-submit signup__btn">Sign Up</BtnSubmit>
     </form>
   );
 }

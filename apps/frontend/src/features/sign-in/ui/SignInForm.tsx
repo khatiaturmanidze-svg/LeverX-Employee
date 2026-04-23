@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSignInMutation } from '../../authApi';
 import { getErrorMessage } from '@shared/lib';
+import { BtnSubmit } from '@/shared/ui';
 
 export default function SignInForm(): React.ReactElement {
   const navigate = useNavigate();
@@ -79,9 +80,7 @@ export default function SignInForm(): React.ReactElement {
       </div>
 
       {errorMessage && <p className="signin__error">{errorMessage}</p>}
-      <button type="submit" className="signin__btn search__btn-submit">
-        Sign In
-      </button>
+      <BtnSubmit className="signin__btn search__btn-submit">Sign In</BtnSubmit>
     </form>
   );
 }

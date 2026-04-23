@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { useSetNewPasswordMutation } from '../features/authApi';
 import { getErrorMessage } from '@shared/lib';
-import { SignHeader, SignMain } from '@shared/ui';
+import { SignHeader, SignMain, BtnSubmit } from '@shared/ui';
 
 function getStoredEmail(): string {
   return (
@@ -91,13 +91,9 @@ export default function NewPassword(): React.ReactElement {
           {errorMessage && <p className="signin__error">{errorMessage}</p>}
           {successMessage && <p className="sign__label">{successMessage}</p>}
 
-          <button
-            type="submit"
-            className="signin__btn search__btn-submit"
-            disabled={isLoading}
-          >
+          <BtnSubmit className="signin__btn search__btn-submit">
             {isLoading ? 'Saving...' : 'Set new password'}
-          </button>
+          </BtnSubmit>
         </form>
       </SignMain>
     </>

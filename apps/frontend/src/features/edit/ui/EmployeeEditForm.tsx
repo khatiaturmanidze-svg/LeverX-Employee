@@ -10,6 +10,7 @@ import {
 import { EmployeeFormState, SubmitState } from '../model/state.types';
 import { editReducer, setField, setVisa } from '../model/state';
 import { useUpdateEmployeeMutation } from '@/features/usersApi';
+import { BtnSubmit } from '@/shared/ui';
 
 interface EmployeEditFormProps {
   user: IEmployee;
@@ -139,13 +140,9 @@ export function EmployeeEditForm({ user, onCancel }: EmployeEditFormProps) {
       )}
 
       <div className="details-section__btns">
-        <button
-          type="submit"
-          className="details-section__row-save"
-          disabled={isPending || isLoading}
-        >
+        <BtnSubmit className="details-section__row-save">
           {isPending || isLoading ? 'Saving...' : 'Save'}
-        </button>
+        </BtnSubmit>
         <button
           type="button"
           className="details-section__row-cancel"
