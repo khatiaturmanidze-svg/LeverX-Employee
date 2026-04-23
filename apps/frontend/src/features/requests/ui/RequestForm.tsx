@@ -20,26 +20,26 @@ export default function RequestForm(): React.ReactElement {
     initialState,
     getInitialState,
   );
-  const [addRequest, { isLoading }] = useAddRequestMutation();
+  const [addRequest] = useAddRequestMutation();
   const { formData } = state;
 
-  const [submitState, submitAction, isPending] = useActionState<
-    SubmitState,
-    FormData
-  >(async () => {
-    const loggedInUser = getLoggedInUser(allUsers);
-    const result = await submitRequest(
-      formData,
-      loggedInUser?._id ?? '',
-      addRequest,
-    );
+  const [submitState, submitAction] = useActionState<SubmitState, FormData>(
+    async () => {
+      const loggedInUser = getLoggedInUser(allUsers);
+      const result = await submitRequest(
+        formData,
+        loggedInUser?._id ?? '',
+        addRequest,
+      );
 
-    if (result.statusType === 'success') {
-      dispatch(resetForm());
-    }
+      if (result.statusType === 'success') {
+        dispatch(resetForm());
+      }
 
-    return result;
-  }, initialSubmitState);
+      return result;
+    },
+    initialSubmitState,
+  );
 
   return (
     <div className="request-form card">
@@ -98,9 +98,7 @@ export default function RequestForm(): React.ReactElement {
           )}
         </FormGroup>
 
-        <BtnSubmit className="btn-submit">
-          {isPending || isLoading ? 'Submitting...' : 'Submit Request'}
-        </BtnSubmit>
+        <BtnSubmit className="btn-submit">Submit Request</BtnSubmit>
 
         {submitState.statusMessage && (
           <p

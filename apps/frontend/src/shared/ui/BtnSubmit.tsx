@@ -1,4 +1,5 @@
 import React from 'react';
+import { useFormStatus } from 'react-dom';
 
 interface BtnSubmitProps {
   className?: string;
@@ -11,13 +12,15 @@ export default function BtnSubmit({
   handleSubmit,
   children,
 }: BtnSubmitProps): React.ReactElement {
+  const { pending } = useFormStatus();
   return (
     <button
       type="submit"
       className={`${className}`.trim()}
       onClick={handleSubmit}
+      disabled={pending}
     >
-      {children}
+      {pending ? 'Saving...' : children}
     </button>
   );
 }
