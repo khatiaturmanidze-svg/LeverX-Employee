@@ -6,3 +6,57 @@
   justify-content: center;
   gap: $space-md;
 }
+
+.loading {
+  min-height: min(50vh, 32rem);
+  width: 100%;
+  display: flex;
+  margin: 10rem 3rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $space-sm;
+  padding: $space-lg;
+  color: $color-1000;
+
+  &__text {
+    margin: 0;
+    color: $color-font;
+    font-size: $font-small;
+    font-weight: 600;
+  }
+}
+
+.loading__spinner {
+  position: relative;
+  width: 5.6rem;
+  height: 5.6rem;
+
+  &:before,
+  &:after {
+    content: '';
+    border-radius: 50%;
+    position: absolute;
+    inset: 0;
+  }
+
+  &:before {
+    border: 0.45rem solid $color-100;
+  }
+
+  &:after {
+    border: 0.45rem solid transparent;
+    border-top-color: $color-1000;
+    border-right-color: $color-500;
+    animation: rotate 0.8s linear infinite;
+  }
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

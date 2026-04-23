@@ -10,11 +10,16 @@ vi.mock('@shared/lib', () => ({
   useGetHeaderProps: useGetHeaderPropsMock,
 }));
 
-vi.mock('@features/create-user', () => ({
+vi.mock('@features/create-user/ui/CreateUserForm', () => ({
   CreateUserForm: () =>
     React.createElement('section', null, 'Create user form'),
+  default: () => React.createElement('section', null, 'Create user form'),
+}));
+
+vi.mock('@features/create-user/ui/CreateUserUpload', () => ({
   CreateUserUpload: () =>
     React.createElement('section', null, 'Create user upload'),
+  default: () => React.createElement('section', null, 'Create user upload'),
 }));
 
 vi.mock('@/shared/ui/Header', () => ({
@@ -33,7 +38,7 @@ vi.mock('@/shared/ui/Header', () => ({
 }));
 
 describe('Create page', () => {
-  it('renders header with logged-in user props and both create-user widgets', () => {
+  it('renders header with logged-in user props and both create-user widgets', async () => {
     useGetHeaderPropsMock.mockReturnValue({
       loggedUser: { email: 'admin@example.com' },
       isAdmin: true,
@@ -44,7 +49,7 @@ describe('Create page', () => {
     expect(screen.getByTestId('create-header')).toHaveTextContent(
       'admin@example.com:true',
     );
-    expect(screen.getByText('Create user form')).toBeInTheDocument();
-    expect(screen.getByText('Create user upload')).toBeInTheDocument();
+    expect(await screen.findByText('Create user form')).toBeInTheDocument();
+    expect(await screen.findByText('Create user upload')).toBeInTheDocument();
   });
 });

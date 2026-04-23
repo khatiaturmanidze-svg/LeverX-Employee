@@ -1,20 +1,22 @@
-import React, { useState, useMemo } from 'react';
+import React, { lazy, Suspense, useState, useMemo } from 'react';
+import { Header, TabGroup } from '@shared/ui';
+import type { AdvancedSearchCriteria } from '@features/search/ui/SearchAdvanced';
+import type { SearchCriteria } from '@features/search/ui/SearchBasic';
 import {
-  Header,
-  TabGroup,
-  EmployeeContainer,
-  EmployeeHeader,
-} from '@shared/ui';
-import {
-  SearchBasic,
-  SearchAdvanced,
-  AdvancedSearchCriteria,
-  SearchCriteria,
   filterUsers,
   filterAdvancedUsers,
-} from '@features/search';
+} from '@features/search/lib/userFilters';
 import { useGetHeaderProps } from '@shared/lib';
 import { useGetUsersQuery } from '../features/usersApi';
+import Loading from '@/shared/ui/Loading';
+
+const EmployeeHeader = lazy(() => import('@shared/ui/EmployeeHeader'));
+
+const EmployeeContainer = lazy(() => import('@shared/ui/EmployeeContainer'));
+
+const SearchBasic = lazy(() => import('@features/search/ui/SearchBasic'));
+
+const SearchAdvanced = lazy(() => import('@features/search/ui/SearchAdvanced'));
 
 export default function Main(): React.ReactElement {
   const [isBasicSearch, setIsBasicSearch] = useState(true);
@@ -75,12 +77,16 @@ export default function Main(): React.ReactElement {
               },
             ]}
           />
-          <EmployeeHeader users={filteredUsers} onViewChange={setViewMode} />
-          {isBasicSearch ? (
-            <SearchBasic onSearchSubmit={handleBasicSearch} />
-          ) : (
-            <SearchAdvanced onSearchSubmit={handleAdvancedSearch} />
-          )}
+          <Suspense fallback={<Loading />}>
+            <EmployeeHeader users={filteredUsers} onViewChange={setViewMode} />
+          </Suspense>
+          <Suspense fallback={<Loading />}>
+            {isBasicSearch ? (
+              <SearchBasic onSearchSubmit={handleBasicSearch} />
+            ) : (
+              <SearchAdvanced onSearchSubmit={handleAdvancedSearch} />
+            )}
+          </Suspense>
           {filteredUsers.length === 0 ? (
             <img
               src="./svgs/not-found.jpg"
@@ -88,7 +94,9 @@ export default function Main(): React.ReactElement {
               className="nothing-found"
             />
           ) : (
-            <EmployeeContainer users={filteredUsers} viewMode={viewMode} />
+            <Suspense fallback={<Loading />}>
+              <EmployeeContainer users={filteredUsers} viewMode={viewMode} />
+            </Suspense>
           )}
         </div>
       </div>

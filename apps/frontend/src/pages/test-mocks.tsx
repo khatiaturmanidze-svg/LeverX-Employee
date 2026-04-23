@@ -149,6 +149,47 @@ export const mainSharedUiFactory = async (
   };
 };
 
+export const mainEmployeeHeaderModule = {
+  default: ({
+    users,
+    onViewChange,
+  }: {
+    users: IEmployee[];
+    onViewChange: (mode: 'grid' | 'list') => void;
+  }) =>
+    React.createElement('div', { 'data-testid': 'employee-header' }, [
+      React.createElement(
+        'span',
+        { key: 'count' },
+        `employees:${users.length}`,
+      ),
+      React.createElement(
+        'button',
+        {
+          key: 'toggle',
+          type: 'button',
+          onClick: () => onViewChange('list'),
+        },
+        'toggle-view',
+      ),
+    ]),
+};
+
+export const mainEmployeeContainerModule = {
+  default: ({
+    users,
+    viewMode,
+  }: {
+    users: IEmployee[];
+    viewMode: 'grid' | 'list';
+  }) =>
+    React.createElement(
+      'div',
+      { 'data-testid': 'employee-container' },
+      `container:${users.length}:${viewMode}`,
+    ),
+};
+
 export const mainSearchFeatureFactory = async (
   importOriginal: () => Promise<typeof import('@features/search')>,
 ) => {
@@ -192,6 +233,44 @@ export const mainSearchFeatureFactory = async (
   };
 };
 
+export const mainSearchBasicModule = {
+  default: ({
+    onSearchSubmit,
+  }: {
+    onSearchSubmit: (criteria: SearchCriteria) => void;
+  }) =>
+    React.createElement('div', { 'data-testid': 'basic-search' }, [
+      React.createElement(
+        'button',
+        {
+          key: 'submit-basic',
+          type: 'button',
+          onClick: () => onSearchSubmit(basicCriteriaValue),
+        },
+        'submit-basic',
+      ),
+    ]),
+};
+
+export const mainSearchAdvancedModule = {
+  default: ({
+    onSearchSubmit,
+  }: {
+    onSearchSubmit: (criteria: AdvancedSearchCriteria) => void;
+  }) =>
+    React.createElement('div', { 'data-testid': 'advanced-search' }, [
+      React.createElement(
+        'button',
+        {
+          key: 'submit-advanced',
+          type: 'button',
+          onClick: () => onSearchSubmit(advancedCriteriaValue),
+        },
+        'submit-advanced',
+      ),
+    ]),
+};
+
 export const requestsSharedUiModule = rolesSharedUiModule;
 
 export const requestsFeatureFactory = async (
@@ -211,6 +290,23 @@ export const requestsFeatureFactory = async (
     RequestList: () =>
       React.createElement('div', { 'data-testid': 'request-list' }),
   };
+};
+
+export const requestsManagersModule = {
+  default: ({ loggedInUser }: { loggedInUser: IEmployee | null }) =>
+    React.createElement(
+      'div',
+      { 'data-testid': 'managers' },
+      loggedInUser ? `managers:${loggedInUser.email}` : 'managers:no-user',
+    ),
+};
+
+export const requestsRequestFormModule = {
+  default: () => React.createElement('div', { 'data-testid': 'request-form' }),
+};
+
+export const requestsRequestListModule = {
+  default: () => React.createElement('div', { 'data-testid': 'request-list' }),
 };
 
 export const detailsRouterModule = {
@@ -297,6 +393,53 @@ export const detailsFeatureModule = {
       ),
     ]),
 };
+
+export const detailsAvatarSectionModule = {
+  default: ({
+    canEdit,
+    onEditClick,
+    onCopyLink,
+  }: {
+    canEdit: boolean;
+    onEditClick: () => void;
+    onCopyLink: () => void;
+  }) =>
+    React.createElement('section', { 'data-testid': 'avatar' }, [
+      canEdit
+        ? React.createElement(
+            'button',
+            {
+              key: 'edit',
+              type: 'button',
+              className: 'avatar-section__edit',
+              onClick: onEditClick,
+            },
+            'edit',
+          )
+        : null,
+      React.createElement(
+        'button',
+        {
+          key: 'copy',
+          type: 'button',
+          className: 'avatar-section__copy',
+          onClick: onCopyLink,
+        },
+        'Copy link',
+      ),
+    ]),
+};
+
+export const detailsEmployeeViewModule = {
+  EmployeeView: () =>
+    React.createElement(
+      'div',
+      { 'data-testid': 'employee-view' },
+      'EmployeeView',
+    ),
+};
+
+export const detailsEmployeeEditFormModule = detailsFeatureModule;
 
 export const authPagesSharedUiModule = {
   SignHeader: () =>
