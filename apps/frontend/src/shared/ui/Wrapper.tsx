@@ -1,5 +1,6 @@
 import React from 'react';
 import { IEmployee } from '../../types/type';
+import LazyImage from './LazyImage';
 
 interface WrapperProps {
   display: string;
@@ -12,10 +13,11 @@ export default function Wrapper({
 }: WrapperProps): React.ReactElement {
   return (
     <div className="wrapper">
-      <img
+      <LazyImage
         src={user.user_avatar}
         alt={user.first_name}
         className={`employee-${display}__img`}
+        skeletonClassName={`lazy-image--employee-${display}`}
       />
 
       {user.isRemoteWork ? (

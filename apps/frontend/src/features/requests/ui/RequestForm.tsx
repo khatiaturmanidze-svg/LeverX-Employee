@@ -6,7 +6,7 @@ import {
   resetForm,
   setField,
 } from '../model/state';
-import { InputField, FormGroup, BtnSubmit } from '@shared/ui';
+import { InputField, FormGroup, BtnSubmit, LazyImage } from '@shared/ui';
 import { getInitialState, submitRequest } from '../lib/helpers';
 import { SubmitState } from '../model/state.types';
 import { initialSubmitState } from '@/features/edit';
@@ -43,10 +43,11 @@ export default function RequestForm(): React.ReactElement {
 
   return (
     <div className="request-form card">
-      <img
+      <LazyImage
         src="../assets/vacation-bg.jpg"
         alt="vacation picture"
         className="request-form__img"
+        skeletonClassName="lazy-image--request"
       />
       <h2 className="request-form__title">New Request</h2>
 

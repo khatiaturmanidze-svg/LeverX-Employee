@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import RequestListItem from './RequestListItem';
 import { useGetRequestsQuery } from '../api/RequestsApi';
 import { useParams } from 'react-router-dom';
-import { TabGroup } from '@shared/ui';
+import { LazyImage, TabGroup } from '@shared/ui';
 import { getManagedEmployees } from '@shared/lib';
 import { useGetUsersQuery, usersApi } from '../../usersApi';
 import { useDispatch } from 'react-redux';
@@ -89,10 +89,11 @@ export default function RequestList(): React.ReactElement {
             ))
         ) : (
           <div className="request-list__empty">
-            <img
+            <LazyImage
               src="/assets/nothing-found.jpg"
               alt="nothing found"
               className="request-form__img"
+              skeletonClassName="lazy-image--request"
             />
             <p className="request-list__nothing">
               No {requestType} requests found

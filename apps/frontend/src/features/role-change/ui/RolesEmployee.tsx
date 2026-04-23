@@ -1,6 +1,7 @@
 import React from 'react';
 import { IEmployee } from '../../../types/type';
 import BtnRole from './BtnRole';
+import { LazyImage } from '@shared/ui';
 
 interface RolesEmployeeProps {
   user: IEmployee;
@@ -18,10 +19,11 @@ export function RolesEmployee({
   return (
     <div className="section-roles__employee-container" key={key}>
       <div className="section-roles__employee">
-        <img
+        <LazyImage
           src={user.user_avatar}
           alt="employee img"
           className="section-roles__employee-img"
+          skeletonClassName="lazy-image--role-employee"
         />
         <p className="section-roles__employee-name">
           {user.first_name} {user.last_name}

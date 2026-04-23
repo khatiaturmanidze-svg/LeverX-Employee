@@ -10,6 +10,7 @@ export { default as HeaderTabs } from './HeaderTabs';
 export { default as Icon } from './Icon';
 
 export { default as ListHeader } from './ListHeader';
+export { default as LazyImage } from './LazyImage';
 export { default as LoggedInUser } from './LoggedInUser';
 export { default as Logo } from './Logo';
 export { default as SignHeader } from './SignHeader';

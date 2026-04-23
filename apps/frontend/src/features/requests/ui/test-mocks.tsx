@@ -74,6 +74,15 @@ export const requestListSharedLibModule = {
 };
 
 export const requestListSharedUiModule = {
+  LazyImage: ({
+    src,
+    alt,
+    className,
+  }: {
+    src: string;
+    alt: string;
+    className?: string;
+  }) => React.createElement('img', { src, alt, className }),
   TabGroup: ({
     tabs,
   }: {

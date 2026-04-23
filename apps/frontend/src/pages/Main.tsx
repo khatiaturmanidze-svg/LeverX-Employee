@@ -9,6 +9,7 @@ import {
 import { useGetHeaderProps } from '@shared/lib';
 import { useGetUsersQuery } from '../features/usersApi';
 import Loading from '@/shared/ui/Loading';
+import { LazyImage } from '@shared/ui';
 
 const EmployeeHeader = lazy(() => import('@shared/ui/EmployeeHeader'));
 
@@ -88,10 +89,11 @@ export default function Main(): React.ReactElement {
             )}
           </Suspense>
           {filteredUsers.length === 0 ? (
-            <img
+            <LazyImage
               src="./svgs/not-found.jpg"
               alt="nothing found"
               className="nothing-found"
+              skeletonClassName="lazy-image--empty-state"
             />
           ) : (
             <Suspense fallback={<Loading />}>
