@@ -1,13 +1,12 @@
 import React, { useActionState, useReducer } from 'react';
 import { useAddRequestMutation } from '../api/RequestsApi';
-import { FormGroup } from './FormGroup';
 import {
   requestReducer,
   initialState,
   resetForm,
   setField,
 } from '../model/state';
-import { InputField } from './InputField';
+import { InputField, FormGroup } from '@shared/ui';
 import { getInitialState, submitRequest } from '../lib/helpers';
 import { SubmitState } from '../model/state.types';
 import { initialSubmitState } from '@/features/edit';
