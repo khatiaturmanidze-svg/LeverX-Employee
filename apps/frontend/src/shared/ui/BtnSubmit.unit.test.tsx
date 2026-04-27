@@ -29,4 +29,22 @@ describe('BtnSubmit', () => {
     expect(button).toHaveAttribute('class', '');
     expect(handleSubmit).toHaveBeenCalledTimes(1);
   });
+
+  it('disables the button and shows the default loading message', () => {
+    render(<BtnSubmit isLoading>Save</BtnSubmit>);
+
+    const button = screen.getByRole('button', { name: 'Loading...' });
+
+    expect(button).toBeDisabled();
+  });
+
+  it('shows a custom loading message', () => {
+    render(
+      <BtnSubmit isLoading message="Submitting">
+        Submit
+      </BtnSubmit>,
+    );
+
+    expect(screen.getByRole('button', { name: 'Submitting' })).toBeDisabled();
+  });
 });

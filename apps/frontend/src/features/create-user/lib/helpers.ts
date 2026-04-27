@@ -1,11 +1,14 @@
-import { CreateUserPayload } from '@/types/type';
+import type { CreateUserPayload, CreateUserResponse } from '@/types/type';
 import {
   EmployeeFormState,
   FormState,
   SubmitState,
 } from '../model/state.types';
 import { getErrorMessage } from '@/shared';
-import { useAddUserMutation } from '../api/createUserApi';
+
+type AddUserMutation = (payload: CreateUserPayload) => {
+  unwrap: () => Promise<CreateUserResponse>;
+};
 
 export const initialState: FormState = {
   formData: {
@@ -111,7 +114,7 @@ export const buildCreateUserPayload = (
 
 export async function submitCreateUser(
   formState: EmployeeFormState,
-  addUser: ReturnType<typeof useAddUserMutation>[0],
+  addUser: AddUserMutation,
 ): Promise<SubmitState> {
   const validationErrors = validateCreateUserForm(formState);
 

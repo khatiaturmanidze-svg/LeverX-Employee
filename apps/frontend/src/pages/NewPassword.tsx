@@ -91,8 +91,12 @@ export default function NewPassword(): React.ReactElement {
           {errorMessage && <p className="signin__error">{errorMessage}</p>}
           {successMessage && <p className="sign__label">{successMessage}</p>}
 
-          <BtnSubmit className="signin__btn search__btn-submit">
-            {isLoading ? 'Saving...' : 'Set new password'}
+          <BtnSubmit
+            isLoading={isLoading}
+            message="Saving..."
+            className="signin__btn search__btn-submit"
+          >
+            Set new password
           </BtnSubmit>
         </form>
       </SignMain>

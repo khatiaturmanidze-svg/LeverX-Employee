@@ -186,7 +186,10 @@ export default function SearchAdvanced({
         </select>
       </div>
 
-      <BtnSubmit className="search__btn-submit search-form__advanced-submit">
+      <BtnSubmit
+        message="Submitting"
+        className="search__btn-submit search-form__advanced-submit"
+      >
         submit
       </BtnSubmit>
     </form>

@@ -1,26 +1,28 @@
 import React from 'react';
-import { useFormStatus } from 'react-dom';
 
 interface BtnSubmitProps {
   className?: string;
   handleSubmit?: () => void;
+  isLoading?: boolean;
+  message?: string;
   children: React.ReactNode;
 }
 
 export default function BtnSubmit({
   className = '',
   handleSubmit,
+  isLoading = false,
   children,
+  message = 'Loading...',
 }: BtnSubmitProps): React.ReactElement {
-  const { pending } = useFormStatus();
   return (
     <button
       type="submit"
       className={`${className}`.trim()}
       onClick={handleSubmit}
-      disabled={pending}
+      disabled={isLoading}
     >
-      {pending ? 'Saving...' : children}
+      {isLoading ? message : children}
     </button>
   );
 }

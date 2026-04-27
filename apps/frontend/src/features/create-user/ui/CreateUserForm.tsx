@@ -320,8 +320,12 @@ export default function CreateUserForm(): React.ReactElement {
         />
       </FormGroup>
       <div className="wrapper-btn">
-        <BtnSubmit className="btn-submit create-user-form__submit">
-          {isPending || isLoading ? 'Creating...' : 'Create Employee'}
+        <BtnSubmit
+          isLoading={isPending || isLoading}
+          message="Creating..."
+          className="btn-submit create-user-form__submit"
+        >
+          Create Employee
         </BtnSubmit>
       </div>
 

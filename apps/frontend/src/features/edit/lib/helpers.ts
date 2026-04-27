@@ -5,7 +5,7 @@ import {
   FormState,
   SubmitState,
 } from '../model/state.types';
-import { getErrorMessage } from '@shared/lib';
+import { getErrorMessage, initialSubmitState } from '@shared/lib';
 
 export const getEmployeeFormState = (user: IEmployee): EmployeeFormState => ({
   department: user.department,
@@ -69,12 +69,6 @@ export const validateEmployeeForm = (formData: EmployeeFormState) => {
 export const getInitialState = (user: IEmployee): FormState => ({
   formData: getEmployeeFormState(user),
 });
-
-export const initialSubmitState: SubmitState = {
-  errors: {},
-  statusMessage: '',
-  statusType: null,
-};
 
 export const buildUpdatePayload = (
   formData: EmployeeFormState,

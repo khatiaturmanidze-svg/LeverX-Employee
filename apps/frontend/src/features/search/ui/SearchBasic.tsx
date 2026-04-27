@@ -33,7 +33,10 @@ export default function SearchBasic({
         onChange={(e) => setFullname(e.target.value)}
       />
 
-      <BtnSubmit className="search__btn-submit search-form__basic-submit">
+      <BtnSubmit
+        message="Searching"
+        className="search__btn-submit search-form__basic-submit"
+      >
         search
       </BtnSubmit>
     </form>

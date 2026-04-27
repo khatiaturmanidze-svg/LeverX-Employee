@@ -448,11 +448,20 @@ export const authPagesSharedUiModule = {
     React.createElement('div', { 'data-testid': 'sign-main' }, children),
   BtnSubmit: ({
     className,
+    isLoading = false,
+    message = 'Loading...',
     children,
   }: {
     className?: string;
+    isLoading?: boolean;
+    message?: string;
     children?: React.ReactNode;
-  }) => React.createElement('button', { type: 'submit', className }, children),
+  }) =>
+    React.createElement(
+      'button',
+      { type: 'submit', className, disabled: isLoading },
+      isLoading ? message : children,
+    ),
 };
 
 export const authPagesRouterModule = {
@@ -460,11 +469,11 @@ export const authPagesRouterModule = {
 };
 
 export const signInPageAuthApiModule = {
-  useSignInMutation: () => [signInMock],
+  useSignInMutation: () => [signInMock, { isLoading: false }],
 };
 
 export const signUpPageAuthApiModule = {
-  useSignUpMutation: () => [signUpMock],
+  useSignUpMutation: () => [signUpMock, { isLoading: false }],
 };
 
 export const newPasswordPageAuthApiModule = {

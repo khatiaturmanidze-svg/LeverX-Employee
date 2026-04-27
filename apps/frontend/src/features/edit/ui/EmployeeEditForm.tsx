@@ -2,15 +2,12 @@ import React, { useActionState, useReducer } from 'react';
 import { IEmployee, IVisa } from '@/types/type';
 import { DetailRow } from './DetailRow';
 import VisaEditorList from './VisaEditorList';
-import {
-  getInitialState,
-  initialSubmitState,
-  submitEditUser,
-} from '../lib/helpers';
+import { getInitialState, submitEditUser } from '../lib/helpers';
 import { EmployeeFormState, SubmitState } from '../model/state.types';
 import { editReducer, setField, setVisa } from '../model/state';
 import { useUpdateEmployeeMutation } from '@/features/usersApi';
 import { BtnSubmit } from '@/shared/ui';
+import { initialSubmitState } from '@/shared/lib';
 
 interface EmployeEditFormProps {
   user: IEmployee;
@@ -140,8 +137,12 @@ export function EmployeeEditForm({ user, onCancel }: EmployeEditFormProps) {
       )}
 
       <div className="details-section__btns">
-        <BtnSubmit className="details-section__row-save">
-          {isPending || isLoading ? 'Saving...' : 'Save'}
+        <BtnSubmit
+          isLoading={isPending || isLoading}
+          message="Saving..."
+          className="details-section__row-save"
+        >
+          Save
         </BtnSubmit>
         <button
           type="button"

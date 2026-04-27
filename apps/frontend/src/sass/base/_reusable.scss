@@ -80,6 +80,20 @@
     }
   }
 
+  &__fallback {
+    min-height: 6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: $space-sm;
+    border: 1px solid $color-grey;
+    background-color: $color-lighter-grey;
+    color: $color-darker-grey;
+    font-size: $font-smallest;
+    font-weight: 600;
+    text-align: center;
+  }
+
   &--avatar,
   &--employee-grid,
   &--employee-menu,

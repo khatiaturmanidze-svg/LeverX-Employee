@@ -13,7 +13,7 @@ export default function SignInForm(): React.ReactElement {
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const [signIn] = useSignInMutation();
+  const [signIn, { isLoading }] = useSignInMutation();
 
   const handleSumbit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,7 +80,13 @@ export default function SignInForm(): React.ReactElement {
       </div>
 
       {errorMessage && <p className="signin__error">{errorMessage}</p>}
-      <BtnSubmit className="signin__btn search__btn-submit">Sign In</BtnSubmit>
+      <BtnSubmit
+        isLoading={isLoading}
+        message="Signing in..."
+        className="signin__btn search__btn-submit"
+      >
+        Sign In
+      </BtnSubmit>
     </form>
   );
 }

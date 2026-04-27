@@ -46,6 +46,11 @@ export const requestFormSharedLibModule = {
   validateRequest: validateRequestMock,
   getErrorMessage: getErrorMessageMock,
   getLoggedInUser: getLoggedInUserMock,
+  initialSubmitState: {
+    errors: {},
+    statusMessage: '',
+    statusType: null,
+  },
 };
 
 export const requestListApiModule = {

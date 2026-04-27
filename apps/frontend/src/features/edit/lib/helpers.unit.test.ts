@@ -1,10 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import {
-  buildUpdatePayload,
-  initialSubmitState,
-  validateEmployeeForm,
-} from './helpers';
+import { buildUpdatePayload, validateEmployeeForm } from './helpers';
 import { EmployeeFormState } from '../model/state.types';
+import { initialSubmitState } from '@shared/lib';
 
 describe('validateEmployeeForm', () => {
   const validFormData: EmployeeFormState = {

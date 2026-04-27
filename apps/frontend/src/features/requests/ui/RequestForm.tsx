@@ -9,8 +9,7 @@ import {
 import { InputField, FormGroup, BtnSubmit, LazyImage } from '@shared/ui';
 import { getInitialState, submitRequest } from '../lib/helpers';
 import { SubmitState } from '../model/state.types';
-import { initialSubmitState } from '@/features/edit';
-import { getLoggedInUser } from '@shared/lib';
+import { getLoggedInUser, initialSubmitState } from '@shared/lib';
 import { useGetUsersQuery } from '../../usersApi';
 
 export default function RequestForm(): React.ReactElement {
@@ -23,23 +22,23 @@ export default function RequestForm(): React.ReactElement {
   const [addRequest] = useAddRequestMutation();
   const { formData } = state;
 
-  const [submitState, submitAction] = useActionState<SubmitState, FormData>(
-    async () => {
-      const loggedInUser = getLoggedInUser(allUsers);
-      const result = await submitRequest(
-        formData,
-        loggedInUser?._id ?? '',
-        addRequest,
-      );
+  const [submitState, submitAction, isPending] = useActionState<
+    SubmitState,
+    FormData
+  >(async () => {
+    const loggedInUser = getLoggedInUser(allUsers);
+    const result = await submitRequest(
+      formData,
+      loggedInUser?._id ?? '',
+      addRequest,
+    );
 
-      if (result.statusType === 'success') {
-        dispatch(resetForm());
-      }
+    if (result.statusType === 'success') {
+      dispatch(resetForm());
+    }
 
-      return result;
-    },
-    initialSubmitState,
-  );
+    return result;
+  }, initialSubmitState);
 
   return (
     <div className="request-form card">
@@ -99,7 +98,13 @@ export default function RequestForm(): React.ReactElement {
           )}
         </FormGroup>
 
-        <BtnSubmit className="btn-submit">Submit Request</BtnSubmit>
+        <BtnSubmit
+          isLoading={isPending}
+          message="Submitting"
+          className="btn-submit"
+        >
+          Submit Request
+        </BtnSubmit>
 
         {submitState.statusMessage && (
           <p

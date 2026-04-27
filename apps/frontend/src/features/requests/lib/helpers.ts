@@ -1,7 +1,10 @@
 import { FormState, IRequestData, SubmitState } from '../model/state.types';
 import { useAddRequestMutation } from '../api/RequestsApi';
-import { getErrorMessage, validateRequest } from '@shared/lib';
-import { initialSubmitState } from '@/features/edit';
+import {
+  getErrorMessage,
+  initialSubmitState,
+  validateRequest,
+} from '@shared/lib';
 
 export const getRequestFormState = (request: IRequestData): IRequestData => ({
   id: request.id,

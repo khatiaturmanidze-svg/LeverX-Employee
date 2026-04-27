@@ -13,7 +13,7 @@ export default function SignUpForm(): React.ReactElement {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
 
-  const [signUp] = useSignUpMutation();
+  const [signUp, { isLoading }] = useSignUpMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,7 +113,13 @@ export default function SignUpForm(): React.ReactElement {
       </div>
       {errorMessage && <p className="signup__form-error">{errorMessage}</p>}
 
-      <BtnSubmit className="search__btn-submit signup__btn">Sign Up</BtnSubmit>
+      <BtnSubmit
+        isLoading={isLoading}
+        message="Signing up"
+        className="search__btn-submit signup__btn"
+      >
+        Sign Up
+      </BtnSubmit>
     </form>
   );
 }
