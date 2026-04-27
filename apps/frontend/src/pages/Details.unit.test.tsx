@@ -8,12 +8,10 @@ import {
   detailsLoggedUser,
   detailsViewedEmployee,
   getLoggedInUserMock,
-  updateEmployeeMock,
   useGetHeaderPropsMock,
   useGetEmployeeDetailsQueryMock,
   useGetUsersQueryMock,
   useParamsMock,
-  useUpdateEmployeeMutationMock,
 } from './test-mocks';
 
 vi.mock(
@@ -37,11 +35,32 @@ vi.mock('@shared/ui', async (importOriginal) => {
 });
 
 vi.mock(
+  '@shared/ui/AvatarSection',
+  async () => (await import('./test-mocks')).detailsAvatarSectionModule,
+);
+
+vi.mock(
+  '@shared/ui/EmployeeView',
+  async () => (await import('./test-mocks')).detailsEmployeeViewModule,
+);
+
+vi.mock(
   '@features/edit',
   async () => (await import('./test-mocks')).detailsFeatureModule,
 );
 
+vi.mock(
+  '@features/edit/ui/EmployeeEditForm',
+  async () => (await import('./test-mocks')).detailsEmployeeEditFormModule,
+);
+
 describe('pages/Details', () => {
+  const resolveLazySections = async () => {
+    await act(async () => {
+      await Promise.resolve();
+    });
+  };
+
   const setupBaseMocks = () => {
     useParamsMock.mockReturnValue({ id: detailsViewedEmployee._id });
     useGetUsersQueryMock.mockReturnValue({ data: [detailsLoggedUser] });
@@ -55,29 +74,17 @@ describe('pages/Details', () => {
       isLoading: false,
       isError: false,
     });
-
-    updateEmployeeMock.mockReset();
-    updateEmployeeMock.mockReturnValue({
-      unwrap: () => Promise.resolve({}),
-    });
-    useUpdateEmployeeMutationMock.mockReturnValue([updateEmployeeMock]);
   };
 
   beforeEach(() => {
     localStorage.clear();
     sessionStorage.clear();
-    updateEmployeeMock.mockReset();
-    updateEmployeeMock.mockReturnValue({
-      unwrap: () => Promise.resolve({}),
-    });
-    useUpdateEmployeeMutationMock.mockReturnValue([updateEmployeeMock]);
     canEditMock.mockReset();
     getLoggedInUserMock.mockReset();
     useGetHeaderPropsMock.mockReset();
     useParamsMock.mockReset();
     useGetUsersQueryMock.mockReset();
     useGetEmployeeDetailsQueryMock.mockReset();
-    // useUpdateEmployeeMutationMock is set above to avoid crashes on destructuring.
   });
 
   it('renders loading state while employee details are loading', async () => {
@@ -101,8 +108,9 @@ describe('pages/Details', () => {
     await act(async () => {
       root.render(React.createElement(Details));
     });
+    await resolveLazySections();
 
-    expect(container.textContent).toContain('Loading Employee Details...');
+    expect(container.textContent).toContain('Loading...');
     expect(container.textContent).not.toContain('Employee not found');
 
     await act(async () => {
@@ -131,6 +139,7 @@ describe('pages/Details', () => {
     await act(async () => {
       root.render(React.createElement(Details));
     });
+    await resolveLazySections();
 
     expect(container.textContent).toContain('Employee not found');
 
@@ -165,6 +174,7 @@ describe('pages/Details', () => {
     await act(async () => {
       editBtn!.click();
     });
+    await resolveLazySections();
 
     expect(
       container.querySelector('[data-testid="employee-edit-form"]'),
@@ -175,7 +185,7 @@ describe('pages/Details', () => {
     });
   });
 
-  it('copies link when clicked and then saves successfully in edit mode', async () => {
+  it('copies link when clicked and then exits edit mode after save success', async () => {
     setupBaseMocks();
     canEditMock.mockReturnValue(true);
     localStorage.setItem('loggedInUser', 'admin@example.com');
@@ -192,6 +202,7 @@ describe('pages/Details', () => {
     await act(async () => {
       root.render(React.createElement(Details));
     });
+    await resolveLazySections();
 
     const copyBtn = container.querySelector(
       'button.avatar-section__copy',
@@ -210,6 +221,7 @@ describe('pages/Details', () => {
     await act(async () => {
       editBtn.click();
     });
+    await resolveLazySections();
 
     const saveBtn = Array.from(container.querySelectorAll('button')).find(
       (btn) => btn.textContent === 'Save success',
@@ -218,11 +230,6 @@ describe('pages/Details', () => {
 
     await act(async () => {
       saveBtn.click();
-    });
-
-    expect(updateEmployeeMock).toHaveBeenCalledWith({
-      id: detailsViewedEmployee._id,
-      update: { department: 'IT-Updated' },
     });
 
     // After save succeeds, Details should exit edit mode.

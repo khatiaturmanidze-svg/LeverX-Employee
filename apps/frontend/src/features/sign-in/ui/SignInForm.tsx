@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSignInMutation } from '../../authApi';
 import { getErrorMessage } from '@shared/lib';
+import { BtnSubmit } from '@/shared/ui';
 
 export default function SignInForm(): React.ReactElement {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ export default function SignInForm(): React.ReactElement {
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const [signIn] = useSignInMutation();
+  const [signIn, { isLoading }] = useSignInMutation();
 
   const handleSumbit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,9 +80,13 @@ export default function SignInForm(): React.ReactElement {
       </div>
 
       {errorMessage && <p className="signin__error">{errorMessage}</p>}
-      <button type="submit" className="signin__btn search__btn-submit">
+      <BtnSubmit
+        isLoading={isLoading}
+        message="Signing in..."
+        className="signin__btn search__btn-submit"
+      >
         Sign In
-      </button>
+      </BtnSubmit>
     </form>
   );
 }

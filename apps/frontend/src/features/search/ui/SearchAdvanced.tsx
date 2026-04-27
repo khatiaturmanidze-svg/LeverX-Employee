@@ -1,3 +1,4 @@
+import { BtnSubmit } from '@/shared/ui';
 import React, { useReducer } from 'react';
 
 export interface AdvancedSearchCriteria {
@@ -185,12 +186,12 @@ export default function SearchAdvanced({
         </select>
       </div>
 
-      <button
-        type="submit"
+      <BtnSubmit
+        message="Submitting"
         className="search__btn-submit search-form__advanced-submit"
       >
         submit
-      </button>
+      </BtnSubmit>
     </form>
   );
 }

@@ -1,6 +1,7 @@
 import { IEmployee } from '../../types/type';
 import React from 'react';
 import Icon from './Icon';
+import LazyImage from './LazyImage';
 
 interface AvatarSectionProps {
   user: IEmployee;
@@ -45,10 +46,11 @@ export default function AvatarSection({
   return (
     <div className="avatar-section">
       <div className="wrapper">
-        <img
+        <LazyImage
           src={user.user_avatar}
           alt="employee"
           className="avatar-section__img"
+          skeletonClassName="lazy-image--avatar"
         />
         {isRemoteWork}
       </div>

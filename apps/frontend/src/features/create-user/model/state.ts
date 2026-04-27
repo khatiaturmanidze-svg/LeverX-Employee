@@ -4,10 +4,7 @@ import {
   EmployeeFormState,
   FormState,
   SetFieldAction,
-  SubmitErrorAction,
   SetVisaAction,
-  SubmitStartAction,
-  SubmitSuccessAction,
 } from './state.types';
 
 import { IVisa } from '@/types/type';
@@ -40,12 +37,6 @@ export function createReducer(
         formData: { ...state.formData, visas },
       };
     }
-    case EmployeeCreateActionType.SUBMIT_START:
-      return { ...state, isSubmitting: true };
-    case EmployeeCreateActionType.SUBMIT_SUCCESS:
-      return { ...state, isSubmitting: false, errors: {} };
-    case EmployeeCreateActionType.SUBMIT_ERROR:
-      return { ...state, isSubmitting: false, errors: action.errors };
     default:
       return state;
   }
@@ -69,19 +60,4 @@ export const setVisa = <K extends keyof IVisa>(
   index,
   field,
   value,
-});
-
-export const submitStart = (): SubmitStartAction => ({
-  type: EmployeeCreateActionType.SUBMIT_START,
-});
-
-export const submitSuccess = (): SubmitSuccessAction => ({
-  type: EmployeeCreateActionType.SUBMIT_SUCCESS,
-});
-
-export const submitError = (
-  errors: Record<string, string>,
-): SubmitErrorAction => ({
-  type: EmployeeCreateActionType.SUBMIT_ERROR,
-  errors,
 });

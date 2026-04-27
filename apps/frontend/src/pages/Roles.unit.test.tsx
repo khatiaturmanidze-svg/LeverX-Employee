@@ -31,7 +31,18 @@ vi.mock(
   async () => (await import('./test-mocks')).rolesFeatureModule,
 );
 
+vi.mock(
+  '@features/role-change/ui/RolesEmployee',
+  async () => (await import('./test-mocks')).rolesFeatureModule,
+);
+
 describe('pages/Roles', () => {
+  const resolveLazySections = async () => {
+    await act(async () => {
+      await Promise.resolve();
+    });
+  };
+
   beforeEach(() => {
     useGetUsersQueryMock.mockReset();
     getLoggedInUserMock.mockReset();
@@ -70,6 +81,7 @@ describe('pages/Roles', () => {
     await act(async () => {
       root.render(React.createElement(Roles));
     });
+    await resolveLazySections();
 
     expect(container.querySelector('[data-testid="header"]')?.textContent).toBe(
       'header:Admin:true',
@@ -91,6 +103,7 @@ describe('pages/Roles', () => {
     await act(async () => {
       root.render(React.createElement(Roles));
     });
+    await resolveLazySections();
 
     const searchInput = container.querySelector(
       'input.section-roles__search',
@@ -100,6 +113,7 @@ describe('pages/Roles', () => {
     await act(async () => {
       setInputValue(searchInput, 'Ja');
     });
+    await resolveLazySections();
 
     const items = container.querySelectorAll('[data-testid="role-employee"]');
     expect(items).toHaveLength(1);
@@ -124,6 +138,7 @@ describe('pages/Roles', () => {
     await act(async () => {
       root.render(React.createElement(Roles));
     });
+    await resolveLazySections();
 
     const errorNode = container.querySelector(
       'p.section-roles__error',

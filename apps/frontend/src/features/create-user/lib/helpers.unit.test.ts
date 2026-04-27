@@ -1,14 +1,23 @@
 import { describe, expect, it } from 'vitest';
-import { initialState, validateCreateUserForm } from './helpers';
+import {
+  initialState,
+  initialSubmitState,
+  validateCreateUserForm,
+} from './helpers';
 
 describe('create-user helpers', () => {
   it('provides expected initial state', () => {
-    expect(initialState.isSubmitting).toBe(false);
-    expect(initialState.errors).toEqual({});
     expect(initialState.formData.first_name).toBe('');
     expect(initialState.formData.role).toBe('Employee');
     expect(initialState.formData.isRemoteWork).toBe(false);
     expect(initialState.formData.visas).toEqual([]);
+  });
+
+  it('provides expected initial submit state', () => {
+    expect(initialSubmitState.errors).toEqual({});
+    expect(initialSubmitState.statusMessage).toBe('');
+    expect(initialSubmitState.statusType).toBeNull();
+    expect(initialSubmitState.temporaryPassword).toBe('');
   });
 
   it('returns no validation errors for valid form data', () => {

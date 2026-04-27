@@ -35,7 +35,28 @@ vi.mock(import('@features/requests'), async (importOriginal) => {
   return requestsFeatureFactory(importOriginal);
 });
 
+vi.mock(
+  '@features/requests/ui/Managers',
+  async () => (await import('./test-mocks')).requestsManagersModule,
+);
+
+vi.mock(
+  '@features/requests/ui/RequestForm',
+  async () => (await import('./test-mocks')).requestsRequestFormModule,
+);
+
+vi.mock(
+  '@features/requests/ui/RequestList',
+  async () => (await import('./test-mocks')).requestsRequestListModule,
+);
+
 describe('pages/Requests', () => {
+  const resolveLazySections = async () => {
+    await act(async () => {
+      await Promise.resolve();
+    });
+  };
+
   beforeEach(() => {
     useGetUsersQueryMock.mockReset();
     getLoggedInUserMock.mockReset();
@@ -59,6 +80,7 @@ describe('pages/Requests', () => {
     await act(async () => {
       root.render(React.createElement(Requests));
     });
+    await resolveLazySections();
 
     expect(container.querySelector('[data-testid="header"]')?.textContent).toBe(
       `header:${loggedUser.role}:true`,
@@ -97,6 +119,7 @@ describe('pages/Requests', () => {
     await act(async () => {
       root.render(React.createElement(Requests));
     });
+    await resolveLazySections();
 
     expect(container.querySelector('[data-testid="header"]')?.textContent).toBe(
       `header:${nonAdminUser.role}:false`,

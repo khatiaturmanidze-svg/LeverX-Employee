@@ -27,12 +27,38 @@ vi.mock('@shared/ui', async (importOriginal) => {
   return mainSharedUiFactory(importOriginal);
 });
 
+vi.mock(
+  '@shared/ui/EmployeeHeader',
+  async () => (await import('./test-mocks')).mainEmployeeHeaderModule,
+);
+
+vi.mock(
+  '@shared/ui/EmployeeContainer',
+  async () => (await import('./test-mocks')).mainEmployeeContainerModule,
+);
+
 vi.mock('@features/search', async (importOriginal) => {
   const { mainSearchFeatureFactory } = await import('./test-mocks');
   return mainSearchFeatureFactory(importOriginal);
 });
 
+vi.mock(
+  '@features/search/ui/SearchBasic',
+  async () => (await import('./test-mocks')).mainSearchBasicModule,
+);
+
+vi.mock(
+  '@features/search/ui/SearchAdvanced',
+  async () => (await import('./test-mocks')).mainSearchAdvancedModule,
+);
+
 describe('pages/Main', () => {
+  const resolveLazySections = async () => {
+    await act(async () => {
+      await Promise.resolve();
+    });
+  };
+
   beforeEach(() => {
     resetMainSearchCriteria();
     useGetUsersQueryMock.mockReturnValue({ data: mainUsers });
@@ -50,6 +76,7 @@ describe('pages/Main', () => {
     await act(async () => {
       root.render(React.createElement(Main));
     });
+    await resolveLazySections();
 
     expect(
       container.querySelector('[data-testid="basic-search"]'),
@@ -84,6 +111,7 @@ describe('pages/Main', () => {
     await act(async () => {
       root.render(React.createElement(Main));
     });
+    await resolveLazySections();
 
     await act(async () => {
       const submitBtn = container.querySelector(
@@ -110,6 +138,7 @@ describe('pages/Main', () => {
     await act(async () => {
       root.render(React.createElement(Main));
     });
+    await resolveLazySections();
 
     const advancedTab = Array.from(container.querySelectorAll('button')).find(
       (btn) => btn.textContent === 'advanced search',
@@ -119,6 +148,7 @@ describe('pages/Main', () => {
     await act(async () => {
       (advancedTab as HTMLButtonElement).click();
     });
+    await resolveLazySections();
 
     expect(
       container.querySelector('[data-testid="advanced-search"]'),

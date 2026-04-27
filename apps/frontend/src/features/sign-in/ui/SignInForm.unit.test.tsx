@@ -10,7 +10,7 @@ vi.mock('react-router-dom', () => ({
 }));
 
 vi.mock('../../authApi', () => ({
-  useSignInMutation: () => [signInMock],
+  useSignInMutation: () => [signInMock, { isLoading: false }],
 }));
 vi.mock('@shared/lib', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@shared/lib')>();

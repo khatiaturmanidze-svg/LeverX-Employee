@@ -1,3 +1,4 @@
+import { BtnSubmit } from '@/shared/ui';
 import React, { useState } from 'react';
 
 export interface SearchCriteria {
@@ -32,12 +33,12 @@ export default function SearchBasic({
         onChange={(e) => setFullname(e.target.value)}
       />
 
-      <button
-        type="submit"
+      <BtnSubmit
+        message="Searching"
         className="search__btn-submit search-form__basic-submit"
       >
         search
-      </button>
+      </BtnSubmit>
     </form>
   );
 }

@@ -4,10 +4,7 @@ import {
   EmployeeFormState,
   FormState,
   SetFieldAction,
-  SubmitErrorAction,
   SetVisaAction,
-  SubmitStartAction,
-  SubmitSuccessAction,
 } from './state.types';
 
 import { IVisa } from '@/types/type';
@@ -40,12 +37,7 @@ export function editReducer(
         formData: { ...state.formData, visas },
       };
     }
-    case EmployeeEditActionType.SUBMIT_START:
-      return { ...state, isSubmitting: true };
-    case EmployeeEditActionType.SUBMIT_SUCCESS:
-      return { ...state, isSubmitting: false, errors: {} };
-    case EmployeeEditActionType.SUBMIT_ERROR:
-      return { ...state, isSubmitting: false, errors: action.errors };
+
     default:
       return state;
   }
@@ -60,13 +52,6 @@ export const setField = <K extends keyof EmployeeFormState>(
   value,
 });
 
-export const submitError = (
-  errors: Record<string, string>,
-): SubmitErrorAction => ({
-  type: EmployeeEditActionType.SUBMIT_ERROR,
-  errors,
-});
-
 export const setVisa = <K extends keyof IVisa>(
   index: number,
   field: K,
@@ -76,12 +61,4 @@ export const setVisa = <K extends keyof IVisa>(
   index,
   field,
   value,
-});
-
-export const submitStart = (): SubmitStartAction => ({
-  type: EmployeeEditActionType.SUBMIT_START,
-});
-
-export const submitSuccess = (): SubmitSuccessAction => ({
-  type: EmployeeEditActionType.SUBMIT_SUCCESS,
 });

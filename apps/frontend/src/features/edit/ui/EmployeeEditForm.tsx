@@ -1,73 +1,41 @@
-import React, { useReducer } from 'react';
-import { IEmployee, EmployeeUpdate, IVisa } from '@/types/type';
+import React, { useActionState, useReducer } from 'react';
+import { IEmployee, IVisa } from '@/types/type';
 import { DetailRow } from './DetailRow';
 import VisaEditorList from './VisaEditorList';
-import { getInitialState, validateEmployeeForm } from '../lib/helpers';
-import { EmployeeFormState } from '../model/state.types';
-import {
-  editReducer,
-  setField,
-  setVisa,
-  submitError,
-  submitStart,
-  submitSuccess,
-} from '../model/state';
+import { getInitialState, submitEditUser } from '../lib/helpers';
+import { EmployeeFormState, SubmitState } from '../model/state.types';
+import { editReducer, setField, setVisa } from '../model/state';
+import { useUpdateEmployeeMutation } from '@/features/usersApi';
+import { BtnSubmit } from '@/shared/ui';
+import { initialSubmitState } from '@/shared/lib';
 
 interface EmployeEditFormProps {
   user: IEmployee;
   onCancel: () => void;
-  onSaveSuccess: (updatedUser: EmployeeUpdate) => void;
 }
 
-export function EmployeeEditForm({
-  user,
-  onCancel,
-  onSaveSuccess,
-}: EmployeEditFormProps) {
+export function EmployeeEditForm({ user, onCancel }: EmployeEditFormProps) {
   const [state, dispatch] = useReducer(editReducer, user, getInitialState);
-  const { formData, isSubmitting, errors } = state;
+  const [updateEmployee, { isLoading }] = useUpdateEmployeeMutation();
+  const { formData } = state;
 
   const handleInputChange = (
     fieldName: keyof EmployeeFormState,
     newValue: string,
   ) => dispatch(setField(fieldName, newValue));
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    dispatch(submitStart());
+  const [submitState, submitAction, isPending] = useActionState<
+    SubmitState,
+    FormData
+  >(async () => {
+    const result = await submitEditUser(formData, user._id, updateEmployee);
 
-    const validationErrors = validateEmployeeForm(formData);
-    if (Object.keys(validationErrors).length > 0) {
-      dispatch(submitError(validationErrors));
-      return;
+    if (result.statusType === 'success') {
+      onCancel();
     }
 
-    dispatch(submitSuccess());
-
-    const [year, month, day] = formData.date_birth
-      ? formData.date_birth.split('-').map(Number)
-      : [];
-
-    const updatePayload: EmployeeUpdate = {
-      department: formData.department,
-      building: formData.building,
-      room: formData.room,
-      desk_number: formData.desk_number ? Number(formData.desk_number) : null,
-      phone: formData.phone,
-      email: formData.email,
-      zoom_id: formData.zoom_id,
-      zoom_link: formData.zoom_link,
-      citizenship: formData.citizenship,
-
-      first_native_name: formData.first_native_name,
-      last_native_name: formData.last_native_name,
-
-      date_birth: formData.date_birth ? { year, month, day } : undefined,
-
-      manager: formData.manager_id || undefined,
-    };
-    onSaveSuccess(updatePayload);
-  };
+    return result;
+  }, initialSubmitState);
 
   const handleVisaChange = (
     index: number,
@@ -99,66 +67,90 @@ export function EmployeeEditForm({
   };
 
   return (
-    <form className="employee-edit-form" onSubmit={handleSubmit}>
+    <form className="employee-edit-form" action={submitAction}>
       <h2 className="details-section__general">General Info</h2>
       {renderEditableRow('briefcase-icon', 'Department', 'department')}
-      {errors.department && <p className="form-error">{errors.department}</p>}
+      {submitState.errors.department && (
+        <p className="form-error">{submitState.errors.department}</p>
+      )}
       {renderEditableRow('building-icon', 'Building', 'building')}
-      {errors.building && <p className="form-error">{errors.building}</p>}
+      {submitState.errors.building && (
+        <p className="form-error">{submitState.errors.building}</p>
+      )}
 
       {renderEditableRow('door-icon', 'Room', 'room')}
-      {errors.room && <p className="form-error">{errors.room}</p>}
+      {submitState.errors.room && (
+        <p className="form-error">{submitState.errors.room}</p>
+      )}
 
       {renderEditableRow('hashtag-icon', 'Desk Number', 'desk_number')}
-      {errors.desk_number && <p className="form-error">{errors.desk_number}</p>}
+      {submitState.errors.desk_number && (
+        <p className="form-error">{submitState.errors.desk_number}</p>
+      )}
 
       {renderEditableRow('user-icon', 'First Native Name', 'first_native_name')}
-      {errors.first_native_name && (
-        <p className="form-error">{errors.first_native_name}</p>
+      {submitState.errors.first_native_name && (
+        <p className="form-error">{submitState.errors.first_native_name}</p>
       )}
 
       {renderEditableRow('user-icon', 'Last Native Name', 'last_native_name')}
-      {errors.last_native_name && (
-        <p className="form-error">{errors.last_native_name}</p>
+      {submitState.errors.last_native_name && (
+        <p className="form-error">{submitState.errors.last_native_name}</p>
       )}
 
       {renderEditableRow('calendar-icon', 'Date of Birth', 'date_birth')}
-      {errors.date_birth && <p className="form-error">{errors.date_birth}</p>}
+      {submitState.errors.date_birth && (
+        <p className="form-error">{submitState.errors.date_birth}</p>
+      )}
 
       <h2 className="details-section__general">Contacts</h2>
       {renderEditableRow('mobile-icon', 'Phone', 'phone')}
-      {errors.phone && <p className="form-error">{errors.phone}</p>}
+      {submitState.errors.phone && (
+        <p className="form-error">{submitState.errors.phone}</p>
+      )}
 
       {renderEditableRow('at-icon', 'Email', 'email')}
-      {errors.email && <p className="form-error">{errors.email}</p>}
+      {submitState.errors.email && (
+        <p className="form-error">{submitState.errors.email}</p>
+      )}
 
       {renderEditableRow('zoom-icon', 'Zoom ID', 'zoom_id')}
-      {errors.zoom_id && <p className="form-error">{errors.zoom_id}</p>}
+      {submitState.errors.zoom_id && (
+        <p className="form-error">{submitState.errors.zoom_id}</p>
+      )}
 
       {renderEditableRow('zoom-icon', 'Zoom Link', 'zoom_link')}
-      {errors.zoom_link && <p className="form-error">{errors.zoom_link}</p>}
+      {submitState.errors.zoom_link && (
+        <p className="form-error">{submitState.errors.zoom_link}</p>
+      )}
 
       <h2 className="details-section__general">Travel Info</h2>
       {renderEditableRow('globe-icon', 'Citizenship', 'citizenship')}
-      {errors.citizenship && <p className="form-error">{errors.citizenship}</p>}
+      {submitState.errors.citizenship && (
+        <p className="form-error">{submitState.errors.citizenship}</p>
+      )}
 
       <VisaEditorList visas={formData.visas} onVisaChange={handleVisaChange} />
 
+      {submitState.statusMessage && submitState.statusType === 'error' && (
+        <p className="form-error">{submitState.statusMessage}</p>
+      )}
+
       <div className="details-section__btns">
-        <button
-          type="submit"
+        <BtnSubmit
+          isLoading={isPending || isLoading}
+          message="Saving..."
           className="details-section__row-save"
-          disabled={isSubmitting}
         >
-          {isSubmitting ? 'Saving...' : 'Save'}
-        </button>
+          Save
+        </BtnSubmit>
         <button
           type="button"
           className="details-section__row-cancel"
           onClick={onCancel}
-          disabled={isSubmitting}
+          disabled={isPending || isLoading}
         >
-          {isSubmitting ? 'Canceling...' : 'Cancel'}
+          {isPending || isLoading ? 'Canceling...' : 'Cancel'}
         </button>
       </div>
     </form>

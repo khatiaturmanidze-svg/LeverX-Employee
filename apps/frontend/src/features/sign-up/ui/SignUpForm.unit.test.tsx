@@ -9,7 +9,7 @@ vi.mock('react-router-dom', () => ({
 }));
 
 vi.mock('../../authApi', () => ({
-  useSignUpMutation: () => [signUpMock],
+  useSignUpMutation: () => [signUpMock, { isLoading: false }],
 }));
 
 vi.mock('@shared/lib', async () => {

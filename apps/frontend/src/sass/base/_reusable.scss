@@ -6,3 +6,122 @@
   justify-content: center;
   gap: $space-md;
 }
+
+.loading {
+  min-height: min(50vh, 32rem);
+  width: 100%;
+  display: flex;
+  margin: 10rem 3rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $space-sm;
+  padding: $space-lg;
+  color: $color-1000;
+
+  &__text {
+    margin: 0;
+    color: $color-font;
+    font-size: $font-small;
+    font-weight: 600;
+  }
+}
+
+.loading__spinner {
+  position: relative;
+  width: 5.6rem;
+  height: 5.6rem;
+
+  &:before,
+  &:after {
+    content: '';
+    border-radius: 50%;
+    position: absolute;
+    inset: 0;
+  }
+
+  &:before {
+    border: 0.45rem solid $color-100;
+  }
+
+  &:after {
+    border: 0.45rem solid transparent;
+    border-top-color: $color-1000;
+    border-right-color: $color-500;
+    animation: rotate 0.8s linear infinite;
+  }
+}
+
+.lazy-image {
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    90deg,
+    $color-lighter-grey 0%,
+    $color-100 45%,
+    $color-lighter-grey 90%
+  );
+  background-size: 220% 100%;
+  animation: skeleton-shimmer 1.2s ease-in-out infinite;
+
+  img {
+    display: block;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  &--loaded {
+    background: transparent;
+    animation: none;
+
+    img {
+      opacity: 1;
+    }
+  }
+
+  &__fallback {
+    min-height: 6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: $space-sm;
+    border: 1px solid $color-grey;
+    background-color: $color-lighter-grey;
+    color: $color-darker-grey;
+    font-size: $font-smallest;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  &--avatar,
+  &--employee-grid,
+  &--employee-menu,
+  &--role-employee,
+  &--manager {
+    border-radius: 50%;
+  }
+
+  &--request,
+  &--empty-state {
+    border-radius: $radius-small;
+  }
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 120% 0;
+  }
+  100% {
+    background-position: -120% 0;
+  }
+}

@@ -6,6 +6,7 @@ export const useGetUsersQueryMock = vi.fn();
 export const getUserByIdMock = vi.fn();
 export const useAddRequestMutationMock = vi.fn();
 export const validateRequestMock = vi.fn();
+export const getErrorMessageMock = vi.fn();
 export const getLoggedInUserMock = vi.fn();
 export const addRequestMock = vi.fn();
 export const useGetRequestsQueryMock = vi.fn();
@@ -43,7 +44,13 @@ export const requestFormApiModule = {
 
 export const requestFormSharedLibModule = {
   validateRequest: validateRequestMock,
+  getErrorMessage: getErrorMessageMock,
   getLoggedInUser: getLoggedInUserMock,
+  initialSubmitState: {
+    errors: {},
+    statusMessage: '',
+    statusType: null,
+  },
 };
 
 export const requestListApiModule = {
@@ -72,6 +79,15 @@ export const requestListSharedLibModule = {
 };
 
 export const requestListSharedUiModule = {
+  LazyImage: ({
+    src,
+    alt,
+    className,
+  }: {
+    src: string;
+    alt: string;
+    className?: string;
+  }) => React.createElement('img', { src, alt, className }),
   TabGroup: ({
     tabs,
   }: {

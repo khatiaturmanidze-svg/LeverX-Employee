@@ -1,21 +1,29 @@
-import { getEmployeeFormState } from '../lib/helpers';
 import { IVisa } from '@/types/type';
 
-export type EmployeeFormState = ReturnType<typeof getEmployeeFormState> & {
+export type EmployeeFormState = {
+  department: string;
+  building: string;
+  room: string;
+  desk_number: string;
+  phone: string;
+  email: string;
+  zoom_id: string;
+  zoom_link: string;
+  citizenship: string;
+  first_native_name: string;
+  last_native_name: string;
+  date_birth: string;
+  manager_id: string;
   visas: IVisa[];
 };
 
 export interface FormState {
   formData: EmployeeFormState;
-  isSubmitting: boolean;
-  errors: Record<string, string>;
 }
+
 export enum EmployeeEditActionType {
   SET_FIELD = 'SET_FIELD',
   SET_VISA = 'SET_VISA',
-  SUBMIT_START = 'SUBMIT_START',
-  SUBMIT_SUCCESS = 'SUBMIT_SUCCESS',
-  SUBMIT_ERROR = 'SUBMIT_ERROR',
 }
 
 export type SetFieldAction<
@@ -33,22 +41,11 @@ export type SetVisaAction<K extends keyof IVisa = keyof IVisa> = {
   value: IVisa[K];
 };
 
-export type SubmitStartAction = {
-  type: EmployeeEditActionType.SUBMIT_START;
-};
-
-export type SubmitSuccessAction = {
-  type: EmployeeEditActionType.SUBMIT_SUCCESS;
-};
-
-export type SubmitErrorAction = {
-  type: EmployeeEditActionType.SUBMIT_ERROR;
+// current result of action
+export interface SubmitState {
   errors: Record<string, string>;
-};
+  statusMessage: string;
+  statusType: 'success' | 'error' | null;
+}
 
-export type EmployeeEditAction =
-  | SetFieldAction
-  | SetVisaAction
-  | SubmitStartAction
-  | SubmitSuccessAction
-  | SubmitErrorAction;
+export type EmployeeEditAction = SetFieldAction | SetVisaAction;

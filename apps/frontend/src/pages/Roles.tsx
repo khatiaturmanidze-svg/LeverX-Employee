@@ -1,12 +1,17 @@
-import React, { useState } from 'react';
+import React, { lazy, Suspense, useState } from 'react';
 import { Header } from '@shared/ui';
-import { RolesEmployee } from '@features/role-change';
 import { useGetUsersQuery } from '../features/usersApi';
 import {
   useFilteredItems,
   useRoleChange,
   useGetHeaderProps,
 } from '@shared/lib';
+import Loading from '@/shared/ui/Loading';
+
+const RolesEmployee = lazy(async () => {
+  const module = await import('@features/role-change/ui/RolesEmployee');
+  return { default: module.RolesEmployee };
+});
 
 export default function Roles(): React.ReactElement {
   const [searchTerm, setSearchTerm] = useState('');
@@ -41,14 +46,16 @@ export default function Roles(): React.ReactElement {
           {error && <p className="section-roles__error">{error}</p>}
           <p className="section-roles__book">Address book role</p>
           <p className="section-roles__admin">Admin</p>
-          {filteredUsers.map((user) => (
-            <RolesEmployee
-              key={user._id}
-              user={user}
-              isAdmin={isAdmin}
-              onRoleChange={handleRoleChange}
-            />
-          ))}
+          <Suspense fallback={<Loading />}>
+            {filteredUsers.map((user) => (
+              <RolesEmployee
+                key={user._id}
+                user={user}
+                isAdmin={isAdmin}
+                onRoleChange={handleRoleChange}
+              />
+            ))}
+          </Suspense>
         </section>
       </main>
     </>

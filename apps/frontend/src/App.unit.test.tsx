@@ -4,8 +4,36 @@ import { render, screen, waitFor } from '@testing-library/react';
 import App from './App';
 
 vi.mock(
-  '@/pages',
-  async () => (await import('./App.unit.test.mocks')).mockPagesModule,
+  '@/pages/SignIn',
+  async () => (await import('./App.unit.test.mocks')).signInPageModule,
+);
+vi.mock(
+  '@/pages/SignUp',
+  async () => (await import('./App.unit.test.mocks')).signUpPageModule,
+);
+vi.mock(
+  '@/pages/NewPassword',
+  async () => (await import('./App.unit.test.mocks')).newPasswordPageModule,
+);
+vi.mock(
+  '@/pages/Main',
+  async () => (await import('./App.unit.test.mocks')).mainPageModule,
+);
+vi.mock(
+  '@/pages/Details',
+  async () => (await import('./App.unit.test.mocks')).detailsPageModule,
+);
+vi.mock(
+  '@/pages/Roles',
+  async () => (await import('./App.unit.test.mocks')).rolesPageModule,
+);
+vi.mock(
+  '@/pages/Requests',
+  async () => (await import('./App.unit.test.mocks')).requestsPageModule,
+);
+vi.mock(
+  '@/pages/Create',
+  async () => (await import('./App.unit.test.mocks')).createPageModule,
 );
 
 describe('App', () => {
