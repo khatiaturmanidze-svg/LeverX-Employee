@@ -1,6 +1,7 @@
 import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Loading from './shared/ui/Loading';
+import TestRenderingPage from './pages/test-rendering/TestRenderingPage';
 
 const SignIn = lazy(() => import('@/pages/SignIn'));
 const SignUp = lazy(() => import('@/pages/SignUp'));
@@ -30,7 +31,6 @@ export default function App() {
       <Suspense fallback={<Loading />}>
         <Routes>
           <Route path="/" element={<Navigate to="/signin" replace />} />
-
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
           <Route
@@ -41,7 +41,6 @@ export default function App() {
               </PrivateRoute>
             }
           />
-
           <Route
             path="/main"
             element={
@@ -74,7 +73,6 @@ export default function App() {
               </PrivateRoute>
             }
           />
-
           <Route
             path="/create"
             element={
@@ -82,7 +80,8 @@ export default function App() {
                 <Create />
               </PrivateRoute>
             }
-          />
+          />{' '}
+          <Route path="rendering-test" element={<TestRenderingPage />} />
         </Routes>
       </Suspense>
     </BrowserRouter>
