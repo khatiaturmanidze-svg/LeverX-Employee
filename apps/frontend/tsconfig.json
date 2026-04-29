@@ -19,6 +19,7 @@
       "vite/client",
       "vitest/globals",
       "@testing-library/jest-dom",
+      "@webgpu/types",
       "react/canary",
       "react-dom/canary"
     ]

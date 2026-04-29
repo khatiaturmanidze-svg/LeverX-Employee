@@ -27,6 +27,7 @@
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.7.0",
     "@vitest/coverage-v8": "^4.1.1",
+    "@webgpu/types": "^0.1.69",
     "jsdom": "^24.1.0",
     "sass": "^1.98.0",
     "typescript": "^5.9.3",
