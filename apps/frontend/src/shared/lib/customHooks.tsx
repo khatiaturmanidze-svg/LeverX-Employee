@@ -48,10 +48,10 @@ export function useGetManager(employeeId: string) {
 }
 
 export function useGetHeaderProps() {
-  const { data: allUsers = [] } = useGetUsersQuery();
+  const { data: allUsers = [], isLoading } = useGetUsersQuery();
   const loggedUser = useMemo(() => {
     return getLoggedInUser(allUsers) || null;
   }, [allUsers]);
   const isAdmin = useMemo(() => loggedUser?.role === 'Admin', [loggedUser]);
-  return { loggedUser, isAdmin };
+  return { loggedUser, isAdmin, isLoading };
 }

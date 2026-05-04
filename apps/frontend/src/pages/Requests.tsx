@@ -10,7 +10,12 @@ const RequestForm = lazy(() => import('@features/requests/ui/RequestForm'));
 const RequestList = lazy(() => import('@features/requests/ui/RequestList'));
 
 export default function Requests(): React.ReactElement {
-  const { loggedUser, isAdmin } = useGetHeaderProps();
+  const { loggedUser, isAdmin, isLoading } = useGetHeaderProps();
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
   return (
     <div className="page">
       <Header loggedInUser={loggedUser || null} isAdmin={isAdmin} />{' '}

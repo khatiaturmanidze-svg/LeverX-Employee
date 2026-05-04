@@ -12,7 +12,12 @@ const CreateUserUpload = lazy(
 );
 
 export default function Create(): React.ReactElement {
-  const { loggedUser, isAdmin } = useGetHeaderProps();
+  const { loggedUser, isAdmin, isLoading } = useGetHeaderProps();
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
   return (
     <div className="create-page">
       <Header loggedInUser={loggedUser} isAdmin={isAdmin} />
