@@ -34,11 +34,19 @@ export default function EmployeeContainer({
   return (
     <div
       className={
-        isGrid ? 'employee-grid__container' : 'employee-menu__container'
+        isGrid
+          ? 'employee-grid__container'
+          : isTable
+            ? 'employee-table__container'
+            : 'employee-menu__container'
       }
     >
       {isMenu && <ListHeader />}
-      {isTable ? <EmployeeTable /> : employeeItems}
+      {isTable ? (
+        <EmployeeTable users={users} onViewDetails={handleEmployeeClick} />
+      ) : (
+        employeeItems
+      )}
     </div>
   );
 }
