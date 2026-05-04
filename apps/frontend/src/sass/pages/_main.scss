@@ -316,7 +316,8 @@
 
 .view-toggle {
   &__icon-menu,
-  &__icon-grid {
+  &__icon-grid,
+  &__icon-table {
     font-size: 2.5rem;
     cursor: pointer;
     color: $color-grey;

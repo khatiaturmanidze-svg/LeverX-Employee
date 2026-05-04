@@ -1,23 +1,24 @@
 import React, { useState } from 'react';
 import { IEmployee } from '../../types/type';
-import { TabGroup } from '@shared/ui';
+import { Icon, TabGroup } from '@shared/ui';
 
 interface EmployeeHeaderProps {
   users: IEmployee[];
-  onViewChange: (mode: 'grid' | 'list') => void;
+  onViewChange: (mode: 'grid' | 'list' | 'table') => void;
 }
 
 export default function EmployeeHeader({
   users,
   onViewChange,
 }: EmployeeHeaderProps): React.ReactElement {
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'table'>('grid');
 
-  const handleViewToggle = (mode: 'grid' | 'list') => {
+  const handleViewToggle = (mode: 'grid' | 'list' | 'table') => {
     setViewMode(mode);
     onViewChange(mode);
   };
   const isGrid = viewMode === 'grid';
+  const isList = viewMode === 'list';
   const employeeCount = users.length;
 
   return (
@@ -38,78 +39,44 @@ export default function EmployeeHeader({
                 onClick: () => handleViewToggle('grid'),
                 className: 'view-toggle__icon-grid',
                 label: (
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                    <rect
-                      x="48"
-                      y="48"
-                      width="176"
-                      height="176"
-                      rx="20"
-                      ry="20"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="32"
-                    />
-                    <rect
-                      x="288"
-                      y="48"
-                      width="176"
-                      height="176"
-                      rx="20"
-                      ry="20"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="32"
-                    />
-                    <rect
-                      x="48"
-                      y="288"
-                      width="176"
-                      height="176"
-                      rx="20"
-                      ry="20"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="32"
-                    />
-                    <rect
-                      x="288"
-                      y="288"
-                      width="176"
-                      height="176"
-                      rx="20"
-                      ry="20"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="32"
-                    />
-                  </svg>
+                  <Icon
+                    src={`${isGrid ? '/svgs/grid_view-active.svg' : '/svgs/grid_view.svg'}`}
+                    alt="Grid View"
+                    className="view-toggle__icon-grid"
+                    width={24}
+                    height={24}
+                  />
                 ),
               },
               {
                 id: 'list',
-                isActive: !isGrid,
+                isActive: isList,
                 onClick: () => handleViewToggle('list'),
                 className: 'view-toggle__icon-menu',
                 label: (
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                    <path
-                      fill="none"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeMiterlimit="10"
-                      strokeWidth="32"
-                      d="M80 160h352M80 256h352M80 352h352"
-                    />
-                  </svg>
+                  <Icon
+                    src={`${isList ? '/svgs/menu_view-active.svg' : '/svgs/menu_view.svg'}`}
+                    alt="List View"
+                    className="view-toggle__icon-menu"
+                    width={24}
+                    height={24}
+                  />
+                ),
+              },
+
+              {
+                id: 'table',
+                isActive: !isGrid && !isList,
+                onClick: () => handleViewToggle('table'),
+                className: 'view-toggle__icon-table',
+                label: (
+                  <Icon
+                    src={`${!isGrid && !isList ? '/svgs/table_view-active.svg' : '/svgs/table_view.svg'}`}
+                    alt="Table View"
+                    className="view-toggle__icon-table"
+                    width={24}
+                    height={24}
+                  />
                 ),
               },
             ]}

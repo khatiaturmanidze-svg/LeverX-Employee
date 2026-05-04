@@ -26,7 +26,7 @@ export default function Main(): React.ReactElement {
   );
   const [advancedCriteria, setAdvancedCriteria] =
     useState<AdvancedSearchCriteria | null>(null);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'table'>('grid');
   const { data: allUsers = [], isLoading: isUsersLoading } = useGetUsersQuery();
   const {
     loggedUser,
