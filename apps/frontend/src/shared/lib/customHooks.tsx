@@ -55,3 +55,17 @@ export function useGetHeaderProps() {
   const isAdmin = useMemo(() => loggedUser?.role === 'Admin', [loggedUser]);
   return { loggedUser, isAdmin, isLoading };
 }
+
+export function useCanEdit(targetUser: IEmployee | null) {
+  const { data: allUsers = [] } = useGetUsersQuery();
+  const loggedUser = useMemo(() => {
+    return getLoggedInUser(allUsers) || null;
+  }, [allUsers]);
+
+  return useMemo(() => {
+    if (!loggedUser) return false;
+    return (
+      loggedUser.role === 'Admin' || loggedUser._id === targetUser?.manager?.id
+    );
+  }, [loggedUser, targetUser]);
+}
