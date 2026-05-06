@@ -46,7 +46,18 @@ const baseRowData = (): EmployeeRowData => ({
 });
 
 const renderRow = (rowData: EmployeeRowData = baseRowData()) =>
-  render(<EmployeeRow index={0} style={{}} {...rowData} />);
+  render(
+    <EmployeeRow
+      ariaAttributes={{
+        'aria-posinset': 1,
+        'aria-setsize': users.length,
+        role: 'listitem',
+      }}
+      index={0}
+      style={{}}
+      {...rowData}
+    />,
+  );
 
 describe('EmployeeRow', () => {
   beforeEach(() => {
