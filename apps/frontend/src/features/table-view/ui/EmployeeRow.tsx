@@ -25,6 +25,7 @@ export default function EmployeeRow({
   const isEditing = editingUserId === user._id;
   const draft = drafts[user._id] || {};
   const rowError = rowErrors[user._id];
+  const canEdit = useCanEdit(user);
   const getValue = (field: EditableEmployeeField) => {
     // If the user typed a draft value, show that instead of saved data so they can see their in-progress changes.
     if (draft[field] !== undefined) return draft[field];
@@ -120,7 +121,7 @@ export default function EmployeeRow({
             >
               Details
             </button>
-            {useCanEdit(user) && (
+            {canEdit && (
               <button
                 type="button"
                 className="employee-table__edit-btn"
