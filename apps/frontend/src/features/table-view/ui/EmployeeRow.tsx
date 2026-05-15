@@ -46,7 +46,7 @@ export default function EmployeeRow({
     };
 
     return (
-      <div className="employee-table__cell" role="cell">
+      <td className="employee-table__cell" role="cell">
         {isEditing ? (
           <InputField
             type={type}
@@ -56,7 +56,7 @@ export default function EmployeeRow({
         ) : (
           getValue(field) || '-'
         )}
-      </div>
+      </td>
     );
   };
 

@@ -3,7 +3,7 @@ import { IEmployee } from '../../types/type';
 import { useNavigate } from 'react-router-dom';
 import ListHeader from './ListHeader';
 import EmployeeCard from './EmployeeCard';
-import EmployeeTable from '@features/table-view/ui/EmployeeTable';
+import { EmployeeTable } from '@features/table-view';
 interface EmployeeHeaderProps {
   users: IEmployee[];
   viewMode: 'grid' | 'list' | 'table';
@@ -17,6 +17,14 @@ export default function EmployeeContainer({
   const isTable = viewMode === 'table';
   const isMenu = viewMode === 'list';
   const navigate = useNavigate();
+
+  let containerClassName = 'employee-menu__container';
+
+  if (isGrid) {
+    containerClassName = 'employee-grid__container';
+  } else if (isTable) {
+    containerClassName = 'employee-table__container';
+  }
 
   const handleEmployeeClick = (userId: string) => {
     navigate(`/details/${userId}`);
@@ -32,15 +40,7 @@ export default function EmployeeContainer({
   ));
 
   return (
-    <div
-      className={
-        isGrid
-          ? 'employee-grid__container'
-          : isTable
-            ? 'employee-table__container'
-            : 'employee-menu__container'
-      }
-    >
+    <div className={containerClassName}>
       {isMenu && <ListHeader />}
       {isTable ? (
         <EmployeeTable users={users} onViewDetails={handleEmployeeClick} />
