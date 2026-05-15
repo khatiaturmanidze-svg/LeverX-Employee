@@ -38,21 +38,33 @@ export default function EmployeeRow({
   const renderEditableCell = (
     field: Exclude<EditableEmployeeField, 'isRemoteWork'>,
     type = 'text',
-  ) => (
-    <div className="employee-table__cell" role="cell">
-      {isEditing ? (
-        <InputField
-          type={type}
-          value={getValue(field)}
-          onChange={(event) =>
-            onDraftChange(user._id, field, event.target.value)
-          }
-        />
-      ) : (
-        getValue(field) || '-'
-      )}
-    </div>
-  );
+  ) => {
+    const handleInputChange: React.ChangeEventHandler<HTMLInputElement> = (
+      event,
+    ) => {
+      onDraftChange(user._id, field, event.target.value);
+    };
+
+    return (
+      <div className="employee-table__cell" role="cell">
+        {isEditing ? (
+          <InputField
+            type={type}
+            value={getValue(field)}
+            onChange={handleInputChange}
+          />
+        ) : (
+          getValue(field) || '-'
+        )}
+      </div>
+    );
+  };
+
+  const handleRemoteWorkChange: React.ChangeEventHandler<HTMLSelectElement> = (
+    event,
+  ) => {
+    onDraftChange(user._id, 'isRemoteWork', event.target.value);
+  };
 
   return (
     <div
@@ -79,9 +91,7 @@ export default function EmployeeRow({
           <select
             className="edit-input"
             value={getValue('isRemoteWork')}
-            onChange={(event) =>
-              onDraftChange(user._id, 'isRemoteWork', event.target.value)
-            }
+            onChange={handleRemoteWorkChange}
           >
             <option value="false">No</option>
             <option value="true">Yes</option>

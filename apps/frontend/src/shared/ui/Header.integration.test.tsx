@@ -27,7 +27,9 @@ describe('Header Integration', () => {
     render(<Header loggedInUser={headerMockUser} isAdmin />);
 
     expect(screen.getByTestId('logo')).toBeInTheDocument();
-    expect(screen.getByAltText('open menu')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'open menu' }),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: 'close menu overlay' }),
     ).toBeInTheDocument();
@@ -44,7 +46,9 @@ describe('Header Integration', () => {
   it('renders fallback for no logged in user', () => {
     render(<Header loggedInUser={null} />);
 
-    expect(screen.getByAltText('open menu')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'open menu' }),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: 'close menu overlay' }),
     ).toBeInTheDocument();

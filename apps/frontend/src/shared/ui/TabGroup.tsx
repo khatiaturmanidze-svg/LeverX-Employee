@@ -26,11 +26,13 @@ export default function TabGroup({
       {tabs.map((tab) => (
         <button
           key={tab.id}
+          type="button"
           className={`${tabBaseClassName} ${
             tab.isActive && activeModifierClassName
               ? activeModifierClassName
               : ''
           } ${tab.className ?? ''}`}
+          aria-pressed={tab.isActive}
           onClick={tab.onClick}
         >
           {tab.label}

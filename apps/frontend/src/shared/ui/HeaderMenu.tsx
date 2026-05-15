@@ -28,13 +28,18 @@ export function HeaderMenu({
         aria-label="close menu overlay"
         onClick={handleMenuClick}
       />
-      <img
-        src="/svgs/menu-icon.svg"
-        alt={isMenuOpen ? 'close menu' : 'open menu'}
+      <button
+        type="button"
         className="header--menu-btn"
+        aria-label={isMenuOpen ? 'close menu' : 'open menu'}
+        aria-expanded={isMenuOpen}
+        aria-controls="header-mobile-menu"
         onClick={handleMenuClick}
-      />
+      >
+        <img src="/svgs/menu-icon.svg" alt="" aria-hidden="true" />
+      </button>
       <aside
+        id="header-mobile-menu"
         className={`header--mobile-menu ${
           isMenuOpen ? 'header--mobile-menu-open' : ''
         }`}
