@@ -1,5 +1,10 @@
 import { renderHook, act } from '@testing-library/react';
-import { useFilteredItems, useRoleChange, useGetManager } from './customHooks';
+import {
+  useCanEdit,
+  useFilteredItems,
+  useRoleChange,
+  useGetManager,
+} from './customHooks';
 import { IEmployee } from '../../types/type';
 import * as usersApi from '../../features/usersApi';
 import { describe, it, expect, vi } from 'vitest';
@@ -99,5 +104,55 @@ describe('useGetManager', () => {
   it('returns undefined if no manager', () => {
     const { result } = renderHook(() => useGetManager('1'));
     expect(result.current).toBeUndefined();
+  });
+});
+
+describe('useCanEdit', () => {
+  it('returns true for an admin user', () => {
+    localStorage.setItem('loggedInUser', employees[0].email);
+    vi.spyOn(usersApi, 'useGetUsersQuery').mockReturnValue({
+      data: employees,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof usersApi.useGetUsersQuery>);
+
+    const { result } = renderHook(() => useCanEdit(employees[1]));
+
+    expect(result.current).toBe(true);
+  });
+
+  it('returns true for the target employee manager', () => {
+    localStorage.setItem('loggedInUser', employees[0].email);
+    vi.spyOn(usersApi, 'useGetUsersQuery').mockReturnValue({
+      data: [{ ...employees[0], role: 'Manager' }, employees[1]],
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof usersApi.useGetUsersQuery>);
+
+    const { result } = renderHook(() => useCanEdit(employees[1]));
+
+    expect(result.current).toBe(true);
+  });
+
+  it('returns false when logged-in user is neither admin nor manager', () => {
+    const nonManager = {
+      ...employees[0],
+      _id: '3',
+      role: 'Employee',
+      email: 'other@example.com',
+    };
+    localStorage.setItem('loggedInUser', nonManager.email);
+    vi.spyOn(usersApi, 'useGetUsersQuery').mockReturnValue({
+      data: [nonManager, employees[1]],
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof usersApi.useGetUsersQuery>);
+
+    const { result } = renderHook(() => useCanEdit(employees[1]));
+
+    expect(result.current).toBe(false);
   });
 });

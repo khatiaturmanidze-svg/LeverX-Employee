@@ -21,7 +21,11 @@ const EmployeeEditForm = lazy(async () => {
 export default function Details(): React.ReactElement {
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
-  const { loggedUser, isAdmin } = useGetHeaderProps();
+  const {
+    loggedUser,
+    isAdmin,
+    isLoading: isHeaderLoading,
+  } = useGetHeaderProps();
   const { id } = useParams<{ id: string }>();
 
   const {
@@ -52,6 +56,10 @@ export default function Details(): React.ReactElement {
       navigator.clipboard.writeText(window.location.href);
     }
   };
+
+  if (isHeaderLoading) {
+    return <Loading />;
+  }
 
   if (isLoading || isFetching) {
     return (

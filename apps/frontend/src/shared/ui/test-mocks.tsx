@@ -161,6 +161,7 @@ type Tab = {
 };
 
 export const employeeHeaderSharedUiModule = {
+  Icon: ({ alt }: { alt: string }) => <img alt={alt} />,
   TabGroup: ({ tabs }: { tabs: Tab[] }) => (
     <div>
       {tabs.map((tab) => (

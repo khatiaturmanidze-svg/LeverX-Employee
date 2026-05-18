@@ -110,3 +110,14 @@ export type UploadSpreadsheetResponse = {
   importedUsers: UploadedUserResult[];
   skippedRows: UploadSpreadsheetError[];
 };
+
+export type EditableEmployeeField =
+  | 'role'
+  | 'department'
+  | 'building'
+  | 'room'
+  | 'desk_number'
+  | 'isRemoteWork'
+  | 'email';
+
+export type EmployeeDraft = Partial<Record<EditableEmployeeField, string>>;

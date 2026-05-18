@@ -42,4 +42,17 @@ describe('EmployeeHeader', () => {
     fireEvent.click(screen.getByTestId('tab-list'));
     expect(onViewChange).toHaveBeenCalledWith('list');
   });
+
+  it('calls onViewChange when table tab is clicked', () => {
+    const onViewChange = vi.fn();
+    render(
+      <EmployeeHeader
+        users={employeeHeaderMockUsers}
+        onViewChange={onViewChange}
+      />,
+    );
+
+    fireEvent.click(screen.getByTestId('tab-table'));
+    expect(onViewChange).toHaveBeenCalledWith('table');
+  });
 });

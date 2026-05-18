@@ -38,7 +38,10 @@ export const usersApi = createApi({
         },
         body: update,
       }),
-      invalidatesTags: (result, error, { id }) => [{ type: 'users', id }],
+      invalidatesTags: (result, error, { id }) => [
+        'users',
+        { type: 'users', id },
+      ],
     }),
 
     updateEmployeeRole: builder.mutation<

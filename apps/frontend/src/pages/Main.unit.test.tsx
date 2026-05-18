@@ -102,6 +102,32 @@ describe('pages/Main', () => {
     });
   });
 
+  it('renders loading state while users are loading', async () => {
+    useGetUsersQueryMock.mockReturnValue({ data: [], isLoading: true });
+    useGetHeaderPropsMock.mockReturnValue({
+      loggedUser: null,
+      isAdmin: false,
+      isLoading: true,
+    });
+
+    const container = document.createElement('div');
+    const root = createRoot(container);
+
+    await act(async () => {
+      root.render(React.createElement(Main));
+    });
+
+    expect(container.textContent).toContain('Loading...');
+    expect(container.querySelector('img[alt="nothing found"]')).toBeFalsy();
+    expect(
+      container.querySelector('[data-testid="employee-header"]'),
+    ).toBeFalsy();
+
+    await act(async () => {
+      root.unmount();
+    });
+  });
+
   it('switches filtered results when submitting basic search', async () => {
     basicCriteriaValue.fullname = 'Jane Doe';
 

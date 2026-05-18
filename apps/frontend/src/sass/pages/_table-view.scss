@@ -1,0 +1,166 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+.employee-table__container {
+  grid-column: 2/3;
+  grid-row: 2/3;
+  min-width: 0;
+
+  @include respond(phone) {
+    grid-column: 1/-1;
+    grid-row: auto;
+  }
+}
+
+.employee-table {
+  overflow: hidden;
+  background-color: $color-white;
+  border: 1px solid $color-lighter-grey;
+  border-radius: $radius-small;
+  box-shadow: $card-shadow;
+
+  &__scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  &__header,
+  &__row {
+    display: grid;
+    grid-template-columns:
+      minmax(16rem, 1.4fr)
+      minmax(10rem, 0.8fr)
+      minmax(14rem, 1fr)
+      minmax(10rem, 0.8fr)
+      minmax(8rem, 0.6fr)
+      minmax(8rem, 0.6fr)
+      minmax(20rem, 1.5fr)
+      minmax(15rem, 1.1fr)
+      minmax(8rem, 0.6fr)
+      minmax(15rem, 1fr);
+    width: 124rem;
+  }
+
+  &__header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: $color-100;
+    color: $color-1000;
+    border-bottom: 1px solid $color-300;
+    font-size: $font-smallest;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  &__body {
+    width: 124rem;
+    overflow-x: hidden !important;
+  }
+
+  &__row {
+    position: relative;
+    align-items: center;
+    background-color: $color-white;
+    border-bottom: 1px solid $color-lighter-grey;
+    transition:
+      background-color 0.2s ease,
+      box-shadow 0.2s ease;
+
+    &:hover {
+      background-color: #f8fbff;
+      box-shadow: inset 3px 0 0 $color-500;
+    }
+
+    &--editing {
+      background-color: #f8fbff;
+      box-shadow: inset 3px 0 0 $color-500;
+    }
+  }
+
+  &__cell {
+    min-width: 0;
+    overflow: hidden;
+    padding: $space-sm;
+    color: $color-font;
+    font-size: 1.3rem;
+    line-height: 1.4;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__actions {
+    display: flex;
+    gap: $space-xs;
+    justify-content: flex-start;
+  }
+
+  &__details-btn,
+  &__edit-btn,
+  &__save-btn,
+  &__cancel-btn {
+    padding: 0.6rem $space-sm;
+    border: 1px solid $color-300;
+    border-radius: $radius-small;
+    background-color: $color-white;
+    color: $color-900;
+    font-size: $font-smallest;
+    font-weight: 700;
+    text-transform: uppercase;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease,
+      border-color 0.2s ease;
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    &:hover,
+    &:focus-visible {
+      background-color: $color-900;
+      border-color: $color-900;
+      color: $color-white;
+    }
+  }
+
+  &__save-btn {
+    background-color: $color-900;
+    border-color: $color-900;
+    color: $color-white;
+  }
+
+  &__cancel-btn {
+    color: $color-darker-grey;
+  }
+
+  &__error {
+    position: absolute;
+    right: $space-sm;
+    bottom: 0.2rem;
+    color: #b42318;
+    font-size: 1rem;
+  }
+
+  .edit-input {
+    width: 100%;
+    min-width: 0;
+    border: 1px solid $color-grey;
+    border-radius: $radius-small;
+    padding: 0.5rem 0.7rem;
+    font-size: $font-smallest;
+
+    &:focus {
+      border-color: $color-500;
+      outline: none;
+    }
+  }
+
+  @include respond(small-tab) {
+    &__cell {
+      padding: 0.8rem;
+      font-size: $font-smallest;
+    }
+  }
+}

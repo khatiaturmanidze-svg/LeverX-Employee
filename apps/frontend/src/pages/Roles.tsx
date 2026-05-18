@@ -15,8 +15,12 @@ const RolesEmployee = lazy(async () => {
 
 export default function Roles(): React.ReactElement {
   const [searchTerm, setSearchTerm] = useState('');
-  const { data: allUsers = [] } = useGetUsersQuery();
-  const { loggedUser, isAdmin } = useGetHeaderProps();
+  const { data: allUsers = [], isLoading: isUsersLoading } = useGetUsersQuery();
+  const {
+    loggedUser,
+    isAdmin,
+    isLoading: isHeaderLoading,
+  } = useGetHeaderProps();
 
   const { handleRoleChange, error } = useRoleChange(loggedUser);
 
@@ -27,6 +31,10 @@ export default function Roles(): React.ReactElement {
       user.first_name.toLowerCase().startsWith(term.toLowerCase()) ||
       user.last_name.toLowerCase().startsWith(term.toLowerCase()),
   );
+
+  if (isUsersLoading || isHeaderLoading) {
+    return <Loading />;
+  }
 
   return (
     <>

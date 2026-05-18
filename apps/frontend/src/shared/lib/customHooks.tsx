@@ -48,10 +48,24 @@ export function useGetManager(employeeId: string) {
 }
 
 export function useGetHeaderProps() {
-  const { data: allUsers = [] } = useGetUsersQuery();
+  const { data: allUsers = [], isLoading } = useGetUsersQuery();
   const loggedUser = useMemo(() => {
     return getLoggedInUser(allUsers) || null;
   }, [allUsers]);
   const isAdmin = useMemo(() => loggedUser?.role === 'Admin', [loggedUser]);
-  return { loggedUser, isAdmin };
+  return { loggedUser, isAdmin, isLoading };
+}
+
+export function useCanEdit(targetUser: IEmployee | null) {
+  const { data: allUsers = [] } = useGetUsersQuery();
+  const loggedUser = useMemo(() => {
+    return getLoggedInUser(allUsers) || null;
+  }, [allUsers]);
+
+  return useMemo(() => {
+    if (!loggedUser) return false;
+    return (
+      loggedUser.role === 'Admin' || loggedUser._id === targetUser?.manager?.id
+    );
+  }, [loggedUser, targetUser]);
 }

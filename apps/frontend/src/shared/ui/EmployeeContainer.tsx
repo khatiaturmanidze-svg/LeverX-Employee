@@ -3,9 +3,10 @@ import { IEmployee } from '../../types/type';
 import { useNavigate } from 'react-router-dom';
 import ListHeader from './ListHeader';
 import EmployeeCard from './EmployeeCard';
+import EmployeeTable from '@features/table-view/ui/EmployeeTable';
 interface EmployeeHeaderProps {
   users: IEmployee[];
-  viewMode: 'grid' | 'list';
+  viewMode: 'grid' | 'list' | 'table';
 }
 
 export default function EmployeeContainer({
@@ -13,6 +14,8 @@ export default function EmployeeContainer({
   viewMode,
 }: EmployeeHeaderProps): React.ReactElement {
   const isGrid = viewMode === 'grid';
+  const isTable = viewMode === 'table';
+  const isMenu = viewMode === 'list';
   const navigate = useNavigate();
 
   const handleEmployeeClick = (userId: string) => {
@@ -31,11 +34,19 @@ export default function EmployeeContainer({
   return (
     <div
       className={
-        isGrid ? 'employee-grid__container' : 'employee-menu__container'
+        isGrid
+          ? 'employee-grid__container'
+          : isTable
+            ? 'employee-table__container'
+            : 'employee-menu__container'
       }
     >
-      {!isGrid && <ListHeader />}
-      {employeeItems}
+      {isMenu && <ListHeader />}
+      {isTable ? (
+        <EmployeeTable users={users} onViewDetails={handleEmployeeClick} />
+      ) : (
+        employeeItems
+      )}
     </div>
   );
 }

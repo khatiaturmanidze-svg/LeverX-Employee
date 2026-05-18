@@ -26,9 +26,13 @@ export default function Main(): React.ReactElement {
   );
   const [advancedCriteria, setAdvancedCriteria] =
     useState<AdvancedSearchCriteria | null>(null);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const { data: allUsers = [] } = useGetUsersQuery();
-  const { loggedUser, isAdmin } = useGetHeaderProps();
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'table'>('grid');
+  const { data: allUsers = [], isLoading: isUsersLoading } = useGetUsersQuery();
+  const {
+    loggedUser,
+    isAdmin,
+    isLoading: isHeaderLoading,
+  } = useGetHeaderProps();
 
   const filteredUsers = useMemo(() => {
     if (basicCriteria) {
@@ -51,6 +55,10 @@ export default function Main(): React.ReactElement {
     setBasicCriteria(null);
     setAdvancedCriteria(criteria);
   };
+
+  if (isUsersLoading || isHeaderLoading) {
+    return <Loading />;
+  }
 
   return (
     <>
