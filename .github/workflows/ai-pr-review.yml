@@ -4,8 +4,7 @@ on:
   pull_request:
     types:
       - opened
-      - synchronize
-      - reopened
+      - ready_for_review
     branches:
       - develop
       - main
@@ -30,6 +29,7 @@ permissions:
 
 jobs:
   ai-review:
+    if: ${{ github.event.pull_request.draft == false }}
     runs-on: ubuntu-latest
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
