@@ -29,4 +29,15 @@ Create a `.env` file in the root directory and define the following variables:
 
 # test data
 
-I've included the test spreadsheet in the /docs/data folder for easy access.
+I've included the test spreadsheet at `docs/sample-users-upload.xlsx` for easy access.
+
+# research document and examples
+
+- `apps/frontend/test/docs/rendering-research.md` -> research document comparing DOM, Canvas, WebGL, and WebGPU rendering approaches.
+- `apps/frontend/src/pages/test-rendering/` -> example implementation files used by the research page:
+  - `DomTest.tsx` -> renders a large grid with regular DOM elements.
+  - `CanvasTest.tsx` -> renders the same grid with the Canvas 2D API.
+  - `WebGpuTest.tsx` -> renders animated cells with WebGPU instancing.
+  - `TestRenderingPage.tsx` -> switches between the available rendering examples.
+- `/rendering-test` -> frontend route where the rendering examples can be opened while the app is running.
+- `docs/sample-users-upload.xlsx` -> sample spreadsheet for testing employee upload data.

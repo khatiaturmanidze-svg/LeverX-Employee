@@ -1,0 +1,89 @@
+@use '../abstracts/variables' as *;
+
+.rendering-test {
+  min-height: 100vh;
+  padding: $space-md;
+  color: $color-font;
+  background: $color-lighter-grey;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $space-sm;
+    margin-bottom: $space-md;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: $font-large;
+    line-height: 1.1;
+  }
+
+  &__actions {
+    display: flex;
+    gap: $space-xs;
+    flex-wrap: wrap;
+  }
+
+  &__button {
+    min-width: 96px;
+    padding: 0.75rem 1.2rem;
+    border: 1px solid $color-grey;
+    border-radius: $radius-small;
+    color: $color-font;
+    background: $color-white;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background-color 0.2s ease,
+      border-color 0.2s ease,
+      color 0.2s ease;
+
+    &:hover {
+      border-color: $color-700;
+      color: $color-700;
+    }
+
+    &.active {
+      border-color: $color-900;
+      color: $color-white;
+      background: $color-900;
+    }
+  }
+
+  &__stop-button {
+    margin-bottom: $space-sm;
+  }
+
+  &__stage {
+    overflow: auto;
+    min-height: 70vh;
+    padding: $space-sm;
+    border: 1px solid $color-grey;
+    border-radius: $radius-small;
+    background: $color-white;
+  }
+
+  &__empty {
+    margin: 0;
+    color: $color-darker-grey;
+    font-size: $font-small;
+  }
+}
+
+@media (max-width: 700px) {
+  .rendering-test {
+    padding: $space-sm;
+
+    &__header {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    h1 {
+      font-size: $font-medium;
+    }
+  }
+}
