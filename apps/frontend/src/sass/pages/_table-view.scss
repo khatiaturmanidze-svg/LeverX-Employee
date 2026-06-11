@@ -13,6 +13,8 @@
 }
 
 .employee-table {
+  --employee-table-width: 124rem;
+
   overflow: hidden;
   background-color: $color-white;
   border: 1px solid $color-lighter-grey;
@@ -38,7 +40,7 @@
       minmax(15rem, 1.1fr)
       minmax(8rem, 0.6fr)
       minmax(15rem, 1fr);
-    width: 124rem;
+    width: var(--employee-table-width);
   }
 
   &__header {
@@ -54,7 +56,7 @@
   }
 
   &__body {
-    width: 124rem;
+    width: var(--employee-table-width);
     overflow-x: hidden !important;
   }
 

@@ -59,9 +59,7 @@ export function EmployeeEditForm({ user, onCancel }: EmployeEditFormProps) {
         value={displayValue}
         isEditing={true}
         fieldName={fieldName}
-        onValueChange={
-          handleInputChange as (fieldName: string, newValue: string) => void
-        }
+        onValueChange={handleInputChange}
       />
     );
   };

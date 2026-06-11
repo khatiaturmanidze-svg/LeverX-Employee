@@ -167,7 +167,9 @@ export const employeeHeaderSharedUiModule = {
       {tabs.map((tab) => (
         <button
           key={tab.id}
+          type="button"
           data-testid={`tab-${tab.id}`}
+          aria-pressed={tab.isActive}
           onClick={tab.onClick}
         >
           {tab.id}

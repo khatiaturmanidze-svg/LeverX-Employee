@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import EmployeeHeader from './EmployeeHeader';
 import { employeeHeaderMockUsers } from './test-mocks';
@@ -54,5 +55,26 @@ describe('EmployeeHeader', () => {
 
     fireEvent.click(screen.getByTestId('tab-table'));
     expect(onViewChange).toHaveBeenCalledWith('table');
+  });
+
+  it('supports keyboard navigation between view toggle buttons', async () => {
+    const user = userEvent.setup();
+    const onViewChange = vi.fn();
+
+    render(
+      <EmployeeHeader
+        users={employeeHeaderMockUsers}
+        onViewChange={onViewChange}
+      />,
+    );
+
+    await user.tab();
+    expect(screen.getByTestId('tab-grid')).toHaveFocus();
+
+    await user.tab();
+    expect(screen.getByTestId('tab-list')).toHaveFocus();
+
+    await user.keyboard('{Enter}');
+    expect(onViewChange).toHaveBeenCalledWith('list');
   });
 });

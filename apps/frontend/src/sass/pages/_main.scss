@@ -138,6 +138,9 @@
   &--menu-btn {
     display: none;
     cursor: pointer;
+    border: none;
+    background: transparent;
+    padding: 0;
 
     @include respond(small-tab) {
       display: block;

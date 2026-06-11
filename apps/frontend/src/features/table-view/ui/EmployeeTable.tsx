@@ -30,7 +30,7 @@ const TABLE_COLUMNS = [
 
 const ROW_HEIGHT = 56;
 const MAX_TABLE_HEIGHT = 560;
-const TABLE_WIDTH = '124rem';
+const TABLE_WIDTH = 'var(--employee-table-width)';
 
 export default function EmployeeTable({
   users,

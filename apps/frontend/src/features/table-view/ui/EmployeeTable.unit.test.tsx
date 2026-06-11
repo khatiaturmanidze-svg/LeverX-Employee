@@ -1,5 +1,6 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import EmployeeTable from './EmployeeTable';
 import type { IEmployee } from '@/types/type';
@@ -81,6 +82,19 @@ describe('EmployeeTable', () => {
     render(<EmployeeTable users={users} onViewDetails={onViewDetails} />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Details' }));
+    expect(onViewDetails).toHaveBeenCalledWith('1');
+  });
+
+  it('supports keyboard navigation to the row action', async () => {
+    const user = userEvent.setup();
+    const onViewDetails = vi.fn();
+
+    render(<EmployeeTable users={users} onViewDetails={onViewDetails} />);
+
+    await user.tab();
+    expect(screen.getByRole('button', { name: 'Details' })).toHaveFocus();
+
+    await user.keyboard('{Enter}');
     expect(onViewDetails).toHaveBeenCalledWith('1');
   });
 

@@ -45,7 +45,8 @@
     ]
   },
   "dependencies": {
-    "ci": "^2.3.0"
+    "ci": "^2.3.0",
+    "openai": "^6.37.0"
   },
   "overrides": {
     "react": "^19.2.5",

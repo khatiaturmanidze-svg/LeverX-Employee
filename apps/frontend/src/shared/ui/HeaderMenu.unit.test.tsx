@@ -1,5 +1,6 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import { HeaderMenu } from './HeaderMenu';
@@ -45,7 +46,10 @@ describe('HeaderMenu', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByAltText('open menu')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'open menu' })).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    );
     expect(
       screen.getByRole('button', { name: 'close menu overlay' }),
     ).not.toHaveClass('header--mobile-overlay-open');
@@ -62,9 +66,12 @@ describe('HeaderMenu', () => {
       </MemoryRouter>,
     );
 
-    fireEvent.click(screen.getByAltText('open menu'));
+    fireEvent.click(screen.getByRole('button', { name: 'open menu' }));
 
-    expect(screen.getByAltText('close menu')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'close menu' })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    );
     expect(
       screen.getByRole('button', { name: 'close menu overlay' }),
     ).toHaveClass('header--mobile-overlay-open');
@@ -92,14 +99,41 @@ describe('HeaderMenu', () => {
       </MemoryRouter>,
     );
 
-    fireEvent.click(screen.getByAltText('open menu'));
+    fireEvent.click(screen.getByRole('button', { name: 'open menu' }));
     fireEvent.click(screen.getByRole('button', { name: 'close menu overlay' }));
 
-    expect(screen.getByAltText('open menu')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'open menu' })).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    );
     expect(
       screen.getByRole('button', { name: 'close menu overlay' }),
     ).not.toHaveClass('header--mobile-overlay-open');
     expect(screen.getByTestId('header-tabs').parentElement).not.toHaveClass(
+      'header--mobile-menu-open',
+    );
+  });
+
+  it('opens the sidebar from the keyboard', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter>
+        <HeaderMenu loggedInUser={mockUser} isAdmin />
+      </MemoryRouter>,
+    );
+
+    await user.tab();
+    await user.tab();
+    expect(screen.getByRole('button', { name: 'open menu' })).toHaveFocus();
+
+    await user.keyboard('{Enter}');
+
+    expect(screen.getByRole('button', { name: 'close menu' })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    );
+    expect(screen.getByTestId('header-tabs').parentElement).toHaveClass(
       'header--mobile-menu-open',
     );
   });

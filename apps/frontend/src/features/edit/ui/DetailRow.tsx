@@ -1,23 +1,27 @@
 import React from 'react';
 import { Icon } from '@shared/ui';
 
-interface DetailRowProps {
+interface DetailRowProps<FieldName extends string = string> {
   icon: string;
   label: string;
   value?: string;
   isEditing: boolean;
-  fieldName: string;
-  onValueChange?: (fieldName: string, newValue: string) => void;
+  fieldName: FieldName;
+  onValueChange?: (fieldName: FieldName, newValue: string) => void;
 }
 
-export function DetailRow({
+export function DetailRow<FieldName extends string = string>({
   icon,
   label,
   value,
   isEditing,
   fieldName,
   onValueChange,
-}: DetailRowProps) {
+}: DetailRowProps<FieldName>) {
+  const handleChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
+    onValueChange?.(fieldName, event.target.value);
+  };
+
   if (!isEditing) {
     return (
       <div className="details-section__row">
@@ -53,7 +57,7 @@ export function DetailRow({
         name={fieldName}
         className="edit-input"
         defaultValue={value}
-        onChange={(e) => onValueChange?.(fieldName, e.target.value)}
+        onChange={handleChange}
       />
     </div>
   );
