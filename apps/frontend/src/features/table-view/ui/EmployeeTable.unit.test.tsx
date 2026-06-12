@@ -57,6 +57,26 @@ const users: IEmployee[] = [
   } as IEmployee,
 ];
 
+const roleUsers: IEmployee[] = [
+  users[0],
+  {
+    ...users[0],
+    _id: '2',
+    role: 'Manager',
+    first_name: 'Mark',
+    last_name: 'Manager',
+    email: 'mark.manager@example.com',
+  },
+  {
+    ...users[0],
+    _id: '3',
+    role: 'Admin',
+    first_name: 'Alice',
+    last_name: 'Admin',
+    email: 'alice.admin@example.com',
+  },
+];
+
 describe('EmployeeTable', () => {
   beforeEach(() => {
     updateEmployeeMock.mockClear();
@@ -74,6 +94,24 @@ describe('EmployeeTable', () => {
     ).toBeInTheDocument();
     expect(screen.getByTestId('virtual-list')).toBeInTheDocument();
     expect(screen.getByText('Jane Doe')).toBeInTheDocument();
+  });
+
+  it('excludes Admin users while keeping other roles visible', () => {
+    render(<EmployeeTable users={roleUsers} onViewDetails={vi.fn()} />);
+
+    expect(screen.getByText('Jane Doe')).toBeInTheDocument();
+    expect(screen.getByText('Mark Manager')).toBeInTheDocument();
+    expect(screen.queryByText('Alice Admin')).not.toBeInTheDocument();
+  });
+
+  it('renders the header and empty state without a virtualized list', () => {
+    render(<EmployeeTable users={[roleUsers[2]]} />);
+
+    expect(
+      screen.getByRole('columnheader', { name: 'Name' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('No employees found.')).toBeInTheDocument();
+    expect(screen.queryByTestId('virtual-list')).not.toBeInTheDocument();
   });
 
   it('navigates to details from the row action', () => {

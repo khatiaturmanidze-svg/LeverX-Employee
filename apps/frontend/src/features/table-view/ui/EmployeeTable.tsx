@@ -40,6 +40,8 @@ export default function EmployeeTable({
   const [drafts, setDrafts] = useState<Record<string, EmployeeDraft>>({});
   const [rowErrors, setRowErrors] = useState<Record<string, string>>({});
   const [updateEmployee, { isLoading }] = useUpdateEmployeeMutation();
+  const visibleUsers = users.filter((user) => user.role !== 'Admin');
+
   const handleStartEdit = (user: IEmployee) => {
     setEditingUserId(user._id);
     setRowErrors((current) => ({ ...current, [user._id]: '' }));
@@ -126,7 +128,7 @@ export default function EmployeeTable({
   };
 
   const rowData: EmployeeRowData = {
-    users,
+    users: visibleUsers,
     onViewDetails,
     editingUserId,
     drafts,
@@ -138,7 +140,10 @@ export default function EmployeeTable({
     onSave: handleSave,
   };
 
-  const tableHeight = Math.min(MAX_TABLE_HEIGHT, users.length * ROW_HEIGHT);
+  const tableHeight = Math.min(
+    MAX_TABLE_HEIGHT,
+    visibleUsers.length * ROW_HEIGHT,
+  );
 
   return (
     <div className="employee-table" role="table" aria-label="Employees table">
@@ -155,15 +160,19 @@ export default function EmployeeTable({
           ))}
         </div>
 
-        <List<EmployeeRowData>
-          className="employee-table__body"
-          rowComponent={EmployeeRow}
-          rowCount={users.length}
-          rowHeight={ROW_HEIGHT}
-          rowProps={rowData}
-          overscanCount={6}
-          style={{ height: tableHeight, width: TABLE_WIDTH }}
-        />
+        {visibleUsers.length > 0 ? (
+          <List<EmployeeRowData>
+            className="employee-table__body"
+            rowComponent={EmployeeRow}
+            rowCount={visibleUsers.length}
+            rowHeight={ROW_HEIGHT}
+            rowProps={rowData}
+            overscanCount={6}
+            style={{ height: tableHeight, width: TABLE_WIDTH }}
+          />
+        ) : (
+          <div className="employee-table__empty">No employees found.</div>
+        )}
       </div>
     </div>
   );

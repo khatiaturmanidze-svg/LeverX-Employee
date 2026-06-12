@@ -5,3 +5,4 @@ dist-server/
 .env
 apps/backend/src/db.json
 coverage/
+.codex-git-tmp/
