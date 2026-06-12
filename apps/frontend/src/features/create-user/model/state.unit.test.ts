@@ -59,7 +59,7 @@ describe('create-user state reducer/actions', () => {
     const initialState = createInitialState();
     const state = createReducer(initialState, setField('room', '202'));
 
-    expect(state.formData.room).toBe('203');
+    expect(state.formData.room).toBe('202');
     expect(state.formData.email).toBe(initialState.formData.email);
   });
 
