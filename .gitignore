@@ -6,3 +6,9 @@ dist-server/
 apps/backend/src/db.json
 coverage/
 .codex-git-tmp/
+
+# Agent-generated artifacts
+agent-plan-*.md
+agent-implement-*.md
+agent-pr-body-*.md
+ai-review.md

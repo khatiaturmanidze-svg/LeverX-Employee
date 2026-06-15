@@ -129,7 +129,9 @@ console.log('\nReview full diff:');
 console.log('git diff');
 
 console.log('\nIf the implementation is approved, run:');
-console.log(`npm run agent:pr -- ${ticketKey}`);
+console.log(`npm run agent:publish -- ${ticketKey}`);
+console.log('\nAfter the commit is pushed and reviewed, run:');
+console.log(`npm run agent:create-pr -- ${ticketKey}`);
 
 console.log('\nIf you need to revert only implementation changes:');
 console.log('1. Run: git status --short');
