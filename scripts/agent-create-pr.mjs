@@ -1,4 +1,5 @@
 import { spawnSync } from 'node:child_process';
+import path from 'node:path';
 import { createInterface } from 'node:readline/promises';
 
 const ticketKey = process.argv[2]?.toUpperCase();
@@ -33,6 +34,41 @@ function run(command, args) {
   }
 
   return result.stdout.trim();
+}
+
+function runInteractiveCodex(prompt) {
+  let command = 'codex';
+  let args = ['--no-alt-screen', prompt];
+
+  if (process.platform === 'win32') {
+    const codexCommand = run('where.exe', ['codex.cmd']).split(/\r?\n/)[0];
+    const codexEntry = path.join(
+      path.dirname(codexCommand),
+      'node_modules',
+      '@openai',
+      'codex',
+      'bin',
+      'codex.js',
+    );
+
+    command = process.execPath;
+    args = [codexEntry, '--no-alt-screen', prompt];
+  }
+
+  const result = spawnSync(command, args, {
+    stdio: 'inherit',
+  });
+
+  if (result.error) {
+    console.error(
+      `Failed to launch interactive Codex: ${result.error.message}`,
+    );
+    process.exit(1);
+  }
+
+  if (result.status !== 0) {
+    process.exit(result.status ?? 1);
+  }
 }
 
 const branch = run('git', ['branch', '--show-current']);
@@ -148,22 +184,9 @@ Rules:
   creating a duplicate.
 `;
 
-const codexResult = spawnSync('codex', ['exec', '-'], {
-  input: prPrompt,
-  encoding: 'utf-8',
-  stdio: ['pipe', 'pipe', 'pipe'],
-  shell: process.platform === 'win32',
-});
+console.log(
+  '\nLaunching interactive Codex. Approve the GitHub MCP create-PR action when prompted.',
+);
+runInteractiveCodex(prPrompt);
 
-if (codexResult.error) {
-  console.error(`Failed to run Codex: ${codexResult.error.message}`);
-  process.exit(1);
-}
-
-if (codexResult.status !== 0) {
-  console.error(codexResult.stderr || codexResult.stdout);
-  process.exit(codexResult.status ?? 1);
-}
-
-console.log('\nPull request pipeline completed:\n');
-console.log(codexResult.stdout);
+console.log('\nInteractive PR session finished.');
