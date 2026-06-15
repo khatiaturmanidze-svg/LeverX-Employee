@@ -32,9 +32,9 @@ jobs:
     steps:
       - name: Check PR creation token
         env:
-          PR_CREATION_TOKEN: ${{ secrets.PR_CREATION_TOKEN }}
+          PR_CREATION_TOKEN: ${{ github.token }}
         run: |
-          if [ -z "$PR_CREATION_TOKEN" ]; then
+          if [ -z "$github.token " ]; then
             echo "::error::Repository secret PR_CREATION_TOKEN is required."
             exit 1
           fi
@@ -47,7 +47,7 @@ jobs:
           JIRA_KEY: ${{ inputs.jira_key }}
           TASK_SUMMARY: ${{ inputs.task_summary }}
         with:
-          github-token: ${{ secrets.PR_CREATION_TOKEN }}
+          github-token: ${{ github.token }}
           script: |
             const { owner, repo } = context.repo;
             const head = process.env.HEAD_BRANCH.trim();
