@@ -1,0 +1,100 @@
+name: CI Failure Review
+
+on:
+  workflow_run:
+    workflows: ['CI']
+    types: [completed]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+  actions: read
+
+jobs:
+  review-failure:
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout failing commit
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+
+      - name: Run Codex failure analysis
+        id: codex
+        uses: openai/codex-action@v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          prompt: |
+            Use the github-actions-review skill.
+
+            You are reviewing a failed GitHub Actions workflow.
+
+            Repository: ${{ github.repository }}
+            Workflow: ${{ github.event.workflow_run.name }}
+            Branch: ${{ github.event.workflow_run.head_branch }}
+            Commit SHA: ${{ github.event.workflow_run.head_sha }}
+            Run URL: ${{ github.event.workflow_run.html_url }}
+
+            Produce a concise CI failure review with this format:
+
+            1. Summary
+            2. Failed workflow
+            3. Likely cause
+            4. Affected branch/commit
+            5. Suggested next actions
+            6. Message to team lead
+
+            Rules:
+            - Do not modify files.
+            - Do not create commits.
+            - Do not rerun workflows.
+            - If exact logs are not available, say that the cause is uncertain.
+            - Keep it practical and short.
+
+      - name: Find related PR
+        id: find_pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const branch = context.payload.workflow_run.head_branch;
+
+            const prs = await github.rest.pulls.list({
+              owner,
+              repo,
+              state: "open",
+              head: `${owner}:${branch}`,
+            });
+
+            if (prs.data.length > 0) {
+              core.setOutput("pr_number", prs.data[0].number);
+            } else {
+              core.setOutput("pr_number", "");
+            }
+
+      - name: Comment on PR
+        if: ${{ steps.find_pr.outputs.pr_number != '' && steps.codex.outputs.final-message != '' }}
+        uses: actions/github-script@v7
+        env:
+          CODEX_FINAL_MESSAGE: ${{ steps.codex.outputs.final-message }}
+          PR_NUMBER: ${{ steps.find_pr.outputs.pr_number }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const body = `## CI Failure Review
+
+            ${process.env.CODEX_FINAL_MESSAGE}
+
+            Failed run: ${process.env.RUN_URL}`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: Number(process.env.PR_NUMBER),
+              body,
+            });

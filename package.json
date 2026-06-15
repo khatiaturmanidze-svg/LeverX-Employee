@@ -18,7 +18,10 @@
     "prepare": "husky",
     "test": "npm run test -w @mono/frontend",
     "test:watch": "npm run test:watch -w @mono/frontend",
-    "test:coverage": "npm run test:coverage -w @mono/frontend"
+    "test:coverage": "npm run test:coverage -w @mono/frontend",
+    "agent:plan": "node scripts/agent-plan.mjs",
+    "agent:implement": "node scripts/agent-implement.mjs",
+    "agent:publish": "node scripts/agent-publish.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
