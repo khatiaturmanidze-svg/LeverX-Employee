@@ -1,0 +1,155 @@
+name: Create pull request
+
+on:
+  workflow_dispatch:
+    inputs:
+      head_branch:
+        description: Pushed feature branch
+        required: true
+        type: string
+      jira_key:
+        description: Jira ticket key
+        required: true
+        type: string
+      task_summary:
+        description: Jira task title or short summary
+        required: true
+        type: string
+      base_branch:
+        description: Pull request target branch
+        required: true
+        default: develop
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check PR creation token
+        env:
+          PR_CREATION_TOKEN: ${{ secrets.PR_CREATION_TOKEN }}
+        run: |
+          if [ -z "$PR_CREATION_TOKEN" ]; then
+            echo "::error::Repository secret PR_CREATION_TOKEN is required."
+            exit 1
+          fi
+
+      - name: Validate inputs and create pull request
+        uses: actions/github-script@v7
+        env:
+          HEAD_BRANCH: ${{ inputs.head_branch }}
+          BASE_BRANCH: ${{ inputs.base_branch }}
+          JIRA_KEY: ${{ inputs.jira_key }}
+          TASK_SUMMARY: ${{ inputs.task_summary }}
+        with:
+          github-token: ${{ secrets.PR_CREATION_TOKEN }}
+          script: |
+            const { owner, repo } = context.repo;
+            const head = process.env.HEAD_BRANCH.trim();
+            const base = process.env.BASE_BRANCH.trim();
+            const jiraKey = process.env.JIRA_KEY.trim().toUpperCase();
+            const taskSummary = process.env.TASK_SUMMARY
+              .trim()
+              .replace(/\s+/g, ' ');
+            const jiraKeyPattern = /^[A-Z][A-Z0-9]+-\d+$/;
+
+            if (!jiraKeyPattern.test(jiraKey)) {
+              core.setFailed(`Invalid Jira key: ${jiraKey}`);
+              return;
+            }
+
+            if (!head.toUpperCase().includes(jiraKey)) {
+              core.setFailed(
+                `Head branch "${head}" must include Jira key ${jiraKey}.`,
+              );
+              return;
+            }
+
+            if (head === base) {
+              core.setFailed('Head and base branches must be different.');
+              return;
+            }
+
+            for (const branch of [head, base]) {
+              try {
+                await github.rest.repos.getBranch({ owner, repo, branch });
+              } catch {
+                core.setFailed(`Branch "${branch}" does not exist.`);
+                return;
+              }
+            }
+
+            const existing = await github.rest.pulls.list({
+              owner,
+              repo,
+              state: 'open',
+              head: `${owner}:${head}`,
+              base,
+            });
+
+            if (existing.data.length > 0) {
+              core.notice(`PR already exists: ${existing.data[0].html_url}`);
+              return;
+            }
+
+            const comparison = await github.rest.repos.compareCommits({
+              owner,
+              repo,
+              base,
+              head,
+            });
+
+            if (comparison.data.ahead_by === 0) {
+              core.setFailed(`Branch "${head}" has no changes against "${base}".`);
+              return;
+            }
+
+            const files = comparison.data.files ?? [];
+            const changedFiles = files
+              .slice(0, 50)
+              .map((file) => `- \`${file.filename}\` (${file.status})`);
+
+            if (files.length > 50) {
+              changedFiles.push(`- ...and ${files.length - 50} more files`);
+            }
+
+            const commits = comparison.data.commits
+              .slice(-10)
+              .map((commit) => {
+                const subject = commit.commit.message.split('\n')[0];
+                return `- ${commit.sha.slice(0, 7)} ${subject}`;
+              });
+
+            const body = [
+              '## Summary',
+              taskSummary,
+              '',
+              '## Jira',
+              jiraKey,
+              '',
+              '## Commits',
+              ...commits,
+              '',
+              '## Changed files',
+              ...changedFiles,
+              '',
+              '## Validation',
+              '- Local review and approval completed before push.',
+              '- CI, type checking, tests, build, and configured PR reviews run through GitHub Actions.',
+            ].join('\n');
+
+            const pullRequest = await github.rest.pulls.create({
+              owner,
+              repo,
+              head,
+              base,
+              title: `${jiraKey}: ${taskSummary}`,
+              body,
+            });
+
+            core.notice(`Created PR: ${pullRequest.data.html_url}`);

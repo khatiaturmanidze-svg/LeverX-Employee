@@ -144,5 +144,11 @@ section(`Pushing ${branch} to origin`);
 run('git', ['push', '--set-upstream', 'origin', branch]);
 
 console.log('\nCommit and push completed.');
-console.log('After reviewing the pushed branch, create the pull request with:');
-console.log(`npm run agent:create-pr -- ${ticketKey}`);
+console.log('To create the pull request:');
+console.log('1. Open GitHub Actions.');
+console.log('2. Select "Create pull request".');
+console.log('3. Run the workflow with:');
+console.log(`   head_branch: ${branch}`);
+console.log(`   jira_key: ${ticketKey}`);
+console.log('   task_summary: <Jira ticket title>');
+console.log('   base_branch: develop');
