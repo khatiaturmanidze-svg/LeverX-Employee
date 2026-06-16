@@ -13,7 +13,7 @@ on:
         type: string
       task_summary:
         description: Jira task title or short summary
-        required: true
+        required: false
         type: string
       base_branch:
         description: Pull request target branch
@@ -30,15 +30,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check PR creation token
-        env:
-          PR_CREATION_TOKEN: ${{ github.token }}
-        run: |
-          if [ -z "$PR_CREATION_TOKEN" ]; then
-            echo "::error::Repository secret PR_CREATION_TOKEN is required."
-            exit 1
-          fi
-
       - name: Validate inputs and create pull request
         uses: actions/github-script@v7
         env:
@@ -46,6 +37,8 @@ jobs:
           BASE_BRANCH: ${{ inputs.base_branch }}
           JIRA_KEY: ${{ inputs.jira_key }}
           TASK_SUMMARY: ${{ inputs.task_summary }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: gpt-4.1-mini
         with:
           github-token: ${{ github.token }}
           script: |
@@ -53,10 +46,10 @@ jobs:
             const head = process.env.HEAD_BRANCH.trim();
             const base = process.env.BASE_BRANCH.trim();
             const jiraKey = process.env.JIRA_KEY.trim().toUpperCase();
-            const taskSummary = process.env.TASK_SUMMARY
+            const taskSummary = (process.env.TASK_SUMMARY || '')
               .trim()
               .replace(/\s+/g, ' ');
-            const jiraKeyPattern = /^[A-Z][A-Z0-9]+-\d+$/;
+            const jiraKeyPattern = /^[A-Z][A-Z0-9]*-\d+$/;
 
             if (!jiraKeyPattern.test(jiraKey)) {
               core.setFailed(`Invalid Jira key: ${jiraKey}`);
@@ -125,9 +118,10 @@ jobs:
                 return `- ${commit.sha.slice(0, 7)} ${subject}`;
               });
 
-            const body = [
+            const fallbackTitle = `${jiraKey}: ${taskSummary || commits.at(-1)?.replace(/^- [a-f0-9]+ /, '') || 'Update implementation'}`;
+            const fallbackBody = [
               '## Summary',
-              taskSummary,
+              taskSummary || 'Implementation changes generated from the branch diff.',
               '',
               '## Jira',
               jiraKey,
@@ -143,12 +137,108 @@ jobs:
               '- CI, type checking, tests, build, and configured PR reviews run through GitHub Actions.',
             ].join('\n');
 
+            async function generateAiPrContent() {
+              const apiKey = process.env.OPENAI_API_KEY;
+
+              if (!apiKey) {
+                core.notice('OPENAI_API_KEY is not configured. Using fallback PR description.');
+                return null;
+              }
+
+              const fileSummaries = files.slice(0, 25).map((file) => ({
+                filename: file.filename,
+                status: file.status,
+                additions: file.additions,
+                deletions: file.deletions,
+                patch: file.patch?.slice(0, 6000) || '',
+              }));
+
+              const prompt = `
+            Write a clear GitHub pull request title and description for this Jira task.
+
+            Requirements:
+            - Return only valid JSON with "title" and "body" fields.
+            - The title must start with "${jiraKey}: ".
+            - The body must be Markdown.
+            - Explain what changed in useful reviewer language.
+            - Include concise sections for Summary, Implementation, Testing, and Jira.
+            - Mention the Jira key: ${jiraKey}.
+            - Do not invent tests or behavior that are not supported by the diff.
+            - Keep it practical and not salesy.
+
+            Optional task summary:
+            ${taskSummary || '(not provided)'}
+
+            Recent commits:
+            ${commits.join('\n') || '(none)'}
+
+            Changed files and patches:
+            ${JSON.stringify(fileSummaries, null, 2)}
+            `;
+
+              try {
+                const response = await fetch('https://api.openai.com/v1/responses', {
+                  method: 'POST',
+                  headers: {
+                    Authorization: `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    model: process.env.OPENAI_MODEL || 'gpt-4.1-mini',
+                    input: prompt,
+                    temperature: 0.2,
+                  }),
+                });
+
+                if (!response.ok) {
+                  const errorText = await response.text();
+                  core.warning(`OpenAI PR description generation failed: ${errorText}`);
+                  return null;
+                }
+
+                const data = await response.json();
+                const text =
+                  data.output_text ||
+                  data.output
+                    ?.flatMap((item) => item.content || [])
+                    .map((content) => content.text)
+                    .filter(Boolean)
+                    .join('\n');
+
+                if (!text) {
+                  core.warning('OpenAI returned an empty PR description response.');
+                  return null;
+                }
+
+                const parsed = JSON.parse(text.replace(/^```json\s*|\s*```$/g, '').trim());
+
+                if (!parsed.title || !parsed.body) {
+                  core.warning('OpenAI response did not include both title and body.');
+                  return null;
+                }
+
+                return {
+                  title: parsed.title.startsWith(`${jiraKey}: `)
+                    ? parsed.title
+                    : `${jiraKey}: ${parsed.title.replace(new RegExp(`^${jiraKey}:\\s*`, 'i'), '')}`,
+                  body: parsed.body,
+                };
+              } catch (error) {
+                core.warning(`OpenAI PR description generation failed: ${error.message}`);
+                return null;
+              }
+            }
+
+            const aiPrContent = await generateAiPrContent();
+            const title = aiPrContent?.title || fallbackTitle;
+            const body = aiPrContent?.body || fallbackBody;
+
             const pullRequest = await github.rest.pulls.create({
               owner,
               repo,
               head,
               base,
-              title: `${jiraKey}: ${taskSummary}`,
+              title,
               body,
             });
 
