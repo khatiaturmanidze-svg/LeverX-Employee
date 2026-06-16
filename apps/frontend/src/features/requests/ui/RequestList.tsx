@@ -13,8 +13,9 @@ export default function RequestList(): React.ReactElement {
   const [isPersonal, setIsPersonal] = useState(true);
   const { id } = useParams();
   const dispatch = useDispatch();
-  const { data: requests = [] } = useGetRequestsQuery(id);
-  const { data: allUsers = [] } = useGetUsersQuery();
+  const { data: requests = [], isLoading: isRequestsLoading } =
+    useGetRequestsQuery(id);
+  const { data: allUsers = [], isLoading: isUsersLoading } = useGetUsersQuery();
 
   useEffect(() => {
     dispatch(usersApi.util.invalidateTags(['users']));
@@ -22,7 +23,7 @@ export default function RequestList(): React.ReactElement {
 
   const managedUsers = getManagedEmployees(allUsers);
   const teamRequests = managedUsers.flatMap((user) =>
-    user.requests?.map((req) => ({
+    (user.requests ?? []).map((req) => ({
       ...req,
       employeeId: user._id,
       employeeName: `${user.first_name} ${user.last_name}`,
@@ -30,6 +31,7 @@ export default function RequestList(): React.ReactElement {
   );
 
   const currentDataSource = isPersonal ? requests : teamRequests;
+  const isLoading = isPersonal ? isRequestsLoading : isUsersLoading;
 
   const visibleRequests = currentDataSource.filter((req) => {
     if (requestType === 'All types of requests' || requestType === '') {
@@ -77,7 +79,9 @@ export default function RequestList(): React.ReactElement {
         </select>
       </div>
       <div className="request-list__items">
-        {visibleRequests.length > 0 ? (
+        {isLoading ? (
+          <div className="request-list__loading">Loading requests...</div>
+        ) : visibleRequests.length > 0 ? (
           visibleRequests
             .filter((req): req is IRequestData => req !== undefined)
             .map((req) => (

@@ -1,15 +1,15 @@
 import { spawnSync } from 'node:child_process';
 import { createInterface } from 'node:readline/promises';
 
-const ticketKey = process.argv[2]?.toUpperCase();
+const ticketKey = process.argv[2]?.trim().toUpperCase();
 const protectedBranches = new Set(['main', 'develop']);
 
 if (!ticketKey) {
-  console.error(`Usage: npm run agent:publish ${ticketKey}`);
+  console.error(`Usage: npm run agent:publish -- ${ticketKey}`);
   process.exit(1);
 }
 
-if (!/^[A-Z][A-Z0-9]+-\d+$/.test(ticketKey)) {
+if (!/^[A-Z][A-Z0-9]*-\d+$/.test(ticketKey)) {
   console.error(`Invalid Jira ticket key: ${ticketKey}`);
   process.exit(1);
 }

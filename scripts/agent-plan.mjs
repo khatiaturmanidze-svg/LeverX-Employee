@@ -54,6 +54,3 @@ fs.writeFileSync(planPath, result.stdout);
 
 console.log('\nStep 3: Plan saved');
 console.log(`✓ Saved to ${planPath}`);
-
-console.log('\nPlan result:\n');
-console.log(result.stdout);

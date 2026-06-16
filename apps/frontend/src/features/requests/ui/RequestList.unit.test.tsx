@@ -1,5 +1,5 @@
 import React from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import RequestList from './RequestList';
@@ -48,6 +48,10 @@ vi.mock(
 );
 
 describe('RequestList', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('renders personal requests by default and dispatches users invalidation on mount', async () => {
     const dispatch = vi.fn();
     useDispatchMock.mockReturnValue(dispatch);
@@ -64,9 +68,16 @@ describe('RequestList', () => {
           employeeId: 'u-1',
         },
       ],
+      isLoading: false,
     });
-    useGetUsersQueryMock.mockReturnValue({ data: [] });
-    getManagedEmployeesMock.mockReturnValue([]);
+    useGetUsersQueryMock.mockReturnValue({ data: [], isLoading: false });
+    getManagedEmployeesMock.mockReturnValue([
+      {
+        _id: 'u-2',
+        first_name: 'Team',
+        last_name: 'Member',
+      },
+    ]);
 
     const container = document.createElement('div');
     const root = createRoot(container);
@@ -85,11 +96,65 @@ describe('RequestList', () => {
     });
   });
 
-  it('switches to team tab and shows empty state when no team requests', async () => {
+  it('shows loading state while personal requests are loading', async () => {
     useDispatchMock.mockReturnValue(vi.fn());
     useParamsMock.mockReturnValue({ id: 'u-1' });
-    useGetRequestsQueryMock.mockReturnValue({ data: [] });
-    useGetUsersQueryMock.mockReturnValue({ data: [] });
+    useGetRequestsQueryMock.mockReturnValue({ data: [], isLoading: true });
+    useGetUsersQueryMock.mockReturnValue({ data: [], isLoading: false });
+    getManagedEmployeesMock.mockReturnValue([]);
+
+    const container = document.createElement('div');
+    const root = createRoot(container);
+
+    await act(async () => {
+      root.render(React.createElement(RequestList));
+    });
+
+    expect(container.textContent).toContain('Loading requests...');
+    expect(container.textContent).not.toContain('No  requests found');
+
+    await act(async () => {
+      root.unmount();
+    });
+  });
+
+  it('shows loading state on team tab while users are loading', async () => {
+    useDispatchMock.mockReturnValue(vi.fn());
+    useParamsMock.mockReturnValue({ id: 'u-1' });
+    useGetRequestsQueryMock.mockReturnValue({ data: [], isLoading: false });
+    useGetUsersQueryMock.mockReturnValue({ data: [], isLoading: true });
+    getManagedEmployeesMock.mockReturnValue([]);
+
+    const container = document.createElement('div');
+    const root = createRoot(container);
+
+    await act(async () => {
+      root.render(React.createElement(RequestList));
+    });
+
+    const teamButton = Array.from(container.querySelectorAll('button')).find(
+      (btn) => btn.textContent === 'team requests',
+    );
+    if (!teamButton) throw new Error('team requests tab not found');
+
+    await act(async () => {
+      teamButton.click();
+    });
+
+    expect(container.textContent).toContain('Team leave requests');
+    expect(container.textContent).toContain('Loading requests...');
+    expect(container.textContent).not.toContain('No  requests found');
+
+    await act(async () => {
+      root.unmount();
+    });
+  });
+
+  it('switches to team tab and shows empty state when no team requests after loading completes', async () => {
+    useDispatchMock.mockReturnValue(vi.fn());
+    useParamsMock.mockReturnValue({ id: 'u-1' });
+    useGetRequestsQueryMock.mockReturnValue({ data: [], isLoading: false });
+    useGetUsersQueryMock.mockReturnValue({ data: [], isLoading: false });
     getManagedEmployeesMock.mockReturnValue([]);
 
     const container = document.createElement('div');
@@ -110,6 +175,7 @@ describe('RequestList', () => {
 
     expect(container.textContent).toContain('Team leave requests');
     expect(container.textContent).toContain('No  requests found');
+    expect(container.textContent).not.toContain('Loading requests...');
 
     await act(async () => {
       root.unmount();

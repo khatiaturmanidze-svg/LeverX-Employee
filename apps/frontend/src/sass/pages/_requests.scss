@@ -176,6 +176,13 @@
   }
 }
 
+.request-list__loading {
+  padding: $space-md;
+  color: $color-darker-grey;
+  font-size: $font-small;
+  text-align: center;
+}
+
 .request-list__item {
   padding: $space-md;
   background-color: $color-lighter-grey;
