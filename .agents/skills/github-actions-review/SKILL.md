@@ -9,7 +9,7 @@ description: Use this skill when reviewing GitHub Actions workflow runs, CI fail
 
 Turn GitHub Actions workflow/run data into a short engineering update.
 
-## Demo Explanation
+## Explanation
 
 This skill is used after CI fails. The GitHub Actions workflow gives Codex the
 failed run metadata, and the skill tells codex to respond like an engineering
