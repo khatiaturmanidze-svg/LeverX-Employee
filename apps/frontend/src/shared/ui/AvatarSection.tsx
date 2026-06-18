@@ -7,7 +7,8 @@ interface AvatarSectionProps {
   user: IEmployee;
   canEdit: boolean;
   onEditClick: () => void;
-  onCopyLink: () => void;
+  onCopyLink: () => void | Promise<void>;
+  copyLinkMessage?: string;
 }
 
 export default function AvatarSection({
@@ -15,6 +16,7 @@ export default function AvatarSection({
   canEdit,
   onEditClick,
   onCopyLink,
+  copyLinkMessage,
 }: AvatarSectionProps) {
   const isRemoteWork = user.isRemoteWork ? (
     <div className="home-box">
@@ -76,6 +78,7 @@ export default function AvatarSection({
         />
         <p>Copy link</p>
       </button>
+      {copyLinkMessage && <p className="form-success">{copyLinkMessage}</p>}
     </div>
   );
 }

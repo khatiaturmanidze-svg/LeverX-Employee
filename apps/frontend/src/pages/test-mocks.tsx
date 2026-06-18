@@ -399,10 +399,12 @@ export const detailsAvatarSectionModule = {
     canEdit,
     onEditClick,
     onCopyLink,
+    copyLinkMessage,
   }: {
     canEdit: boolean;
     onEditClick: () => void;
     onCopyLink: () => void;
+    copyLinkMessage?: string;
   }) =>
     React.createElement('section', { 'data-testid': 'avatar' }, [
       canEdit
@@ -427,6 +429,13 @@ export const detailsAvatarSectionModule = {
         },
         'Copy link',
       ),
+      copyLinkMessage
+        ? React.createElement(
+            'p',
+            { key: 'copy-message', className: 'form-success' },
+            copyLinkMessage,
+          )
+        : null,
     ]),
 };
 

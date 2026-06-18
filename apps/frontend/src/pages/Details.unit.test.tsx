@@ -185,12 +185,31 @@ describe('pages/Details', () => {
     });
   });
 
-  it('copies link when clicked and then exits edit mode after save success', async () => {
+  it('hides copy confirmation before copy link is clicked', async () => {
+    setupBaseMocks();
+    canEditMock.mockReturnValue(true);
+
+    const container = document.createElement('div');
+    const root = createRoot(container);
+
+    await act(async () => {
+      root.render(React.createElement(Details));
+    });
+    await resolveLazySections();
+
+    expect(container.textContent).not.toContain('Link copied.');
+
+    await act(async () => {
+      root.unmount();
+    });
+  });
+
+  it('copies link and shows confirmation when clicked', async () => {
     setupBaseMocks();
     canEditMock.mockReturnValue(true);
     localStorage.setItem('loggedInUser', 'admin@example.com');
 
-    const writeTextMock = vi.fn();
+    const writeTextMock = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, 'clipboard', {
       value: { writeText: writeTextMock },
       configurable: true,
@@ -210,9 +229,28 @@ describe('pages/Details', () => {
 
     await act(async () => {
       copyBtn.click();
+      await Promise.resolve();
     });
 
     expect(writeTextMock).toHaveBeenCalledWith(window.location.href);
+    expect(container.textContent).toContain('Link copied.');
+
+    await act(async () => {
+      root.unmount();
+    });
+  });
+
+  it('exits edit mode after save success', async () => {
+    setupBaseMocks();
+    canEditMock.mockReturnValue(true);
+
+    const container = document.createElement('div');
+    const root = createRoot(container);
+
+    await act(async () => {
+      root.render(React.createElement(Details));
+    });
+    await resolveLazySections();
 
     const editBtn = container.querySelector(
       'button.avatar-section__edit',

@@ -20,6 +20,8 @@ const EmployeeEditForm = lazy(async () => {
 
 export default function Details(): React.ReactElement {
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [isCopyLinkConfirmed, setIsCopyLinkConfirmed] =
+    useState<boolean>(false);
 
   const {
     loggedUser,
@@ -48,12 +50,13 @@ export default function Details(): React.ReactElement {
     setIsEditing(true);
   };
 
-  const handleCopyLink = () => {
+  const handleCopyLink = async () => {
     if (
       localStorage.getItem('loggedInUser') ||
       sessionStorage.getItem('loggedInUser')
     ) {
-      navigator.clipboard.writeText(window.location.href);
+      await navigator.clipboard.writeText(window.location.href);
+      setIsCopyLinkConfirmed(true);
     }
   };
 
@@ -93,6 +96,7 @@ export default function Details(): React.ReactElement {
             canEdit={canUserEdit}
             onEditClick={handleEditClick}
             onCopyLink={handleCopyLink}
+            copyLinkMessage={isCopyLinkConfirmed ? 'Link copied.' : undefined}
           />
         </Suspense>
 
