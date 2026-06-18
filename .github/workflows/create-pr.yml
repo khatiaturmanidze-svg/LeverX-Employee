@@ -1,6 +1,8 @@
 name: Create pull request
 
 on:
+  # Manual trigger used after a reviewed branch has been pushed
+
   workflow_dispatch:
     inputs:
       head_branch:
@@ -46,6 +48,7 @@ jobs:
           github-token: ${{ github.token }}
           script: |
             const { pathToFileURL } = require('node:url');
+            // Keep the workflow thin: the real logic lives in scripts/create-pr.mjs.
             const { default: createPullRequest } = await import(
               pathToFileURL(`${process.env.GITHUB_WORKSPACE}/scripts/create-pr.mjs`)
             );

@@ -14,6 +14,9 @@ if (!/^[A-Z][A-Z0-9]*-\d+$/.test(ticketKey)) {
   process.exit(1);
 }
 
+// Publishing is intentionally separate from planning and implementation.
+// This script is the first step that can commit or push, so it requires an
+// explicit typed approval before making repository changes.
 function run(command, args, options = {}) {
   const { capture = false, ...spawnOptions } = options;
   const result = spawnSync(command, args, {
@@ -116,6 +119,7 @@ const checks = [
   ['build', ['run', 'build']],
 ];
 
+// Run the same validation categories expected in CI before staging anything.
 for (const [name, args] of checks) {
   section(`Running ${name}`);
   runNpm(args);

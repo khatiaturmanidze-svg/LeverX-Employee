@@ -18,6 +18,8 @@ console.log(`Reviewing changes against base branch: ${BASE_BRANCH}`);
 let diff = '';
 
 try {
+  // Keep the model focused on reviewer-relevant frontend changes instead of
+  // sending the whole repository.
   diff = execSync(`git diff origin/${BASE_BRANCH}...HEAD -- ${FRONTEND_PATH}`, {
     encoding: 'utf-8',
     maxBuffer: 1024 * 1024 * 10,
@@ -37,6 +39,8 @@ if (!diff.trim()) {
   process.exit(0);
 }
 
+// The model acts as a reviewer here. It produces a Markdown review that the
+// workflow posts as a PR comment for humans to inspect.
 const prompt = `
 You are a senior frontend code reviewer.
 

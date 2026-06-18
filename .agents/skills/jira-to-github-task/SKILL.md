@@ -9,6 +9,10 @@ description: Use this skill when implementing a Jira ticket in the current repos
 
 Implement a small Jira task in the current repository safely and prepare a GitHub pull request.
 
+the skill connects the Jira side of the story to the GitHub side:
+Codex reads the Jira ticket through MCP, plans the work, implements only the
+approved scope, runs checks, and waits for a human before publishing.
+
 ## Workflow
 
 1. Fetch and summarize the Jira ticket.

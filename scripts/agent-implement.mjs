@@ -3,8 +3,9 @@ import { spawnSync } from 'node:child_process';
 
 const ticketKey = process.argv[2];
 
+// Stop immediately if the user forgot to provide a Jira ticket key
 if (!ticketKey) {
-  console.error(`Usage: npm run agent:implement -- ${ticketKey}`);
+  console.error('Usage: npm run agent:implement -- IEMEREDU-123');
   process.exit(1);
 }
 
@@ -15,17 +16,18 @@ function run(command, args, options = {}) {
     ...options,
   });
 }
+
 function step(number, message) {
   console.log(`\nStep ${number}: ${message}`);
 }
 
 function done(message) {
-  console.log(`✓ ${message}`);
+  console.log(`OK ${message}`);
 }
 
 const planPath = `agent-plan-${ticketKey}.md`;
 
-step(`1, Loading saved implementation plan for ${ticketKey}...`);
+step(1, `Loading saved implementation plan for ${ticketKey}...`);
 
 if (!fs.existsSync(planPath)) {
   console.error(`Plan file not found: ${planPath}`);
@@ -33,6 +35,7 @@ if (!fs.existsSync(planPath)) {
   process.exit(1);
 }
 
+// Read the saved plan so it can be included in the prompt sent to Codex
 const plan = fs.readFileSync(planPath, 'utf-8');
 done(`Loaded plan from ${planPath}`);
 
@@ -95,10 +98,13 @@ if (result.status !== 0) {
 done('Codex implementation finished');
 
 step(4, 'Agent implementation summary');
+
 console.log(result.stdout);
 
 step(5, 'Collecting changed files...');
 
+// Show the local git state after the agent runs so a human can review the exact
+// files before publishing
 const status = run('git', ['status', '--short']);
 
 if (status.status !== 0) {

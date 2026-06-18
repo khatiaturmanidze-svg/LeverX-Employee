@@ -1,6 +1,7 @@
 name: AI PR Review
 
 on:
+  # Runs when a real PR is opened for review, limited to frontend-relevant paths.
   pull_request:
     types:
       - opened
@@ -24,6 +25,7 @@ on:
 
 permissions:
   contents: read
+  # The workflow posts the generated review as a PR comment.
   pull-requests: write
   issues: write
 
@@ -51,6 +53,7 @@ jobs:
         run: npm ci
 
       - name: Run AI Review Script
+        # Missing API keys skip AI review instead of failing the whole PR workflow.
         if: env.OPENAI_API_KEY != ''
         run: node scripts/ai-pr-review.mjs
 

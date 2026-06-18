@@ -8,6 +8,8 @@ export default async function createPullRequest({ github, context, core }) {
     .replace(/\s+/g, ' ');
   const jiraKeyPattern = /^[A-Z][A-Z0-9]*-\d+$/;
 
+  // Validate traceability first: the Jira key must be valid and included in the
+  // branch name before the workflow creates anything in GitHub.
   if (!jiraKeyPattern.test(jiraKey)) {
     core.setFailed(`Invalid Jira key: ${jiraKey}`);
     return;
@@ -58,6 +60,9 @@ export default async function createPullRequest({ github, context, core }) {
   }
 
   const files = comparison.data.files ?? [];
+
+  // PR creation does not depend on AI. This fallback title/body is deterministic
+  // and is used whenever OpenAI is not configured or returns unusable content.
   const changedFiles = files
     .slice(0, 50)
     .map((file) => `- \`${file.filename}\` (${file.status})`);

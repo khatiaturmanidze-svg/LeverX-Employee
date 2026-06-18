@@ -8,6 +8,8 @@ if (!ticketKey) {
   process.exit(1);
 }
 
+// Planning is read-only. Codex can use the Atlassian/Jira MCP connection to
+// fetch ticket context, but this prompt explicitly forbids edits and publishing.
 const prompt = `
 Use Atlassian/Jira MCP to fetch Jira ticket ${ticketKey}.
 
@@ -50,7 +52,8 @@ console.log('\nPlan created:\n');
 console.log(result.stdout);
 const planPath = `agent-plan-${ticketKey}.md`;
 
+// The saved plan
 fs.writeFileSync(planPath, result.stdout);
 
 console.log('\nStep 3: Plan saved');
-console.log(`✓ Saved to ${planPath}`);
+console.log(`OK Saved to ${planPath}`);

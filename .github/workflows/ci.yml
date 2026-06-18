@@ -1,6 +1,7 @@
 name: CI
 
 on:
+  # Standard validation gate for pull requests and protected branch pushes
   pull_request:
   push:
     branches: [develop, main]

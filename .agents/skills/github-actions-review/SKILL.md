@@ -9,6 +9,16 @@ description: Use this skill when reviewing GitHub Actions workflow runs, CI fail
 
 Turn GitHub Actions workflow/run data into a short engineering update.
 
+## Demo Explanation
+
+This skill is used after CI fails. The GitHub Actions workflow gives Codex the
+failed run metadata, and the skill tells codex to respond like an engineering
+what failed, what is probably wrong, which branch or PR is affected,
+and what to do next.
+
+The skill is intentionally read-only for demos. It should explain the failure,
+not rerun jobs or change code unless someone explicitly asks for that.
+
 ## Always produce this format
 
 1. Summary
