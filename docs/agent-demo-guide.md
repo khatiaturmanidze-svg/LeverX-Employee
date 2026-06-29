@@ -18,7 +18,8 @@ and human-approved.
 6. Review `git diff`.
 7. Run `npm run agent:publish -- JIRA-123`.
 8. The script asks for typed approval, runs checks, commits, and pushes.
-9. In GitHub Actions, manually run `Create pull request`.
+9. Run `npm run agent:create-pr -- JIRA-123` to dispatch the `Create pull
+request` GitHub Actions workflow.
 10. PR workflows run CI, optional AI PR review, and optional CI failure review.
 
 ## What MCP Means Here
@@ -105,6 +106,15 @@ It checks that:
 Then it asks the user to type the Jira key before running lint, typecheck,
 tests, and build. Only after those checks pass does it stage, commit, and push.
 
+### `scripts/agent-create-pr.mjs`
+
+This is the explicit PR creation step after publishing.
+
+It validates the Jira key and current branch, confirms there are no unpushed
+commits, checks GitHub CLI authentication, and dispatches the `Create pull
+request` workflow with the current branch. The default target is `develop`;
+set `AGENT_PR_BASE_BRANCH` to override it.
+
 ### `scripts/create-pr.mjs`
 
 This is used by the `Create pull request` GitHub Actions workflow.
@@ -140,11 +150,10 @@ This runs on pull requests and pushes to `develop` or `main`.
 
 ### `.github/workflows/create-pr.yml`
 
-This is manually triggered after a reviewed branch has been pushed to GitHub.
-For the demo, `agent-publish` is the recommended way to push because it runs
-checks and asks for typed approval first. Technically, the workflow can also be
-run after a manual `git push` if the branch exists on GitHub and the workflow
-inputs are valid.
+This is dispatched by `npm run agent:create-pr -- JIRA-123` after a reviewed
+branch has been pushed to GitHub. For the demo, `agent-publish` is the
+recommended way to push because it runs checks and asks for typed approval
+first. The workflow can still be run manually in GitHub Actions when needed.
 
 It imports `scripts/create-pr.mjs`, validates the inputs, and creates the pull
 request. Keeping the logic in `scripts/create-pr.mjs` makes the workflow easier
@@ -171,7 +180,7 @@ The workflow separates risk into stages:
 - Planning is read-only.
 - Implementation can edit code but cannot publish.
 - Publishing requires typed human approval.
-- PR creation is manual in GitHub Actions.
+- PR creation is an explicit local command that dispatches GitHub Actions.
 - CI and review automation comment on PRs instead of merging anything.
 
 This is useful to emphasize in the demo: the agent is not given one giant
