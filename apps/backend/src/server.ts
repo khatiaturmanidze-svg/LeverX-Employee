@@ -319,6 +319,7 @@ app.get<Record<string, never>, IEmployee[] | ErrorResponse>(
   '/users',
   authMiddleware,
   async (req, res) => {
+    await db.read();
     res.json(db.data.employees);
   },
 );
@@ -327,6 +328,7 @@ app.get<{ id: string }, IEmployee | ErrorResponse>(
   '/users/:id',
   authMiddleware,
   async (req, res) => {
+    await db.read();
     const user = db.data.employees.find(
       (u: IEmployee) => u._id === req.params.id,
     );
@@ -726,7 +728,7 @@ app.post<Record<string, never>, UploadSpreadsheetResponse | ErrorResponse>(
   },
 );
 
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT || process.env.VITE_API_PORT || 3000);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

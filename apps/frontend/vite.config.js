@@ -6,11 +6,15 @@ import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const envDir = path.resolve(__dirname, '../..');
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, '../../', 'VITE_');
+  const env = loadEnv(mode, envDir, 'VITE_');
+  const apiTarget =
+    env.VITE_API_TARGET || `http://localhost:${env.VITE_API_PORT || 3000}`;
 
   return {
+    envDir,
     plugins: [
       react(),
       tsconfigPaths({
@@ -29,7 +33,7 @@ export default defineConfig(({ mode }) => {
     server: {
       proxy: {
         '/api': {
-          target: env.VITE_API_TARGET,
+          target: apiTarget,
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api/, ''),
         },
