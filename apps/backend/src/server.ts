@@ -30,9 +30,14 @@ import { initDatabase } from './database.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
+const FE_PORT = Number(process.env.VITE_FE_PORT || 5173);
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: `http://localhost:${FE_PORT}`,
+  }),
+);
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../dist')));
 const upload = multer({ storage: multer.memoryStorage() });
@@ -319,6 +324,7 @@ app.get<Record<string, never>, IEmployee[] | ErrorResponse>(
   '/users',
   authMiddleware,
   async (req, res) => {
+    await db.read();
     res.json(db.data.employees);
   },
 );
@@ -327,6 +333,7 @@ app.get<{ id: string }, IEmployee | ErrorResponse>(
   '/users/:id',
   authMiddleware,
   async (req, res) => {
+    await db.read();
     const user = db.data.employees.find(
       (u: IEmployee) => u._id === req.params.id,
     );
@@ -726,7 +733,7 @@ app.post<Record<string, never>, UploadSpreadsheetResponse | ErrorResponse>(
   },
 );
 
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT || process.env.VITE_API_PORT || 3000);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

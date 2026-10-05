@@ -9,9 +9,6 @@ import { IEmployee } from './employeeTypes.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const DB_RELATIVE_PATH = process.env.DATABASE_PATH || '../src/db.json';
-const dbFilePath = path.resolve(__dirname, DB_RELATIVE_PATH);
-
 // 2. Initial Data Structure
 const defaultData: DatabaseSchema = {
   authUsers: [],
@@ -25,7 +22,7 @@ const createDefaultAdmin = (overrides: Partial<IEmployee>): IEmployee => {
     last_name: '',
     email: '',
     role: 'Admin',
-    user_avatar: '/users/default.jpg',
+    user_avatar: '/users/dumplinh.jpg',
     first_native_name: '',
     middle_native_name: '',
     last_native_name: '',
@@ -47,6 +44,11 @@ const createDefaultAdmin = (overrides: Partial<IEmployee>): IEmployee => {
 };
 
 export const initDatabase = async () => {
+  const dbFilePath = path.resolve(
+    __dirname,
+    '..',
+    process.env.DATABASE_PATH || './src/db.json',
+  );
   const dir = path.dirname(dbFilePath);
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });

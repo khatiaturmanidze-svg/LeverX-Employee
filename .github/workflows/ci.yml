@@ -18,7 +18,6 @@ jobs:
           cache: npm
 
       - run: npm ci
-      - run: npm install --prefix apps/frontend @rollup/rollup-linux-x64-gnu --no-save
       - run: npm run lint:check
       - run: npm run typecheck
       - run: npm run build
