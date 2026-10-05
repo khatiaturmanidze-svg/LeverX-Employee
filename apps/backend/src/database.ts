@@ -44,7 +44,6 @@ const createDefaultAdmin = (overrides: Partial<IEmployee>): IEmployee => {
 };
 
 export const initDatabase = async () => {
-  // Read configuration after server.ts loads .env; resolve from the backend root.
   const dbFilePath = path.resolve(
     __dirname,
     '..',

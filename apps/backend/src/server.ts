@@ -30,9 +30,14 @@ import { initDatabase } from './database.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
+const FE_PORT = Number(process.env.VITE_FE_PORT || 5173);
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: `http://localhost:${FE_PORT}`,
+  }),
+);
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../dist')));
 const upload = multer({ storage: multer.memoryStorage() });
