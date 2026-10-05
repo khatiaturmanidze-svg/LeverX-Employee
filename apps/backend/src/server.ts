@@ -23,6 +23,7 @@ import type {
   ErrorResponse,
   UploadSpreadsheetResponse,
   UpdateRoleResponse,
+  HealthResponse,
 } from './serverTypes.js';
 import type { IEmployee, IRequestData } from './employeeTypes.js';
 import { initDatabase } from './database.js';
@@ -234,6 +235,15 @@ function authMiddleware(
 
   next();
 }
+
+app.get<Record<string, never>, HealthResponse>(
+  '/health',
+  (_req: Request<Record<string, never>>, res: Response<HealthResponse>) => {
+    res.status(200).json({
+      message: 'Server is running',
+    });
+  },
+);
 
 app.post<Record<string, never>, SignInResponse | ErrorResponse, SignInRequest>(
   '/sign-in',

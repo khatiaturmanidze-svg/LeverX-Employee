@@ -109,6 +109,10 @@ export interface ErrorResponse {
   error: string;
 }
 
+export interface HealthResponse {
+  message: string;
+}
+
 export interface AuthUserContext {
   id: string;
   role: string;
