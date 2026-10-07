@@ -5,7 +5,8 @@
   "scripts": {
     "build": "tsc",
     "start": "nodemon dist/server.js",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "npm run build && node --test tests/*.test.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

@@ -1,4 +1,4 @@
-import type { IEmployee } from './employeeTypes.js';
+import type { IEmployee, IRequestData } from './employeeTypes.js';
 
 export interface IAuthUser {
   email: string;
@@ -116,4 +116,9 @@ export interface HealthResponse {
 export interface AuthUserContext {
   id: string;
   role: string;
+}
+
+export interface UpdateRequestStatusRequest {
+  requestId: string | number;
+  newStatus: IRequestData['status'];
 }
