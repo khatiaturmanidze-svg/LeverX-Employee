@@ -85,3 +85,20 @@ export const initDatabase = async () => {
 
   return db;
 };
+
+/**
+ * 
+ *import pg from 'pg';
+
+export async function initDatabase() {
+  const pool = new pg.Pool({
+    connectionString: process.env.DATABASE_URL,
+  });
+
+  // Verify that the database is reachable.
+  await pool.query('SELECT 1');
+
+  return pool;
+}
+  A pool manages reusable database connections. Create it once at startup and pass it to your services, as you already do with lowDB.
+ */
