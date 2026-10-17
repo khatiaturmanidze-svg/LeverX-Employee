@@ -18,8 +18,12 @@ import type {
 import type { IEmployee } from '../employeeTypes.js';
 import type { Database } from './types.js';
 import { ServiceError } from './serviceError.js';
+// import { Pool } from 'pg';
+import { ReadRepositories } from '../repositories/index.js';
+import { toEmployeeResponse } from '../mappers/employeeMapper.js';
 
-export function createEmployeeService(db: Database) {
+export function createEmployeeService(db: Database, reads: ReadRepositories) {
+  // why is this here
   function getNextEmployeeId(): string {
     const maxId = db.data.employees.reduce((currentMax, employee) => {
       const parsedId = Number(employee._id);
@@ -30,20 +34,28 @@ export function createEmployeeService(db: Database) {
 
     return String(maxId + 1);
   }
+
+  // get /users
   async function listEmployees(): Promise<IEmployee[]> {
     await db.read();
     return db.data.employees;
   }
 
+  // get /users/:id
   async function getEmployee(id: string): Promise<IEmployee> {
-    await db.read();
-    const user = db.data.employees.find((u: IEmployee) => u._id === id);
+    const row = await reads.employees.findById(id);
 
-    if (!user) {
+    if (!row) {
       throw new ServiceError(400, { error: 'user not found' });
     }
 
-    return user;
+    const manager = row.manager_id
+      ? await reads.employees.findManager(row.manager_id)
+      : null;
+    const visas = await reads.visas.listByEmployeeId(id);
+    const requests = await reads.requests.listByEmployeeId(id);
+
+    return toEmployeeResponse(row, manager, visas, requests);
   }
 
   async function updateEmployee(

@@ -4,6 +4,7 @@ import type { Database } from './types.js';
 import { ServiceError } from './serviceError.js';
 
 export function createVisaService(db: Database) {
+  // get /users/:id/visas
   async function listVisas(id: string): Promise<IVisa[]> {
     const employee = db.data.employees.find((emp) => emp._id === id);
     if (!employee) {

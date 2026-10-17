@@ -122,3 +122,18 @@ export interface UpdateRequestStatusRequest {
   requestId: string | number;
   newStatus: IRequestData['status'];
 }
+
+//options sent by the frontend and used by the backend
+export interface EmployeeListQuery {
+  page: number;
+  limit: number;
+  name?: string;
+}
+
+// response returned by GET /users
+export interface EmployeePage {
+  items: IEmployee[];
+  total: number;
+  page: number;
+  limit: number;
+}

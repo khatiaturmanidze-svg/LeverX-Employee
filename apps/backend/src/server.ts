@@ -19,11 +19,15 @@ const result = await postgresPool.query(
 console.log('Employee from postgresPool:', result.rows[0]);
 
 const db = await initDatabase();
-const app = createApp(db, {
-  frontendPort: Number(process.env.VITE_FE_PORT || 5173),
-  token: process.env.VITE_AUTH_TOKEN || 'authorized-can-access',
-  staticDirectory: path.join(__dirname, '../dist'),
-});
+const app = createApp(
+  db,
+  {
+    frontendPort: Number(process.env.VITE_FE_PORT || 5173),
+    token: process.env.VITE_AUTH_TOKEN || 'authorized-can-access',
+    staticDirectory: path.join(__dirname, '../dist'),
+  },
+  postgresPool,
+);
 const PORT = Number(process.env.PORT || process.env.VITE_API_PORT || 3000);
 
 app.listen(PORT, () => {

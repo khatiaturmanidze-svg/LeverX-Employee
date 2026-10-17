@@ -3,16 +3,18 @@ import type { UpdateRequestStatusRequest } from '../serverTypes.js';
 import type { IRequestData } from '../employeeTypes.js';
 import type { Database } from './types.js';
 import { ServiceError } from './serviceError.js';
+import { ReadRepositories } from '../repositories/index.js';
 
-export function createRequestService(db: Database) {
+export function createRequestService(db: Database, reads: ReadRepositories) {
+  // get /users/:id/requests
   async function listRequests(id: string): Promise<IRequestData[]> {
-    const employee = db.data.employees.find((emp) => emp._id === id);
+    const employee = await reads.employees.findById(id);
 
     if (!employee) {
       throw new ServiceError(401, { error: 'employee not found' });
     }
 
-    return employee.requests;
+    return reads.requests.listByEmployeeId(id);
   }
 
   async function createRequest(
