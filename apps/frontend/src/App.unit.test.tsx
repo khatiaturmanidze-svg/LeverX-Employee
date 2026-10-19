@@ -75,11 +75,48 @@ describe('App', () => {
 
   it('renders "/main" for authenticated user from localStorage', async () => {
     localStorage.setItem('loggedInUser', 'user@example.com');
+    localStorage.setItem(
+      'result',
+      JSON.stringify({ mustChangePassword: false }),
+    );
     window.history.pushState({}, '', '/main');
 
     render(<App />);
 
     expect(await screen.findByTestId('main-page')).toBeInTheDocument();
+  });
+
+  it.each(['localStorage', 'sessionStorage'] as const)(
+    'redirects temporary-password users from main using %s',
+    async (storageName) => {
+      window[storageName].setItem('loggedInUser', 'temporary@example.com');
+      window[storageName].setItem(
+        'result',
+        JSON.stringify({ mustChangePassword: true }),
+      );
+      window.history.pushState({}, '', '/main');
+
+      render(<App />);
+
+      expect(
+        await screen.findByTestId('new-password-page'),
+      ).toBeInTheDocument();
+      expect(window.location.pathname).toBe('/new-password');
+      expect(screen.queryByTestId('main-page')).not.toBeInTheDocument();
+    },
+  );
+
+  it('allows temporary-password users to open the password form', async () => {
+    sessionStorage.setItem('loggedInUser', 'temporary@example.com');
+    sessionStorage.setItem(
+      'result',
+      JSON.stringify({ mustChangePassword: true }),
+    );
+    window.history.pushState({}, '', '/new-password');
+
+    render(<App />);
+
+    expect(await screen.findByTestId('new-password-page')).toBeInTheDocument();
   });
 
   it('renders "/details/:id" for authenticated user from sessionStorage', async () => {

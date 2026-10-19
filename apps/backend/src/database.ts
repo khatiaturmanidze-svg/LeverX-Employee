@@ -4,6 +4,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import type { DatabaseSchema } from './serverTypes.js';
 import bcrypt from 'bcrypt';
+import { v4 as uuidv4 } from 'uuid';
 import { IEmployee } from './employeeTypes.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -67,11 +68,12 @@ export const initDatabase = async () => {
 
     const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS) || 10;
     const hashed_password = await bcrypt.hash(testPassword, saltRounds);
+    const userId = uuidv4();
 
-    db.data.authUsers.push({ email: testEmail, hashed_password });
+    db.data.authUsers.push({ _id: userId, email: testEmail, hashed_password });
 
     const testAdmin = createDefaultAdmin({
-      _id: 'test-admin-id',
+      _id: userId,
       first_name: 'Test',
       last_name: 'Admin',
       email: testEmail,

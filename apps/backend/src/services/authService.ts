@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import { v4 as uuidv4 } from 'uuid';
 import type {
   IAuthUser,
   SetNewPasswordRequest,
@@ -80,11 +81,16 @@ export function createAuthService(db: Database, token: string) {
     }
     const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS) || 13;
     const hashed_password = await bcrypt.hash(password, saltRounds);
+    const userId = uuidv4();
 
-    const newAuthUser: IAuthUser = { email, hashed_password };
+    const newAuthUser: IAuthUser = {
+      _id: userId,
+      email,
+      hashed_password,
+    };
 
     const newEmployee: IEmployee = {
-      _id: (db.data.employees.length + 1).toString(),
+      _id: userId,
       role: 'Employee',
       first_name,
       last_name,
@@ -112,7 +118,13 @@ export function createAuthService(db: Database, token: string) {
     db.data.employees.push(newEmployee);
     await db.write();
 
-    return { message: 'User signed up successfully', employee: newEmployee };
+    return {
+      message: 'User signed up successfully',
+      employee: newEmployee,
+      token,
+      userId: newEmployee._id,
+      mustChangePassword: false,
+    };
   }
   return { signIn, setNewPassword, signUp };
 }

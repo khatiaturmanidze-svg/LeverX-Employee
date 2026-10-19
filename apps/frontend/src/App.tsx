@@ -1,5 +1,11 @@
 import React, { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from 'react-router-dom';
 import Loading from './shared/ui/Loading';
 import TestRenderingPage from './pages/test-rendering/TestRenderingPage';
 
@@ -22,7 +28,25 @@ const isAuthenticated = () => {
 const PrivateRoute: React.FC<{ children: React.ReactElement }> = ({
   children,
 }) => {
-  return isAuthenticated() ? children : <Navigate to="/signin" replace />;
+  const { pathname } = useLocation();
+  if (!isAuthenticated()) return <Navigate to="/signin" replace />;
+
+  const storage = localStorage.getItem('loggedInUser')
+    ? localStorage
+    : sessionStorage;
+  let mustChangePassword = false;
+  try {
+    mustChangePassword =
+      JSON.parse(storage.getItem('result') ?? '{}').mustChangePassword === true;
+  } catch {
+    // Ignore malformed stored auth payload.
+  }
+
+  return mustChangePassword && pathname !== '/new-password' ? (
+    <Navigate to="/new-password" replace />
+  ) : (
+    children
+  );
 };
 
 export default function App() {

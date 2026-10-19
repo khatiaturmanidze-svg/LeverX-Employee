@@ -1,6 +1,7 @@
 import type { IEmployee, IRequestData } from './employeeTypes.js';
 
 export interface IAuthUser {
+  _id: string;
   email: string;
   hashed_password: string;
   must_change_password?: boolean;
@@ -64,8 +65,7 @@ export interface SignInResponse {
   mustChangePassword: boolean;
 }
 
-export interface SignUpResponse {
-  message: string;
+export interface SignUpResponse extends SignInResponse {
   employee: IEmployee;
 }
 

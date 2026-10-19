@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { IEmployee } from '../types/type';
+import { usersApi } from './usersApi';
 
 interface SignInPayload {
   email: string;
@@ -28,7 +29,7 @@ interface setNewPasswordResponse {
   message: string;
 }
 
-interface signUpResponse {
+interface signUpResponse extends signInResponse {
   message: string;
   employee: IEmployee;
 }
@@ -85,6 +86,14 @@ export const authApi = createApi({
     }),
 
     signUp: builder.mutation<signUpResponse, SignUpPayload>({
+      async onQueryStarted(_body, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(usersApi.util.invalidateTags(['users']));
+        } catch {
+          // A failed sign-up does not change the employee list.
+        }
+      },
       query: (body) => ({
         url: '/sign-up',
         method: 'POST',

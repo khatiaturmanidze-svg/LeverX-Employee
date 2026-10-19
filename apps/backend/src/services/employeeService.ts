@@ -23,18 +23,6 @@ import { ReadRepositories } from '../repositories/index.js';
 import { toEmployeeResponse } from '../mappers/employeeMapper.js';
 
 export function createEmployeeService(db: Database, reads: ReadRepositories) {
-  // why is this here
-  function getNextEmployeeId(): string {
-    const maxId = db.data.employees.reduce((currentMax, employee) => {
-      const parsedId = Number(employee._id);
-      return Number.isFinite(parsedId)
-        ? Math.max(currentMax, parsedId)
-        : currentMax;
-    }, 0);
-
-    return String(maxId + 1);
-  }
-
   // get /users
   async function listEmployees(): Promise<IEmployee[]> {
     await db.read();
@@ -161,15 +149,17 @@ export function createEmployeeService(db: Database, reads: ReadRepositories) {
     const temporaryPassword = generateTemporaryPassword();
     const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS) || 13;
     const hashed_password = await bcrypt.hash(temporaryPassword, saltRounds);
+    const userId = uuidv4();
 
     const newAuthUser: IAuthUser = {
+      _id: userId,
       email: normalizedEmail,
       hashed_password,
       must_change_password: true,
     };
 
     const newEmployee: IEmployee = {
-      _id: uuidv4(),
+      _id: userId,
       role: role || 'Employee',
       user_avatar: user_avatar || '/users/dumplinh.jpg',
       first_name,
@@ -261,7 +251,7 @@ export function createEmployeeService(db: Database, reads: ReadRepositories) {
           continue;
         }
 
-        const employeeId = getNextEmployeeId();
+        const employeeId = uuidv4();
         const temporaryPassword = generateTemporaryPassword();
         const hashed_password = await bcrypt.hash(
           temporaryPassword,
@@ -270,6 +260,7 @@ export function createEmployeeService(db: Database, reads: ReadRepositories) {
 
         const employee = createEmployeeFromSpreadsheetRow(row, employeeId);
         const authUser: IAuthUser = {
+          _id: employeeId,
           email,
           hashed_password,
           must_change_password: true,

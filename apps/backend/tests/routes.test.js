@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { Low, Memory } from 'lowdb';
 import xlsx from 'xlsx';
+import { validate as isUuid, version as uuidVersion } from 'uuid';
 import { createApp } from '../dist/app.js';
 
 async function setup(t, latency = '') {
@@ -74,6 +75,13 @@ const employee = {
   room: '1',
 };
 
+function assertSharedUuid(db, email, id) {
+  assert.equal(isUuid(id), true);
+  assert.equal(uuidVersion(id), 4);
+  assert.equal(db.data.authUsers.find((user) => user.email === email)._id, id);
+  assert.equal(db.data.employees.find((user) => user.email === email)._id, id);
+}
+
 test('health remains public and bypasses synthetic latency while business routes use it', async (t) => {
   const { request } = await setup(t, '9876');
   const originalTimeout = globalThis.setTimeout;
@@ -99,7 +107,7 @@ test('health remains public and bypasses synthetic latency while business routes
 });
 
 test('signup, sign-in, and forced password changes preserve their contracts', async (t) => {
-  const { request } = await setup(t);
+  const { request, db } = await setup(t);
   assert.equal(
     (await request('/sign-in', { method: 'POST', body: signup })).status,
     400,
@@ -110,6 +118,20 @@ test('signup, sign-in, and forced password changes preserve their contracts', as
   });
   assert.equal(registered.status, 200);
   assert.equal(registered.body.employee.role, 'Employee');
+  assert.equal(registered.body.userId, registered.body.employee._id);
+  assertSharedUuid(db, signup.email, registered.body.userId);
+  assert.equal(registered.body.token, 'test-token');
+  assert.equal(registered.body.mustChangePassword, false);
+  assert.deepEqual(
+    (
+      await request('/set-new-password', {
+        method: 'POST',
+        token: registered.body.token,
+        body: { email: signup.email, newPassword: 'unnecessary-change' },
+      })
+    ).body,
+    { error: 'password change is not required' },
+  );
   assert.deepEqual(
     (await request('/sign-up', { method: 'POST', body: signup })).body,
     { error: 'email already exists' },
@@ -136,6 +158,8 @@ test('signup, sign-in, and forced password changes preserve their contracts', as
     body: employee,
   });
   assert.equal(created.status, 201);
+  assertSharedUuid(db, employee.email, created.body.employee._id);
+  assert.notEqual(created.body.employee._id, registered.body.userId);
   const credentials = {
     email: employee.email,
     password: created.body.temporaryPassword,
@@ -297,6 +321,7 @@ test('spreadsheet upload imports valid rows and reports duplicates and incomplet
       employee,
       employee,
       { email: 'incomplete@example.com' },
+      { ...employee, email: 'second-import@example.com' },
     ]),
   );
   const buffer = xlsx.write(workbook, { type: 'buffer', bookType: 'xlsx' });
@@ -308,7 +333,7 @@ test('spreadsheet upload imports valid rows and reports duplicates and incomplet
     form,
   });
   assert.equal(uploaded.status, 200);
-  assert.equal(uploaded.body.count, 1);
+  assert.equal(uploaded.body.count, 2);
   assert.deepEqual(uploaded.body.skippedRows, [
     { row: 3, email: employee.email, error: 'email already exists' },
     {
@@ -318,6 +343,13 @@ test('spreadsheet upload imports valid rows and reports duplicates and incomplet
     },
   ]);
   assert.equal(db.data.authUsers[0].must_change_password, true);
+  for (const imported of uploaded.body.importedUsers) {
+    assertSharedUuid(db, imported.email, imported.employeeId);
+  }
+  assert.equal(
+    new Set(uploaded.body.importedUsers.map((user) => user.employeeId)).size,
+    2,
+  );
   const user = uploaded.body.importedUsers[0];
   assert.equal(
     (

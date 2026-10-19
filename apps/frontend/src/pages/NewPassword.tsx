@@ -14,7 +14,7 @@ function getStoredEmail(): string {
 }
 
 function updateStoredResult(): void {
-  const storage = localStorage.getItem('result')
+  const storage = localStorage.getItem('loggedInUser')
     ? localStorage
     : sessionStorage;
   const storedResult = storage.getItem('result');

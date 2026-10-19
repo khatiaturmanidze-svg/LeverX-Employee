@@ -95,7 +95,12 @@ describe('pages/NewPassword (integration)', () => {
     });
   });
 
-  it('uses sessionStorage when localStorage is empty', async () => {
+  it('updates the active session result when an earlier localStorage result remains', async () => {
+    const previousResult = JSON.stringify({
+      token: 'previous-token',
+      mustChangePassword: true,
+    });
+    localStorage.setItem('result', previousResult);
     sessionStorage.setItem('loggedInUser', 'session@example.com');
     sessionStorage.setItem(
       'result',
@@ -134,6 +139,7 @@ describe('pages/NewPassword (integration)', () => {
     expect(sessionStorage.getItem('result')).toBe(
       JSON.stringify({ token: 'session-token', mustChangePassword: false }),
     );
+    expect(localStorage.getItem('result')).toBe(previousResult);
 
     await act(async () => {
       root.unmount();

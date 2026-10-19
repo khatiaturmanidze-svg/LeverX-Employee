@@ -26,9 +26,8 @@ export default function SignUpForm(): React.ReactElement {
         last_name: lastName,
       }).unwrap();
       const storage = rememberMe ? localStorage : sessionStorage;
-      const employee = result.employee;
       storage.setItem('loggedInUser', trimmedEmail);
-      storage.setItem('result', JSON.stringify(employee));
+      storage.setItem('result', JSON.stringify(result));
 
       navigate('/main', { replace: true });
     } catch (err) {
