@@ -25,10 +25,12 @@ import { toEmployeeResponse } from '../mappers/employeeMapper.js';
 export function createEmployeeService(db: Database, reads: ReadRepositories) {
   // get /users
   async function listEmployees(): Promise<IEmployee[]> {
-    await db.read();
-    return db.data.employees;
-  }
+    const rows = await reads.employees.listAll();
 
+    return rows.map((row) =>
+      toEmployeeResponse(row, row.manager, row.visas, row.requests),
+    );
+  }
   // get /users/:id
   async function getEmployee(id: string): Promise<IEmployee> {
     const row = await reads.employees.findById(id);

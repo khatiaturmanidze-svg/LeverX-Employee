@@ -4,9 +4,73 @@
  */
 
 import type { Pool } from 'pg';
-import type { IManager } from '../employeeTypes.js';
+import type { IManager, IVisa, IRequestData } from '../employeeTypes.js';
 import type { EmployeeRow } from './types.js';
 export function createEmployeeRepository(pool: Pool) {
+  async function listAll() {
+    const result = await pool.query<
+      EmployeeRow & {
+        manager: IManager | null;
+        visas: IVisa[];
+        requests: IRequestData[];
+      }
+    >(`
+    SELECT
+      e.*,
+
+      CASE WHEN m.id IS NULL THEN NULL
+        ELSE jsonb_build_object(
+          'id', m.id,
+          'first_name', m.first_name,
+          'last_name', m.last_name
+        )
+      END AS manager,
+
+      COALESCE(
+        (
+          SELECT jsonb_agg(
+            jsonb_build_object(
+              'issuing_country', v.issuing_country,
+              'type', v.type,
+              'start_date', v.start_date_ms,
+              'end_date', v.end_date_ms
+            )
+            ORDER BY v.source_position, v.id
+          )
+          FROM visas v
+          WHERE v.employee_id = e.id
+        ),
+        '[]'::jsonb
+      ) AS visas,
+
+      COALESCE(
+        (
+          SELECT jsonb_agg(
+            jsonb_build_object(
+              'id', r.id,
+              'type', r.type,
+              'start_date', to_char(r.start_date, 'YYYY-MM-DD'),
+              'end_date', to_char(r.end_date, 'YYYY-MM-DD'),
+              'note', r.note,
+              'status', r.status,
+              'employeeId', r.employee_id
+            )
+            ORDER BY r.source_position, r.id
+          )
+          FROM requests r
+          WHERE r.employee_id = e.id
+        ),
+        '[]'::jsonb
+      ) AS requests
+
+    FROM employees e
+    LEFT JOIN employees m ON m.id = e.manager_id
+    ORDER BY e.source_position, e.id
+  `);
+
+    return result.rows;
+  }
+
   async function findById(id: string): Promise<EmployeeRow | null> {
     const result = await pool.query<EmployeeRow>(
       ` SELECT
@@ -35,5 +99,5 @@ export function createEmployeeRepository(pool: Pool) {
 
     return manager;
   }
-  return { findById, findManager };
+  return { findById, findManager, listAll };
 }
