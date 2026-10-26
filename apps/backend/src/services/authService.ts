@@ -1,42 +1,39 @@
 import bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import type {
-  IAuthUser,
   SetNewPasswordRequest,
   SetNewPasswordResponse,
   SignInRequest,
   SignUpRequest,
   SignInResponse,
-  SignUpResponse,
 } from '../serverTypes.js';
-import type { IEmployee } from '../employeeTypes.js';
-import type { Database } from './types.js';
 import { ServiceError } from './serviceError.js';
+import type { Pool } from 'pg';
+import { createAuthRepository } from '../repositories/authRepository.js';
+import {
+  createAccount,
+  isEmailConflict,
+  makeProfile,
+} from './accountCreation.js';
 
-export function createAuthService(db: Database, token: string) {
+export function createAuthService(pool: Pool, token: string) {
+  const auth = createAuthRepository(pool);
+
   async function signIn(body: SignInRequest): Promise<SignInResponse> {
-    const { email, password } = body;
+    const normalizedEmail = body.email.trim().toLowerCase();
+    const user = await auth.findByEmail(normalizedEmail);
+    if (!user) throw new ServiceError(400, { error: 'user not found' });
 
-    const user = db.data.authUsers.find((u: IAuthUser) => u.email === email);
-
-    if (!user) {
-      throw new ServiceError(400, { error: 'user not found' });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.hashed_password);
-
-    if (!isMatch) {
+    const matches = await bcrypt.compare(body.password, user.hashed_password);
+    if (!matches) {
       throw new ServiceError(401, { error: 'wrong password' });
     }
 
-    const employee = db.data.employees.find(
-      (e: IEmployee) => e.email === email,
-    );
     return {
       message: 'signed in!',
       token,
-      userId: employee?._id ?? '',
-      mustChangePassword: user.must_change_password ?? false,
+      userId: user.employee_id,
+      mustChangePassword: user.must_change_password,
     };
   }
 
@@ -44,87 +41,56 @@ export function createAuthService(db: Database, token: string) {
     body: SetNewPasswordRequest,
   ): Promise<SetNewPasswordResponse> {
     const { email, newPassword } = body;
-
-    if (!email || !newPassword) {
+    if (!email?.trim() || !newPassword) {
       throw new ServiceError(400, {
         error: 'email and new password are required',
       });
     }
-
     const normalizedEmail = email.trim().toLowerCase();
-    const user = db.data.authUsers.find(
-      (authUser: IAuthUser) => authUser.email === normalizedEmail,
-    );
+    const user = await auth.findByEmail(normalizedEmail);
+    if (!user) throw new ServiceError(404, { error: 'user not found' });
+    const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS) || 13;
+    const hash = await bcrypt.hash(newPassword, saltRounds);
+    const result = await auth.replaceRequiredPassword(user.employee_id, hash);
 
-    if (!user) {
-      throw new ServiceError(404, { error: 'user not found' });
-    }
-
-    if (!user.must_change_password) {
+    if (!result) {
       throw new ServiceError(400, { error: 'password change is not required' });
     }
-
-    const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS) || 13;
-    user.hashed_password = await bcrypt.hash(newPassword, saltRounds);
-    user.must_change_password = false;
-
-    await db.write();
 
     return { message: 'password updated successfully' };
   }
 
-  async function signUp(body: SignUpRequest): Promise<SignUpResponse> {
-    const { first_name, last_name, email, password } = body;
-
-    if (db.data.authUsers.some((u: IAuthUser) => u.email === email)) {
-      throw new ServiceError(400, { error: 'email already exists' });
+  async function signUp(body: SignUpRequest) {
+    if (!body.password)
+      throw new ServiceError(400, { error: 'password is required' });
+    // Pick explicit form fields so a signup body cannot give itself an Admin role.
+    const profile = makeProfile(
+      {
+        first_name: body.first_name,
+        last_name: body.last_name,
+        email: body.email,
+        desk_number: 0, // Preserve the current self-sign-up default.
+      },
+      uuidv4(),
+    );
+    const hash = await bcrypt.hash(
+      body.password,
+      Number(process.env.BCRYPT_SALT_ROUNDS) || 13,
+    );
+    try {
+      const employee = await createAccount(pool, profile, hash, false);
+      return {
+        message: 'User signed up successfully',
+        employee,
+        token,
+        userId: employee._id,
+        mustChangePassword: false,
+      };
+    } catch (error) {
+      if (isEmailConflict(error))
+        throw new ServiceError(400, { error: 'email already exists' });
+      throw error;
     }
-    const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS) || 13;
-    const hashed_password = await bcrypt.hash(password, saltRounds);
-    const userId = uuidv4();
-
-    const newAuthUser: IAuthUser = {
-      _id: userId,
-      email,
-      hashed_password,
-    };
-
-    const newEmployee: IEmployee = {
-      _id: userId,
-      role: 'Employee',
-      first_name,
-      last_name,
-      email,
-      user_avatar: '/users/dumplinh.jpg',
-      first_native_name: '',
-      middle_native_name: '',
-      last_native_name: '',
-      department: '',
-      building: '',
-      room: '0',
-      desk_number: 0,
-      isRemoteWork: false,
-      phone: '',
-      zoom_id: '',
-      zoom_link: '',
-      citizenship: '',
-      date_birth: { year: null, month: null, day: null },
-      manager: { id: '', first_name: '', last_name: '' },
-      visa: [],
-      requests: [],
-    };
-
-    db.data.authUsers.push(newAuthUser);
-    db.data.employees.push(newEmployee);
-    await db.write();
-
-    return {
-      message: 'User signed up successfully',
-      employee: newEmployee,
-      token,
-      userId: newEmployee._id,
-      mustChangePassword: false,
-    };
   }
   return { signIn, setNewPassword, signUp };
 }

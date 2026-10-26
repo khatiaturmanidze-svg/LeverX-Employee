@@ -122,7 +122,7 @@ test('validation rejects invalid numeric fields and malformed arrays', () => {
 
 test('import creates parents before links and commits parameterized data on one connection', async () => {
   const pool = fakePool();
-  await importSnapshot(pool, validateSnapshot(snapshot()));
+  await importSnapshot(pool, validateSnapshot(snapshot()), []);
   assert.equal(pool.calls[0].command, 'BEGIN');
   assert.equal(pool.calls.at(-1).command, 'COMMIT');
   assert.equal(pool.wasReleased(), true);
@@ -157,7 +157,7 @@ test('import creates parents before links and commits parameterized data on one 
 test('SQL failure rolls back instead of committing and releases the connection', async () => {
   const pool = fakePool({ failOn: 'INSERT INTO requests' });
   await assert.rejects(
-    importSnapshot(pool, validateSnapshot(snapshot())),
+    importSnapshot(pool, validateSnapshot(snapshot()), []),
     (error) => error === pool.failure,
   );
   assert.equal(pool.calls.at(-1).command, 'ROLLBACK');
@@ -173,7 +173,7 @@ test('conflicting SQL identities fail before employee writes or related-row repl
     existing: [{ id: 'different-id', email: "o'brien@example.test" }],
   });
   await assert.rejects(
-    importSnapshot(pool, validateSnapshot(snapshot())),
+    importSnapshot(pool, validateSnapshot(snapshot()), []),
     /conflicts with the snapshot identity/,
   );
   assert.equal(
@@ -195,5 +195,6 @@ test('empty imports do not acquire a connection', async () => {
       },
     },
     validateSnapshot({ employees: [] }),
+    [],
   );
 });

@@ -6,10 +6,10 @@ import { readFile } from 'node:fs/promises';
 import dotenv from 'dotenv';
 import type { Pool } from 'pg';
 import type { IEmployee, IRequestData, IVisa } from '../employeeTypes.js';
+import type { IAuthUser } from '../serverTypes.js';
 import { createPostgresPool } from '../postgres.js';
 
 type ImportEmployee = IEmployee & { visa: IVisa[]; requests: IRequestData[] };
-
 function object(value: unknown, label: string): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value))
     throw new Error(`${label} must be an object`);
@@ -73,6 +73,49 @@ function milliseconds(value: unknown, label: string): number {
   if (!Number.isSafeInteger(result))
     throw new Error(`${label} is outside the safe integer range`);
   return result;
+}
+
+export function validateaAuthUsers(
+  source: unknown,
+  employees: IEmployee[],
+): IAuthUser[] {
+  const snapshot = object(source, 'Snapshot');
+  const emails = new Set<string>();
+
+  if (!Array.isArray(snapshot.authUsers))
+    throw new Error('Snapshot.authUsers must be an array');
+
+  const authUsers = snapshot.authUsers.map((value, position): IAuthUser => {
+    const label = `authUsers[${position}]`;
+    const row = object(value, label);
+    const email = text(row.email, `${label}.email`).trim().toLowerCase();
+    if (emails.has(email))
+      throw new Error(`${label} has a duplicate employee ID`);
+    emails.add(email);
+    const employee = employees.find(
+      (candidate) => candidate.email.trim().toLowerCase() === email,
+    );
+
+    if (!employee) {
+      throw new Error(`${label} has no matching employee`);
+    }
+
+    if (
+      row.must_change_password !== undefined &&
+      typeof row.must_change_password !== 'boolean'
+    ) {
+      throw new Error(`${label}.must_change_password must be a boolean`);
+    }
+
+    return {
+      _id: employee._id,
+      email: employee.email,
+      hashed_password: String(row.hashed_password),
+      must_change_password: row.must_change_password ?? false,
+    };
+  });
+
+  return authUsers;
 }
 
 // Validate unknown JSON before opening a database connection.
@@ -215,10 +258,12 @@ export function validateSnapshot(source: unknown): ImportEmployee[] {
 export async function importSnapshot(
   pool: Pick<Pool, 'connect'>,
   employees: ImportEmployee[],
+  authUsers: IAuthUser[],
 ): Promise<void> {
   if (!employees.length) return;
   const client = await pool.connect();
   let began = false;
+
   try {
     await client.query('BEGIN');
     began = true;
@@ -350,6 +395,22 @@ export async function importSnapshot(
         );
       }
     }
+
+    for (const authUser of authUsers) {
+      await client.query(
+        `INSERT INTO auth_users
+       (employee_id, email, hashed_password, must_change_password)
+     VALUES ($1, $2, $3, $4)`,
+        [
+          authUser._id,
+          authUser.email,
+          authUser.hashed_password,
+          authUser.must_change_password ?? false,
+        ],
+      );
+    }
+
+    await client.query('COMMIT'); // Your existing COMMIT.
     await client.query('COMMIT');
   } catch (error) {
     if (began) {
@@ -382,6 +443,7 @@ async function main(): Promise<void> {
   );
   const source: unknown = JSON.parse(await readFile(jsonPath, 'utf8'));
   const employees = validateSnapshot(source);
+  const authUsers = validateaAuthUsers(source, employees);
   const counts = {
     employees: employees.length,
     visas: employees.reduce(
@@ -392,6 +454,7 @@ async function main(): Promise<void> {
       (count, employee) => count + employee.requests.length,
       0,
     ),
+    authUsers: authUsers.length,
   };
   console.log('Validated snapshot:', counts);
   if (args[0] === '--validate-only') {
@@ -402,7 +465,7 @@ async function main(): Promise<void> {
     throw new Error('DATABASE_URL is required for --import');
   const pool = createPostgresPool();
   try {
-    await importSnapshot(pool, employees);
+    await importSnapshot(pool, employees, authUsers);
     console.log('Import committed:', counts);
   } finally {
     await pool.end();

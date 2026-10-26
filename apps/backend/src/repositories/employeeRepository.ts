@@ -7,6 +7,15 @@ import type { Pool } from 'pg';
 import type { IManager, IVisa, IRequestData } from '../employeeTypes.js';
 import type { EmployeeRow } from './types.js';
 export function createEmployeeRepository(pool: Pool) {
+  async function findIdentity(id: string) {
+    const result = await pool.query<{
+      id: string;
+      first_name: string;
+      email: string;
+    }>('SELECT id, first_name, email FROM employees WHERE id = $1', [id]);
+    return result.rows[0] ?? null;
+  }
+
   async function listAll() {
     const result = await pool.query<
       EmployeeRow & {
@@ -99,5 +108,5 @@ export function createEmployeeRepository(pool: Pool) {
 
     return manager;
   }
-  return { findById, findManager, listAll };
+  return { findIdentity, findById, findManager, listAll };
 }

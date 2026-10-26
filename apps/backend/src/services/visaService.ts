@@ -1,9 +1,9 @@
-// import { v4 as uuidv4 } from 'uuid';
+// Deferred visa exercise. This service is not mounted by the SQL application.
 import type { IVisa } from '../employeeTypes.js';
-import type { Database } from './types.js';
+import type { LegacyJsonDatabase } from './types.js';
 import { ServiceError } from './serviceError.js';
 
-export function createVisaService(db: Database) {
+export function createVisaService(db: LegacyJsonDatabase) {
   // get /users/:id/visas
   async function listVisas(id: string): Promise<IVisa[]> {
     const employee = db.data.employees.find((emp) => emp._id === id);

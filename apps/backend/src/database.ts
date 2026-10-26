@@ -1,8 +1,10 @@
+// Legacy JSON initializer retained for the deferred visa exercise.
+// Normal startup uses postgres.ts and the explicit SQL seedAdmin script instead.
 import { JSONFilePreset } from 'lowdb/node';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import type { DatabaseSchema } from './serverTypes.js';
+import type { LowdbSnapshot } from './serverTypes.js';
 import bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import { IEmployee } from './employeeTypes.js';
@@ -11,7 +13,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // 2. Initial Data Structure
-const defaultData: DatabaseSchema = {
+const defaultData: LowdbSnapshot = {
   authUsers: [],
   employees: [],
 };
@@ -55,7 +57,7 @@ export const initDatabase = async () => {
     fs.mkdirSync(dir, { recursive: true });
   }
 
-  const db = await JSONFilePreset<DatabaseSchema>(dbFilePath, defaultData);
+  const db = await JSONFilePreset<LowdbSnapshot>(dbFilePath, defaultData);
 
   const testEmail = process.env.VITE_TEST_USER_EMAIL;
   const testPassword = process.env.VITE_TEST_USER_PASSWORD;

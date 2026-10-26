@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import type { Pool } from 'pg';
-import type { Database } from './services/types.js';
 import { createAuthMiddleware } from './middleware/auth.js';
 import { createSyntheticLatencyMiddleware } from './middleware/syntheticLatency.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -16,7 +15,7 @@ import { createRequestService } from './services/requestService.js';
 import { createRequestController } from './controllers/requestController.js';
 import { createRequestRoutes } from './routes/requestRoutes.js';
 
-import { createReadRepositories } from './repositories/index.js';
+import { createRepositories } from './repositories/index.js';
 
 interface AppOptions {
   frontendPort: number;
@@ -24,18 +23,14 @@ interface AppOptions {
   staticDirectory: string;
 }
 
-export function createApp(
-  db: Database,
-  options: AppOptions,
-  postgresPool: Pool,
-) {
+export function createApp(pool: Pool, options: AppOptions) {
   const app = express();
   app.use(cors({ origin: `http://localhost:${options.frontendPort}` }));
   app.use(express.json());
   app.use(express.static(options.staticDirectory));
   const authMiddleware = createAuthMiddleware(options.token);
 
-  const reads = createReadRepositories(postgresPool);
+  const repositories = createRepositories(pool);
 
   // Only business API routes receive artificial latency.
   app.use(
@@ -45,19 +40,19 @@ export function createApp(
   app.use(createHealthRoutes());
   app.use(
     createAuthRoutes(
-      createAuthController(createAuthService(db, options.token)),
+      createAuthController(createAuthService(pool, options.token)),
       authMiddleware,
     ),
   );
   app.use(
     createEmployeeRoutes(
-      createEmployeeController(createEmployeeService(db, reads)),
+      createEmployeeController(createEmployeeService(pool, repositories)),
       authMiddleware,
     ),
   );
   app.use(
     createRequestRoutes(
-      createRequestController(createRequestService(db, reads)),
+      createRequestController(createRequestService(pool, repositories)),
     ),
   );
   app.use(errorHandler);

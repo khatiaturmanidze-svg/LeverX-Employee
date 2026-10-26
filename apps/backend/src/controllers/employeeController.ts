@@ -9,6 +9,7 @@ import type {
 } from '../serverTypes.js';
 import type { IEmployee } from '../employeeTypes.js';
 import type { createEmployeeService } from '../services/employeeService.js';
+import type { ProfilePatch } from '../services/updateEmployee.js';
 
 export function createEmployeeController(
   service: ReturnType<typeof createEmployeeService>,
@@ -30,7 +31,7 @@ export function createEmployeeController(
   const updateEmployee: RequestHandler<
     { id: string },
     { message: string; employee: IEmployee } | ErrorResponse,
-    Partial<IEmployee>
+    ProfilePatch
   > = async (req, res) => {
     res.status(200).json(await service.updateEmployee(req.params.id, req.body));
   };
