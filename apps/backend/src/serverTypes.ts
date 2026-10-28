@@ -1,14 +1,10 @@
-import type { IEmployee } from './employeeTypes.js';
+import type { IEmployee, IRequestData } from './employeeTypes.js';
 
 export interface IAuthUser {
+  _id: string;
   email: string;
   hashed_password: string;
   must_change_password?: boolean;
-}
-
-export interface DatabaseSchema {
-  authUsers: IAuthUser[];
-  employees: IEmployee[];
 }
 
 // Request body types for each endpoint
@@ -64,8 +60,7 @@ export interface SignInResponse {
   mustChangePassword: boolean;
 }
 
-export interface SignUpResponse {
-  message: string;
+export interface SignUpResponse extends SignInResponse {
   employee: IEmployee;
 }
 
@@ -109,7 +104,31 @@ export interface ErrorResponse {
   error: string;
 }
 
+export interface HealthResponse {
+  message: string;
+}
+
 export interface AuthUserContext {
   id: string;
   role: string;
+}
+
+export interface UpdateRequestStatusRequest {
+  requestId: string | number;
+  newStatus: IRequestData['status'];
+}
+
+//options sent by the frontend and used by the backend
+export interface EmployeeListQuery {
+  page: number;
+  limit: number;
+  name?: string;
+}
+
+// response returned by GET /users
+export interface EmployeePage {
+  items: IEmployee[];
+  total: number;
+  page: number;
+  limit: number;
 }

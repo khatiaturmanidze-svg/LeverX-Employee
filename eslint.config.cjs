@@ -7,7 +7,12 @@ const prettierConfig = require('eslint-config-prettier');
 
 module.exports = [
   {
-    ignores: ['**/dist/**', '**/dist-server/**', '**/coverage/**'],
+    ignores: [
+      '**/dist/**',
+      '**/dist-server/**',
+      '**/coverage/**',
+      '**/src/generated/prisma/**',
+    ],
   },
   {
     files: ['apps/**/*.{js,jsx,ts,tsx}'],

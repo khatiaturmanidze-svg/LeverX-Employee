@@ -1,6 +1,6 @@
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import App from './App';
 
 vi.mock(
@@ -75,12 +75,68 @@ describe('App', () => {
 
   it('renders "/main" for authenticated user from localStorage', async () => {
     localStorage.setItem('loggedInUser', 'user@example.com');
+    localStorage.setItem(
+      'authData',
+      JSON.stringify({ mustChangePassword: false }),
+    );
     window.history.pushState({}, '', '/main');
 
     render(<App />);
 
     expect(await screen.findByTestId('main-page')).toBeInTheDocument();
   });
+
+  it.each(['localStorage', 'sessionStorage'] as const)(
+    'redirects temporary-password users from main using %s',
+    async (storageName) => {
+      window[storageName].setItem('loggedInUser', 'temporary@example.com');
+      window[storageName].setItem(
+        'authData',
+        JSON.stringify({ mustChangePassword: true }),
+      );
+      window.history.pushState({}, '', '/main');
+
+      render(<App />);
+
+      expect(
+        await screen.findByTestId('new-password-page'),
+      ).toBeInTheDocument();
+      expect(window.location.pathname).toBe('/new-password');
+      expect(screen.queryByTestId('main-page')).not.toBeInTheDocument();
+    },
+  );
+
+  it('allows temporary-password users to open the password form', async () => {
+    sessionStorage.setItem('loggedInUser', 'temporary@example.com');
+    sessionStorage.setItem(
+      'authData',
+      JSON.stringify({ mustChangePassword: true }),
+    );
+    window.history.pushState({}, '', '/new-password');
+
+    render(<App />);
+
+    expect(await screen.findByTestId('new-password-page')).toBeInTheDocument();
+  });
+
+  it.each(['localStorage', 'sessionStorage'] as const)(
+    'shows a recoverable error for corrupt sign-in data in %s',
+    async (storageName) => {
+      window[storageName].setItem('loggedInUser', 'test@example.com');
+      window[storageName].setItem('authData', '{invalid json');
+      window.history.pushState({}, '', '/main');
+
+      render(<App />);
+
+      expect(screen.getByRole('alert')).toHaveTextContent(
+        'Your saved sign-in data could not be loaded. Please sign in again.',
+      );
+      expect(screen.queryByTestId('main-page')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('link', { name: 'Sign in again' }));
+      expect(await screen.findByTestId('signin-page')).toBeInTheDocument();
+    },
+  );
 
   it('renders "/details/:id" for authenticated user from sessionStorage', async () => {
     sessionStorage.setItem('loggedInUser', 'user@example.com');

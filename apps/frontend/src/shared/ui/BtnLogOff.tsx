@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getStoredAuth } from '../lib/authStorage';
 
 interface BtnLogOffProps {
   className?: string;
@@ -10,11 +11,7 @@ export default function btnLogOff({
 }: BtnLogOffProps): React.ReactElement {
   const navigate = useNavigate();
   const handleLogOff = () => {
-    if (localStorage.getItem('loggedInUser')) {
-      localStorage.removeItem('loggedInUser');
-    } else if (sessionStorage.getItem('loggedInUser')) {
-      sessionStorage.removeItem('loggedInUser');
-    }
+    getStoredAuth()?.storage.removeItem('loggedInUser');
     navigate('/');
   };
 

@@ -38,12 +38,15 @@ describe('SignUpForm', () => {
     sessionStorage.clear();
   });
 
-  it('submits expected payload and stores employee in sessionStorage by default', async () => {
+  it('stores the sign-up userId and auth state in sessionStorage and goes directly to main', async () => {
+    const result = {
+      employee: { _id: '1', first_name: 'John', last_name: 'Doe' },
+      token: 'signup-token',
+      userId: '1',
+      mustChangePassword: false,
+    };
     signUpMock.mockReturnValue({
-      unwrap: () =>
-        Promise.resolve({
-          employee: { id: '1', first_name: 'John', last_name: 'Doe' },
-        }),
+      unwrap: () => Promise.resolve(result),
     });
 
     const container = document.createElement('div');
@@ -87,11 +90,11 @@ describe('SignUpForm', () => {
       last_name: 'Doe',
     });
     expect(sessionStorage.getItem('loggedInUser')).toBe('user@example.com');
-    expect(sessionStorage.getItem('result')).toBe(
-      JSON.stringify({ id: '1', first_name: 'John', last_name: 'Doe' }),
-    );
+    expect(sessionStorage.getItem('authData')).toBe(JSON.stringify(result));
     expect(localStorage.getItem('loggedInUser')).toBeNull();
-    expect(navigateMock).toHaveBeenCalledWith('/main', { replace: true });
+    expect(navigateMock).toHaveBeenCalledExactlyOnceWith('/main', {
+      replace: true,
+    });
 
     await act(async () => {
       root.unmount();
@@ -99,11 +102,14 @@ describe('SignUpForm', () => {
   });
 
   it('stores signup state in localStorage when remember-me is checked', async () => {
+    const result = {
+      employee: { _id: '2', first_name: 'Alice', last_name: 'Smith' },
+      token: 'signup-token',
+      userId: '2',
+      mustChangePassword: false,
+    };
     signUpMock.mockReturnValue({
-      unwrap: () =>
-        Promise.resolve({
-          employee: { id: '2', first_name: 'Alice', last_name: 'Smith' },
-        }),
+      unwrap: () => Promise.resolve(result),
     });
 
     const container = document.createElement('div');
@@ -145,9 +151,7 @@ describe('SignUpForm', () => {
     });
 
     expect(localStorage.getItem('loggedInUser')).toBe('alice@site.com');
-    expect(localStorage.getItem('result')).toBe(
-      JSON.stringify({ id: '2', first_name: 'Alice', last_name: 'Smith' }),
-    );
+    expect(localStorage.getItem('authData')).toBe(JSON.stringify(result));
     expect(sessionStorage.getItem('loggedInUser')).toBeNull();
 
     await act(async () => {

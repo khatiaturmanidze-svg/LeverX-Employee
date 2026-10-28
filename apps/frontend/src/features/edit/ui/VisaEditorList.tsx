@@ -40,7 +40,11 @@ export default function VisaEditorList({
           <DetailRow
             icon="calendar-icon"
             label="Start Date"
-            value={visa.start_date}
+            value={
+              typeof visa.start_date === 'number'
+                ? new Date(visa.start_date).toISOString().slice(0, 10)
+                : visa.start_date
+            }
             isEditing={true}
             fieldName="start_date"
             onValueChange={(_, value) =>
@@ -50,7 +54,11 @@ export default function VisaEditorList({
           <DetailRow
             icon="calendar-icon"
             label="End Date"
-            value={visa.end_date}
+            value={
+              typeof visa.end_date === 'number'
+                ? new Date(visa.end_date).toISOString().slice(0, 10)
+                : visa.end_date
+            }
             isEditing={true}
             fieldName="end_date"
             onValueChange={(_, value) => onVisaChange(index, 'end_date', value)}
