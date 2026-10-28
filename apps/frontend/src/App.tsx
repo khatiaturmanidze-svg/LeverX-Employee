@@ -4,10 +4,13 @@ import {
   Routes,
   Route,
   Navigate,
+  Link,
   useLocation,
 } from 'react-router-dom';
 import Loading from './shared/ui/Loading';
 import TestRenderingPage from './pages/test-rendering/TestRenderingPage';
+import { getStoredAuth } from './shared/lib/authStorage';
+import { getErrorMessage } from './shared/lib/core';
 
 const SignIn = lazy(() => import('@/pages/SignIn'));
 const SignUp = lazy(() => import('@/pages/SignUp'));
@@ -18,29 +21,21 @@ const Roles = lazy(() => import('@/pages/Roles'));
 const Requests = lazy(() => import('@/pages/Requests'));
 const Create = lazy(() => import('@/pages/Create'));
 
-const isAuthenticated = () => {
-  return (
-    localStorage.getItem('loggedInUser') ||
-    sessionStorage.getItem('loggedInUser')
-  );
-};
-
 const PrivateRoute: React.FC<{ children: React.ReactElement }> = ({
   children,
 }) => {
   const { pathname } = useLocation();
-  if (!isAuthenticated()) return <Navigate to="/signin" replace />;
-
-  const storage = localStorage.getItem('loggedInUser')
-    ? localStorage
-    : sessionStorage;
-  let mustChangePassword = false;
-  try {
-    mustChangePassword =
-      JSON.parse(storage.getItem('result') ?? '{}').mustChangePassword === true;
-  } catch {
-    // Ignore malformed stored auth payload.
+  const auth = getStoredAuth();
+  if (!auth) return <Navigate to="/signin" replace />;
+  if (auth.error) {
+    return (
+      <main>
+        <p role="alert">{getErrorMessage(auth.error)}</p>
+        <Link to="/signin">Sign in again</Link>
+      </main>
+    );
   }
+  const mustChangePassword = auth.authData?.mustChangePassword === true;
 
   return mustChangePassword && pathname !== '/new-password' ? (
     <Navigate to="/new-password" replace />

@@ -52,7 +52,7 @@ describe('pages/NewPassword (integration)', () => {
   it('submits stored localStorage email, updates auth result, and redirects to main', async () => {
     localStorage.setItem('loggedInUser', 'user@example.com');
     localStorage.setItem(
-      'result',
+      'authData',
       JSON.stringify({ token: 'abc', mustChangePassword: true }),
     );
     setNewPasswordMock.mockReturnValue({
@@ -85,7 +85,7 @@ describe('pages/NewPassword (integration)', () => {
       email: 'user@example.com',
       newPassword: 'better-password',
     });
-    expect(localStorage.getItem('result')).toBe(
+    expect(localStorage.getItem('authData')).toBe(
       JSON.stringify({ token: 'abc', mustChangePassword: false }),
     );
     expect(navigateMock).toHaveBeenCalledWith('/main', { replace: true });
@@ -100,10 +100,10 @@ describe('pages/NewPassword (integration)', () => {
       token: 'previous-token',
       mustChangePassword: true,
     });
-    localStorage.setItem('result', previousResult);
+    localStorage.setItem('authData', previousResult);
     sessionStorage.setItem('loggedInUser', 'session@example.com');
     sessionStorage.setItem(
-      'result',
+      'authData',
       JSON.stringify({ token: 'session-token', mustChangePassword: true }),
     );
     setNewPasswordMock.mockReturnValue({
@@ -136,10 +136,10 @@ describe('pages/NewPassword (integration)', () => {
       email: 'session@example.com',
       newPassword: 'session-password',
     });
-    expect(sessionStorage.getItem('result')).toBe(
+    expect(sessionStorage.getItem('authData')).toBe(
       JSON.stringify({ token: 'session-token', mustChangePassword: false }),
     );
-    expect(localStorage.getItem('result')).toBe(previousResult);
+    expect(localStorage.getItem('authData')).toBe(previousResult);
 
     await act(async () => {
       root.unmount();
@@ -168,6 +168,32 @@ describe('pages/NewPassword (integration)', () => {
     await act(async () => {
       root.unmount();
     });
+  });
+
+  it('shows the shared error message for corrupt auth data without sending a request', async () => {
+    sessionStorage.setItem('loggedInUser', 'user@example.com');
+    sessionStorage.setItem('authData', '{invalid json');
+    getErrorMessageMock.mockReturnValue('Please sign in again.');
+    const container = document.createElement('div');
+    const root = createRoot(container);
+
+    await act(async () => {
+      root.render(React.createElement(NewPassword));
+    });
+    const form = container.querySelector('form') as HTMLFormElement;
+    await act(async () => {
+      form.dispatchEvent(
+        new Event('submit', { bubbles: true, cancelable: true }),
+      );
+    });
+
+    expect(getErrorMessageMock).toHaveBeenCalledWith(expect.any(Error));
+    expect(container.querySelector('.signin__error')?.textContent).toBe(
+      'Please sign in again.',
+    );
+    expect(setNewPasswordMock).not.toHaveBeenCalled();
+    expect(navigateMock).not.toHaveBeenCalled();
+    await act(async () => root.unmount());
   });
 
   it('renders an error message when the password update fails', async () => {

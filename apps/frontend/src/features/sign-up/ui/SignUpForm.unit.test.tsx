@@ -90,7 +90,7 @@ describe('SignUpForm', () => {
       last_name: 'Doe',
     });
     expect(sessionStorage.getItem('loggedInUser')).toBe('user@example.com');
-    expect(sessionStorage.getItem('result')).toBe(JSON.stringify(result));
+    expect(sessionStorage.getItem('authData')).toBe(JSON.stringify(result));
     expect(localStorage.getItem('loggedInUser')).toBeNull();
     expect(navigateMock).toHaveBeenCalledExactlyOnceWith('/main', {
       replace: true,
@@ -151,7 +151,7 @@ describe('SignUpForm', () => {
     });
 
     expect(localStorage.getItem('loggedInUser')).toBe('alice@site.com');
-    expect(localStorage.getItem('result')).toBe(JSON.stringify(result));
+    expect(localStorage.getItem('authData')).toBe(JSON.stringify(result));
     expect(sessionStorage.getItem('loggedInUser')).toBeNull();
 
     await act(async () => {

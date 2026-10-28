@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom';
 import { useGetEmployeeDetailsQuery } from '../features/usersApi';
 import { useGetHeaderProps } from '@shared/lib';
 import Loading from '@/shared/ui/Loading';
+import { getStoredAuth } from '@shared/lib/authStorage';
 
 const AvatarSection = lazy(() => import('@shared/ui/AvatarSection'));
 
@@ -49,10 +50,7 @@ export default function Details(): React.ReactElement {
   };
 
   const handleCopyLink = () => {
-    if (
-      localStorage.getItem('loggedInUser') ||
-      sessionStorage.getItem('loggedInUser')
-    ) {
+    if (getStoredAuth()) {
       navigator.clipboard.writeText(window.location.href);
     }
   };

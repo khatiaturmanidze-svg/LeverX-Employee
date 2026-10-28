@@ -42,7 +42,7 @@ export default function VisaEditorList({
             label="Start Date"
             value={
               typeof visa.start_date === 'number'
-                ? new Date(visa.start_date).toISOString().slice(0, 1)
+                ? new Date(visa.start_date).toISOString().slice(0, 10)
                 : visa.start_date
             }
             isEditing={true}
@@ -56,7 +56,7 @@ export default function VisaEditorList({
             label="End Date"
             value={
               typeof visa.end_date === 'number'
-                ? new Date(visa.end_date).toISOString().slice(0, 1)
+                ? new Date(visa.end_date).toISOString().slice(0, 10)
                 : visa.end_date
             }
             isEditing={true}
