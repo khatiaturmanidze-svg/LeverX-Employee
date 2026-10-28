@@ -1,9 +1,10 @@
-import type { Pool } from 'pg';
-import type { IEmployee, IManager } from '../employeeTypes.js';
-import type { EmployeeRow } from '../repositories/types.js';
-import { createAuthRepository } from '../repositories/authRepository.js';
-import { toEmployeeResponse } from '../mappers/employeeMapper.js';
-import { withTransaction } from '../transactions.js';
+import { Prisma, type PrismaClient } from '../generated/prisma/client.js';
+import type { IEmployee } from '../employeeTypes.js';
+import { employeeRelations } from '../repositories/employeeRepository.js';
+import {
+  toEmployeeData,
+  toEmployeeResponse,
+} from '../mappers/employeeMapper.js';
 import { ServiceError } from './serviceError.js';
 
 type ProfileInput = Pick<IEmployee, 'first_name' | 'last_name' | 'email'> &
@@ -44,96 +45,62 @@ export function makeProfile(input: ProfileInput, id: string): IEmployee {
 }
 
 export function isEmailConflict(error: unknown): boolean {
-  if (!error || typeof error !== 'object') return false;
-  const value = error as { code?: string; constraint?: string };
+  if (
+    !(error instanceof Prisma.PrismaClientKnownRequestError) ||
+    error.code !== 'P2002'
+  ) {
+    return false;
+  }
+  const target = error.meta?.target;
+  if (Array.isArray(target) && target.includes('email')) return true;
+
+  const adapterError = error.meta?.driverAdapterError as
+    | {
+        cause?: { constraint?: { index?: string } };
+      }
+    | undefined;
+  const index = adapterError?.cause?.constraint?.index;
   return (
-    value.code === '23505' &&
-    new Set([
-      'employees_email_key',
-      'auth_users_email_key',
-      'employees_email_normalized_key',
-      'auth_users_email_normalized_key',
-    ]).has(value.constraint ?? '')
+    index === 'employees_email_key' ||
+    index === 'auth_users_email_key' ||
+    index === 'employees_email_normalized_key' ||
+    index === 'auth_users_email_normalized_key'
   );
 }
 
 export async function createAccount(
-  pool: Pool,
+  prisma: PrismaClient,
   profile: IEmployee,
   hash: string,
   mustChangePassword: boolean,
 ): Promise<IEmployee> {
-  const auth = createAuthRepository(pool);
-  return withTransaction(pool, async (client) => {
-    const result = await client.query<EmployeeRow>(
-      `INSERT INTO employees (
-        id, role, first_name, last_name, email, user_avatar,
-        first_native_name, middle_native_name, last_native_name,
-        department, building, room, desk_number, is_remote_work,
-        phone, zoom_id, zoom_link, citizenship,
-        birth_year, birth_month, birth_day, manager_id, source_position
-      ) VALUES (
-        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,
-        $15,$16,$17,$18,$19,$20,$21,$22,
-        (SELECT COALESCE(MAX(source_position), -1) + 1 FROM employees)
-      ) RETURNING *`,
-      [
-        profile._id,
-        profile.role,
-        profile.first_name,
-        profile.last_name,
-        profile.email,
-        profile.user_avatar,
-        profile.first_native_name,
-        profile.middle_native_name,
-        profile.last_native_name,
-        profile.department,
-        profile.building,
-        profile.room,
-        profile.desk_number,
-        profile.isRemoteWork,
-        profile.phone,
-        profile.zoom_id,
-        profile.zoom_link,
-        profile.citizenship,
-        profile.date_birth?.year ?? null,
-        profile.date_birth?.month ?? null,
-        profile.date_birth?.day ?? null,
-        profile.manager?.id || null,
-      ],
-    );
-    await auth.insertAuthUser(
-      {
-        employee_id: profile._id,
-        email: profile.email,
-        hashed_password: hash,
-        must_change_password: mustChangePassword,
+  return prisma.$transaction(async (tx) => {
+    const position = await tx.employee.aggregate({
+      _max: { sourcePosition: true },
+    });
+    const employee = await tx.employee.create({
+      data: {
+        ...toEmployeeData(profile),
+        sourcePosition: (position._max.sourcePosition ?? -1) + 1,
+        authUser: {
+          create: {
+            email: profile.email,
+            hashedPassword: hash,
+            mustChangePassword,
+          },
+        },
+        visas: {
+          create: (profile.visa ?? []).map((visa, sourcePosition) => ({
+            issuingCountry: visa.issuing_country,
+            type: visa.type,
+            startDateMs: BigInt(visa.start_date),
+            endDateMs: BigInt(visa.end_date),
+            sourcePosition,
+          })),
+        },
       },
-      client,
-    );
-    for (const [position, visa] of (profile.visa ?? []).entries()) {
-      await client.query(
-        `INSERT INTO visas
-          (employee_id, issuing_country, type, start_date_ms, end_date_ms, source_position)
-         VALUES ($1,$2,$3,$4,$5,$6)`,
-        [
-          profile._id,
-          visa.issuing_country,
-          visa.type,
-          visa.start_date,
-          visa.end_date,
-          position,
-        ],
-      );
-    }
-    let manager: IManager | null = null;
-    if (profile.manager?.id) {
-      const found = await client.query<IManager>(
-        'SELECT id, first_name, last_name FROM employees WHERE id = $1',
-        [profile.manager.id],
-      );
-      manager = found.rows[0] ?? null;
-    }
-    return toEmployeeResponse(result.rows[0], manager, profile.visa ?? [], []);
+      include: employeeRelations,
+    });
+    return toEmployeeResponse(employee);
   });
 }

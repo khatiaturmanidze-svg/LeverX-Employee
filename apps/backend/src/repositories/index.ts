@@ -1,17 +1,15 @@
-// Compose SQL repositories around the application's shared connection pool.
-
-import type { Pool } from 'pg';
+import type { PrismaClient } from '../generated/prisma/client.js';
 import { createEmployeeRepository } from './employeeRepository.js';
 import { createVisaRepository } from './visaRepository.js';
 import { createRequestRepository } from './requestRepository.js';
 import { createAuthRepository } from './authRepository.js';
 
-export function createRepositories(pool: Pool) {
+export function createRepositories(prisma: PrismaClient) {
   return {
-    employees: createEmployeeRepository(pool),
-    visas: createVisaRepository(pool),
-    requests: createRequestRepository(pool),
-    auth: createAuthRepository(pool),
+    employees: createEmployeeRepository(prisma),
+    visas: createVisaRepository(prisma),
+    requests: createRequestRepository(prisma),
+    auth: createAuthRepository(prisma),
   };
 }
 

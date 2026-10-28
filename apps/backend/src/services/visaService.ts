@@ -1,21 +1,17 @@
-// Deferred visa exercise. This service is not mounted by the SQL application.
+// The separate visa router remains deferred; employee responses use the same repository.
 import type { IVisa } from '../employeeTypes.js';
-import type { LegacyJsonDatabase } from './types.js';
+import type { Repositories } from '../repositories/index.js';
 import { ServiceError } from './serviceError.js';
 
-export function createVisaService(db: LegacyJsonDatabase) {
+export function createVisaService(repositories: Repositories) {
   // get /users/:id/visas
   async function listVisas(id: string): Promise<IVisa[]> {
-    const employee = db.data.employees.find((emp) => emp._id === id);
+    const employee = await repositories.employees.findIdentity(id);
     if (!employee) {
       throw new ServiceError(401, { error: 'employee not found' });
     }
 
-    if (!employee.visa) {
-      return [];
-    }
-
-    return employee.visa;
+    return repositories.visas.listByEmployeeId(id);
   }
 
   return { listVisas };

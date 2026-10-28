@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
-import { createPostgresPool } from '../postgres.js';
+import { createPrismaClient } from '../prisma.js';
 import { makeProfile, createAccount } from '../services/accountCreation.js';
 
 async function main(): Promise<void> {
@@ -14,29 +14,30 @@ async function main(): Promise<void> {
   dotenv.config({ path: path.resolve(backendDir, '../../.env'), quiet: true });
   const email = process.env.VITE_TEST_USER_EMAIL?.trim().toLowerCase();
   const password = process.env.VITE_TEST_USER_PASSWORD;
-  if (!process.env.DATABASE_URL || !email || !password) {
-    throw new Error('DATABASE_URL and both test-admin settings are required');
-  }
-  const pool = createPostgresPool();
+  if (!email || !password)
+    throw new Error('Both test-admin settings are required');
+
+  const prisma = createPrismaClient();
   try {
-    const existing = await pool.query<{
-      id: string;
-      email: string;
-      auth_id: string | null;
-      auth_email: string | null;
-    }>(
-      `SELECT e.id, e.email, a.employee_id AS auth_id, a.email AS auth_email
-       FROM employees e LEFT JOIN auth_users a ON a.employee_id = e.id
-       WHERE lower(trim(e.email)) = $1 OR lower(trim(a.email)) = $1`,
-      [email],
+    const employees = await prisma.employee.findMany({
+      select: {
+        id: true,
+        email: true,
+        authUser: { select: { employeeId: true, email: true } },
+      },
+    });
+    const existing = employees.filter(
+      (employee) =>
+        employee.email.trim().toLowerCase() === email ||
+        employee.authUser?.email.trim().toLowerCase() === email,
     );
-    if (existing.rows.length) {
-      const row = existing.rows[0];
+    if (existing.length) {
+      const employee = existing[0];
       if (
-        existing.rows.length !== 1 ||
-        row.auth_id !== row.id ||
-        row.email.trim().toLowerCase() !== email ||
-        row.auth_email?.trim().toLowerCase() !== email
+        existing.length !== 1 ||
+        employee.authUser?.employeeId !== employee.id ||
+        employee.email.trim().toLowerCase() !== email ||
+        employee.authUser.email.trim().toLowerCase() !== email
       ) {
         throw new Error(
           'Existing account is inconsistent; repair it before seeding',
@@ -47,23 +48,19 @@ async function main(): Promise<void> {
       );
       return;
     }
+
     const profile = makeProfile(
-      {
-        email,
-        first_name: 'Test',
-        last_name: 'Admin',
-        role: 'Admin',
-      },
+      { email, first_name: 'Test', last_name: 'Admin', role: 'Admin' },
       uuidv4(),
     );
     const hash = await bcrypt.hash(
       password,
       Number(process.env.BCRYPT_SALT_ROUNDS) || 13,
     );
-    await createAccount(pool, profile, hash, false);
+    await createAccount(prisma, profile, hash, false);
     console.log('Created development admin');
   } finally {
-    await pool.end();
+    await prisma.$disconnect();
   }
 }
 

@@ -39,6 +39,8 @@ Keep the original snapshot as a backup. Imports are manual transfers; the runnin
 
 See [the backend setup and SQL test instructions](apps/backend/README.md) and [the migration course](docs/postgresql-migration-learning-guide.md).
 
+For the current Prisma setup, verified status, and examples from this backend, see [the Prisma guide](docs/prisma-guide.md).
+
 # scripts to run from root directory
 
 - `npm run dev` -> builds the project, then starts the frontend and backend in parallel

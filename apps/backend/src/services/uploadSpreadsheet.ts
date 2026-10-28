@@ -1,7 +1,7 @@
 import xlsx from 'xlsx';
 import bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
-import type { Pool } from 'pg';
+import type { PrismaClient } from '../generated/prisma/client.js';
 import type {
   SpreadsheetRow,
   UploadSpreadsheetResponse,
@@ -14,8 +14,8 @@ import { generateTemporaryPassword } from './password.js';
 import { createAccount, isEmailConflict } from './accountCreation.js';
 import { ServiceError } from './serviceError.js';
 
-export async function uploadSpreadsheetSql(
-  pool: Pool,
+export async function importSpreadsheet(
+  prisma: PrismaClient,
   buffer: Buffer,
 ): Promise<UploadSpreadsheetResponse> {
   const workbook = xlsx.read(buffer, { type: 'buffer' });
@@ -56,7 +56,7 @@ export async function uploadSpreadsheetSql(
       Number(process.env.BCRYPT_SALT_ROUNDS) || 13,
     );
     try {
-      await createAccount(pool, profile, hash, true);
+      await createAccount(prisma, profile, hash, true);
       seen.add(email);
       importedUsers.push({ email, temporaryPassword, employeeId: profile._id });
     } catch (error) {

@@ -2,22 +2,22 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { createApp } from './app.js';
-import { createPostgresPool } from './postgres.js';
+import { createPrismaClient } from './prisma.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
-const postgresPool = createPostgresPool();
+const prisma = createPrismaClient();
 
 try {
-  await postgresPool.query('SELECT 1');
+  await prisma.$connect();
 } catch (error) {
-  await postgresPool.end();
+  await prisma.$disconnect();
   throw error;
 }
 
-const app = createApp(postgresPool, {
+const app = createApp(prisma, {
   frontendPort: Number(process.env.VITE_FE_PORT || 5173),
   token: process.env.VITE_AUTH_TOKEN || 'authorized-can-access',
   staticDirectory: path.join(__dirname, '../dist'),
@@ -39,9 +39,9 @@ const stop = () => {
       console.error(error.message);
       process.exitCode = 1;
     }
-    void postgresPool.end().catch((poolError: unknown) => {
+    void prisma.$disconnect().catch((error: unknown) => {
       console.error(
-        poolError instanceof Error ? poolError.message : 'Pool shutdown failed',
+        error instanceof Error ? error.message : 'Database shutdown failed',
       );
       process.exitCode = 1;
     });
@@ -53,5 +53,5 @@ process.once('SIGTERM', stop);
 server.once('error', (error) => {
   console.error(error.message);
   process.exitCode = 1;
-  void postgresPool.end().catch(() => undefined);
+  void prisma.$disconnect().catch(() => undefined);
 });

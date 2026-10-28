@@ -18,20 +18,21 @@ import {
   isEmailConflict,
   makeProfile,
 } from './accountCreation.js';
-import type { Pool } from 'pg';
-import { updateEmployeeSql, type ProfilePatch } from './updateEmployee.js';
+import type { PrismaClient } from '../generated/prisma/client.js';
+import { updateEmployeeProfile, type ProfilePatch } from './updateEmployee.js';
 
-import { updateRoleSql } from './updateRole.js';
-import { uploadSpreadsheetSql } from './uploadSpreadsheetSql.js';
+import { updateEmployeeRole } from './updateRole.js';
+import { importSpreadsheet } from './uploadSpreadsheet.js';
 
-export function createEmployeeService(pool: Pool, repositories: Repositories) {
+export function createEmployeeService(
+  prisma: PrismaClient,
+  repositories: Repositories,
+) {
   // get /users
   async function listEmployees(): Promise<IEmployee[]> {
     const rows = await repositories.employees.listAll();
 
-    return rows.map((row) =>
-      toEmployeeResponse(row, row.manager, row.visas, row.requests),
-    );
+    return rows.map(toEmployeeResponse);
   }
   // get /users/:id
   async function getEmployee(id: string): Promise<IEmployee> {
@@ -41,26 +42,20 @@ export function createEmployeeService(pool: Pool, repositories: Repositories) {
       throw new ServiceError(400, { error: 'user not found' });
     }
 
-    const manager = row.manager_id
-      ? await repositories.employees.findManager(row.manager_id)
-      : null;
-    const visas = await repositories.visas.listByEmployeeId(id);
-    const requests = await repositories.requests.listByEmployeeId(id);
-
-    return toEmployeeResponse(row, manager, visas, requests);
+    return toEmployeeResponse(row);
   }
 
   async function updateEmployee(
     id: string,
     body: ProfilePatch,
   ): Promise<UpdateRoleResponse> {
-    return updateEmployeeSql(pool, id, body, getEmployee);
+    return updateEmployeeProfile(prisma, id, body, getEmployee);
   }
   async function updateRole(
     id: string,
     body: UpdateRoleRequest,
   ): Promise<UpdateRoleResponse> {
-    return updateRoleSql(pool, id, body.newRole, getEmployee);
+    return updateEmployeeRole(prisma, id, body.newRole, getEmployee);
   }
   async function createEmployee(
     body: CreateUserRequest,
@@ -78,7 +73,7 @@ export function createEmployeeService(pool: Pool, repositories: Repositories) {
     );
 
     try {
-      const employee = await createAccount(pool, profile, hash, true);
+      const employee = await createAccount(prisma, profile, hash, true);
       return {
         message: 'employee created successfully',
         employee,
@@ -95,7 +90,7 @@ export function createEmployeeService(pool: Pool, repositories: Repositories) {
     buffer: Buffer,
   ): Promise<UploadSpreadsheetResponse> {
     try {
-      return await uploadSpreadsheetSql(pool, buffer);
+      return await importSpreadsheet(prisma, buffer);
     } catch (error) {
       if (error instanceof ServiceError) throw error;
 

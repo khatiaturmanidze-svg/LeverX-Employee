@@ -2,13 +2,19 @@ import type { UpdateRequestStatusRequest } from '../serverTypes.js';
 import type { IRequestData } from '../employeeTypes.js';
 import { ServiceError } from './serviceError.js';
 import type { Repositories } from '../repositories/index.js';
-import type { Pool } from 'pg';
-import { createRequestSql, updateRequestSql } from './requestWritesSql.js';
+import type { PrismaClient } from '../generated/prisma/client.js';
+import {
+  createEmployeeRequest,
+  updateEmployeeRequest,
+} from './requestWrites.js';
 
-export function createRequestService(pool: Pool, repositories: Repositories) {
+export function createRequestService(
+  prisma: PrismaClient,
+  repositories: Repositories,
+) {
   // GET /requests/:id; the URL ID identifies the employee.
   async function listRequests(id: string): Promise<IRequestData[]> {
-    const employee = await repositories.employees.findById(id);
+    const employee = await repositories.employees.findIdentity(id);
 
     if (!employee) {
       throw new ServiceError(401, { error: 'employee not found' });
@@ -21,14 +27,19 @@ export function createRequestService(pool: Pool, repositories: Repositories) {
     id: string,
     body: IRequestData,
   ): Promise<IRequestData> {
-    return createRequestSql(pool, id, body);
+    return createEmployeeRequest(prisma, id, body);
   }
 
   async function updateRequest(
     employeeId: string,
     body: UpdateRequestStatusRequest,
   ): Promise<IRequestData> {
-    return updateRequestSql(pool, employeeId, body.requestId, body.newStatus);
+    return updateEmployeeRequest(
+      prisma,
+      employeeId,
+      body.requestId,
+      body.newStatus,
+    );
   }
   return { listRequests, createRequest, updateRequest };
 }

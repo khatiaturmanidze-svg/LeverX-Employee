@@ -23,8 +23,10 @@ async function setup(t, latency = '', suppliedPool) {
       else process.env[key] = previous;
     });
   }
-  const pool = suppliedPool ?? (await createTestDatabase(t)).pool;
-  const app = createApp(pool, {
+  const { pool, prisma } = suppliedPool
+    ? { pool: undefined, prisma: suppliedPool }
+    : await createTestDatabase(t);
+  const app = createApp(prisma, {
     token: 'test-token',
     frontendPort: 5173,
     staticDirectory: fileURLToPath(new URL('../dist', import.meta.url)),
@@ -59,7 +61,7 @@ async function setup(t, latency = '', suppliedPool) {
       headers: response.headers,
     };
   }
-  return { pool, request };
+  return { pool, prisma, request };
 }
 
 const signup = {
@@ -335,7 +337,7 @@ sqlTest(
 sqlTest(
   'spreadsheet upload imports valid rows and reports duplicates and incomplete rows',
   async (t) => {
-    const { request, pool } = await setup(t);
+    const { request, pool, prisma } = await setup(t);
     assert.equal(
       (await request('/users/upload', { method: 'POST', token: 'test-token' }))
         .status,
@@ -399,7 +401,7 @@ sqlTest(
     assert.equal(retried.body.count, 0);
     assert.equal(retried.body.skippedRows.length, 4);
 
-    const connectionMock = t.mock.method(pool, 'connect', async () => {
+    const connectionMock = t.mock.method(prisma, '$transaction', async () => {
       throw new Error('Storage failure');
     });
     try {

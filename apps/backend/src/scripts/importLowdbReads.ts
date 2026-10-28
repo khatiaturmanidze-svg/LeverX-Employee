@@ -1,13 +1,13 @@
-// Import employee read data into existing SQL tables. Never modify the JSON.
-// Auth records remain in lowDB; this script imports employees, visas and requests.
+// Import a JSON snapshot through Prisma. The source file is never modified.
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readFile } from 'node:fs/promises';
 import dotenv from 'dotenv';
-import type { Pool } from 'pg';
+import type { PrismaClient } from '../generated/prisma/client.js';
 import type { IEmployee, IRequestData, IVisa } from '../employeeTypes.js';
 import type { IAuthUser } from '../serverTypes.js';
-import { createPostgresPool } from '../postgres.js';
+import { createPrismaClient } from '../prisma.js';
+import { toEmployeeData } from '../mappers/employeeMapper.js';
 
 type ImportEmployee = IEmployee & { visa: IVisa[]; requests: IRequestData[] };
 function object(value: unknown, label: string): Record<string, unknown> {
@@ -75,7 +75,7 @@ function milliseconds(value: unknown, label: string): number {
   return result;
 }
 
-export function validateaAuthUsers(
+export function validateAuthUsers(
   source: unknown,
   employees: IEmployee[],
 ): IAuthUser[] {
@@ -90,7 +90,7 @@ export function validateaAuthUsers(
     const row = object(value, label);
     const email = text(row.email, `${label}.email`).trim().toLowerCase();
     if (emails.has(email))
-      throw new Error(`${label} has a duplicate employee ID`);
+      throw new Error(`${label} has a duplicate auth email`);
     emails.add(email);
     const employee = employees.find(
       (candidate) => candidate.email.trim().toLowerCase() === email,
@@ -107,10 +107,17 @@ export function validateaAuthUsers(
       throw new Error(`${label}.must_change_password must be a boolean`);
     }
 
+    if (
+      typeof row.hashed_password !== 'string' ||
+      !row.hashed_password.trim()
+    ) {
+      throw new Error(`${label}.hashed_password must be nonempty text`);
+    }
+
     return {
       _id: employee._id,
-      email: employee.email,
-      hashed_password: String(row.hashed_password),
+      email,
+      hashed_password: row.hashed_password,
       must_change_password: row.must_change_password ?? false,
     };
   });
@@ -131,7 +138,9 @@ export function validateSnapshot(source: unknown): ImportEmployee[] {
       const label = `employees[${position}]`;
       const row = object(value, label);
       const id = identifier(row._id, `${label}._id`);
-      const email = identifier(row.email, `${label}.email`);
+      const email = identifier(row.email, `${label}.email`)
+        .trim()
+        .toLowerCase();
       if (ids.has(id)) throw new Error(`${label} has a duplicate employee ID`);
       if (emails.has(email.trim().toLowerCase()))
         throw new Error(`${label} has a duplicate email`);
@@ -256,174 +265,120 @@ export function validateSnapshot(source: unknown): ImportEmployee[] {
 }
 
 export async function importSnapshot(
-  pool: Pick<Pool, 'connect'>,
+  prisma: PrismaClient,
   employees: ImportEmployee[],
   authUsers: IAuthUser[],
 ): Promise<void> {
   if (!employees.length) return;
-  const client = await pool.connect();
-  let began = false;
-
-  try {
-    await client.query('BEGIN');
-    began = true;
-    const ids = employees.map((employee) => employee._id);
-    const emails = employees.map((employee) =>
-      employee.email.trim().toLowerCase(),
-    );
-
-    // Stop if existing SQL records represent different employee identities.
-    const existing = await client.query<{ id: string; email: string }>(
-      'SELECT id, email FROM employees WHERE id = ANY($1::text[]) OR lower(trim(email)) = ANY($2::text[])',
-      [ids, emails],
-    );
-    const sourceById = new Map(
-      employees.map((employee) => [employee._id, employee]),
-    );
-    for (const row of existing.rows) {
-      const source = sourceById.get(row.id);
-      if (
-        !source ||
-        source.email.trim().toLowerCase() !== row.email.trim().toLowerCase()
-      )
-        throw new Error(
-          `SQL employee ${row.id} conflicts with the snapshot identity`,
-        );
-    }
-
-    // Insert every employee first; their managers may appear later in the JSON.
-    for (const [position, employee] of employees.entries()) {
-      await client.query(
-        `
-        INSERT INTO employees (
-          id, first_name, last_name, email, role, user_avatar,
-          first_native_name, middle_native_name, last_native_name,
-          department, building, room, desk_number, is_remote_work,
-          phone, zoom_id, zoom_link, citizenship,
-          birth_year, birth_month, birth_day, manager_id, source_position
-        ) VALUES (
-          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,
-          $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, NULL, $22
-        )
-        ON CONFLICT (id) DO UPDATE SET
-          first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name,
-          email = EXCLUDED.email, role = EXCLUDED.role, user_avatar = EXCLUDED.user_avatar,
-          first_native_name = EXCLUDED.first_native_name, middle_native_name = EXCLUDED.middle_native_name,
-          last_native_name = EXCLUDED.last_native_name, department = EXCLUDED.department,
-          building = EXCLUDED.building, room = EXCLUDED.room, desk_number = EXCLUDED.desk_number,
-          is_remote_work = EXCLUDED.is_remote_work, phone = EXCLUDED.phone,
-          zoom_id = EXCLUDED.zoom_id, zoom_link = EXCLUDED.zoom_link, citizenship = EXCLUDED.citizenship,
-          birth_year = EXCLUDED.birth_year, birth_month = EXCLUDED.birth_month, birth_day = EXCLUDED.birth_day,
-          manager_id = NULL, source_position = EXCLUDED.source_position
-      `,
-        [
-          employee._id,
-          employee.first_name,
-          employee.last_name,
-          employee.email,
-          employee.role,
-          employee.user_avatar,
-          employee.first_native_name,
-          employee.middle_native_name,
-          employee.last_native_name,
-          employee.department,
-          employee.building,
-          employee.room,
-          employee.desk_number,
-          employee.isRemoteWork,
-          employee.phone,
-          employee.zoom_id,
-          employee.zoom_link,
-          employee.citizenship,
-          employee.date_birth?.year,
-          employee.date_birth?.month,
-          employee.date_birth?.day,
-          position,
-        ],
+  await prisma.$transaction(
+    async (tx) => {
+      const ids = employees.map((employee) => employee._id);
+      const byId = new Map(
+        employees.map((employee) => [employee._id, employee]),
       );
-    }
-    for (const employee of employees) {
-      if (employee.manager?.id)
-        await client.query(
-          'UPDATE employees SET manager_id = $1 WHERE id = $2',
-          [employee.manager.id, employee._id],
-        );
-    }
-
-    // Replace related rows only for imported employees; reruns cannot duplicate them.
-    await client.query(
-      'DELETE FROM visas WHERE employee_id = ANY($1::text[])',
-      [ids],
-    );
-    await client.query(
-      'DELETE FROM requests WHERE employee_id = ANY($1::text[])',
-      [ids],
-    );
-    for (const employee of employees) {
-      for (const [position, visa] of employee.visa.entries()) {
-        await client.query(
-          `
-          INSERT INTO visas (employee_id, issuing_country, type, start_date_ms, end_date_ms, source_position)
-          VALUES ($1, $2, $3, $4, $5, $6)
-        `,
-          [
-            employee._id,
-            visa.issuing_country,
-            visa.type,
-            visa.start_date,
-            visa.end_date,
-            position,
-          ],
-        );
-      }
-      for (const [position, request] of employee.requests.entries()) {
-        await client.query(
-          `
-          INSERT INTO requests (id, employee_id, type, start_date, end_date, note, status, source_position)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        `,
-          [
-            request.id,
-            employee._id,
-            request.type,
-            request.start_date,
-            request.end_date,
-            request.note,
-            request.status,
-            position,
-          ],
-        );
-      }
-    }
-
-    for (const authUser of authUsers) {
-      await client.query(
-        `INSERT INTO auth_users
-       (employee_id, email, hashed_password, must_change_password)
-     VALUES ($1, $2, $3, $4)`,
-        [
-          authUser._id,
-          authUser.email,
-          authUser.hashed_password,
-          authUser.must_change_password ?? false,
-        ],
+      const emails = new Set(
+        employees.map((employee) => employee.email.trim().toLowerCase()),
       );
-    }
-
-    await client.query('COMMIT'); // Your existing COMMIT.
-    await client.query('COMMIT');
-  } catch (error) {
-    if (began) {
-      try {
-        await client.query('ROLLBACK');
-      } catch {
-        /* Preserve the original import error. */
+      const existing = await tx.employee.findMany({
+        select: { id: true, email: true },
+      });
+      for (const row of existing) {
+        const normalizedEmail = row.email.trim().toLowerCase();
+        if (!byId.has(row.id) && !emails.has(normalizedEmail)) continue;
+        const original = byId.get(row.id);
+        if (
+          !original ||
+          original.email.trim().toLowerCase() !== normalizedEmail
+        ) {
+          throw new Error(
+            'SQL employee ' + row.id + ' conflicts with the snapshot identity',
+          );
+        }
       }
-    }
-    throw error;
-  } finally {
-    client.release();
-  }
+
+      const sourceAuth = new Map(authUsers.map((user) => [user._id, user]));
+      const authEmails = new Set(authUsers.map((user) => user.email));
+      const existingAuth = await tx.authUser.findMany({
+        select: { employeeId: true, email: true },
+      });
+      for (const row of existingAuth) {
+        const email = row.email.trim().toLowerCase();
+        if (!sourceAuth.has(row.employeeId) && !authEmails.has(email)) continue;
+        if (sourceAuth.get(row.employeeId)?.email !== email) {
+          throw new Error(
+            'SQL credentials conflict with the snapshot identity',
+          );
+        }
+      }
+
+      // All profiles must exist before assigning managers from the same snapshot.
+      for (const [sourcePosition, employee] of employees.entries()) {
+        const data = {
+          ...toEmployeeData(employee),
+          managerId: null,
+          sourcePosition,
+        };
+        await tx.employee.upsert({
+          where: { id: employee._id },
+          create: data,
+          update: data,
+        });
+      }
+      for (const employee of employees) {
+        if (employee.manager?.id) {
+          await tx.employee.update({
+            where: { id: employee._id },
+            data: { managerId: employee.manager.id },
+          });
+        }
+      }
+
+      await tx.visa.deleteMany({ where: { employeeId: { in: ids } } });
+      await tx.leaveRequest.deleteMany({ where: { employeeId: { in: ids } } });
+      for (const employee of employees) {
+        if (employee.visa.length) {
+          await tx.visa.createMany({
+            data: employee.visa.map((visa, sourcePosition) => ({
+              employeeId: employee._id,
+              issuingCountry: visa.issuing_country,
+              type: visa.type,
+              startDateMs: BigInt(visa.start_date),
+              endDateMs: BigInt(visa.end_date),
+              sourcePosition,
+            })),
+          });
+        }
+        if (employee.requests.length) {
+          await tx.leaveRequest.createMany({
+            data: employee.requests.map((request, sourcePosition) => ({
+              id: request.id,
+              employeeId: employee._id,
+              type: request.type,
+              startDate: new Date(request.start_date + 'T00:00:00Z'),
+              endDate: new Date(request.end_date + 'T00:00:00Z'),
+              note: request.note,
+              status: request.status,
+              sourcePosition,
+            })),
+          });
+        }
+      }
+      for (const user of authUsers) {
+        await tx.authUser.upsert({
+          where: { employeeId: user._id },
+          create: {
+            employeeId: user._id,
+            email: user.email,
+            hashedPassword: user.hashed_password,
+            mustChangePassword: user.must_change_password ?? false,
+          },
+          // A retry must not restore an old password or password-change flag.
+          update: { email: user.email },
+        });
+      }
+    },
+    { timeout: 30000 },
+  );
 }
 
 async function main(): Promise<void> {
@@ -443,7 +398,7 @@ async function main(): Promise<void> {
   );
   const source: unknown = JSON.parse(await readFile(jsonPath, 'utf8'));
   const employees = validateSnapshot(source);
-  const authUsers = validateaAuthUsers(source, employees);
+  const authUsers = validateAuthUsers(source, employees);
   const counts = {
     employees: employees.length,
     visas: employees.reduce(
@@ -463,12 +418,12 @@ async function main(): Promise<void> {
   }
   if (!process.env.DATABASE_URL)
     throw new Error('DATABASE_URL is required for --import');
-  const pool = createPostgresPool();
+  const prisma = createPrismaClient();
   try {
-    await importSnapshot(pool, employees, authUsers);
-    console.log('Import committed:', counts);
+    await importSnapshot(prisma, employees, authUsers);
+    console.log('Import committed (snapshot counts):', counts);
   } finally {
-    await pool.end();
+    await prisma.$disconnect();
   }
 }
 

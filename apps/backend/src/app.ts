@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import type { Pool } from 'pg';
+import type { PrismaClient } from './generated/prisma/client.js';
 import { createAuthMiddleware } from './middleware/auth.js';
 import { createSyntheticLatencyMiddleware } from './middleware/syntheticLatency.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -23,14 +23,14 @@ interface AppOptions {
   staticDirectory: string;
 }
 
-export function createApp(pool: Pool, options: AppOptions) {
+export function createApp(prisma: PrismaClient, options: AppOptions) {
   const app = express();
   app.use(cors({ origin: `http://localhost:${options.frontendPort}` }));
   app.use(express.json());
   app.use(express.static(options.staticDirectory));
   const authMiddleware = createAuthMiddleware(options.token);
 
-  const repositories = createRepositories(pool);
+  const repositories = createRepositories(prisma);
 
   // Only business API routes receive artificial latency.
   app.use(
@@ -40,19 +40,19 @@ export function createApp(pool: Pool, options: AppOptions) {
   app.use(createHealthRoutes());
   app.use(
     createAuthRoutes(
-      createAuthController(createAuthService(pool, options.token)),
+      createAuthController(createAuthService(prisma, options.token)),
       authMiddleware,
     ),
   );
   app.use(
     createEmployeeRoutes(
-      createEmployeeController(createEmployeeService(pool, repositories)),
+      createEmployeeController(createEmployeeService(prisma, repositories)),
       authMiddleware,
     ),
   );
   app.use(
     createRequestRoutes(
-      createRequestController(createRequestService(pool, repositories)),
+      createRequestController(createRequestService(prisma, repositories)),
     ),
   );
   app.use(errorHandler);

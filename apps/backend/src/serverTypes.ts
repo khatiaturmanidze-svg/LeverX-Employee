@@ -7,12 +7,6 @@ export interface IAuthUser {
   must_change_password?: boolean;
 }
 
-// Source JSON snapshot shape; used by the retained legacy initializer only.
-export interface LowdbSnapshot {
-  authUsers: IAuthUser[];
-  employees: IEmployee[];
-}
-
 // Request body types for each endpoint
 export interface SignInRequest {
   email: string;

@@ -3,7 +3,9 @@ import test from 'node:test';
 import {
   importSnapshot,
   validateSnapshot,
+  validateAuthUsers,
 } from '../dist/scripts/importLowdbReads.js';
+import { createTestDatabase, sqlTestOptions } from './helpers/postgres.js';
 
 function snapshot() {
   return {
@@ -41,30 +43,6 @@ function snapshot() {
         last_name: 'Manager',
       },
     ],
-  };
-}
-
-// This client never contacts PostgreSQL. It exercises ordering and failure handling.
-function fakePool({ existing = [], failOn } = {}) {
-  const calls = [];
-  let released = false;
-  const failure = new Error('Simulated SQL failure');
-  const client = {
-    async query(sql, values) {
-      const command = sql.replace(/\s+/g, ' ').trim();
-      calls.push({ command, values });
-      if (failOn && command.startsWith(failOn)) throw failure;
-      return { rows: command.startsWith('SELECT') ? existing : [] };
-    },
-    release() {
-      released = true;
-    },
-  };
-  return {
-    connect: async () => client,
-    calls,
-    failure,
-    wasReleased: () => released,
   };
 }
 
@@ -120,81 +98,129 @@ test('validation rejects invalid numeric fields and malformed arrays', () => {
   assert.throws(() => validateSnapshot(source), /must be an array/);
 });
 
-test('import creates parents before links and commits parameterized data on one connection', async () => {
-  const pool = fakePool();
-  await importSnapshot(pool, validateSnapshot(snapshot()), []);
-  assert.equal(pool.calls[0].command, 'BEGIN');
-  assert.equal(pool.calls.at(-1).command, 'COMMIT');
-  assert.equal(pool.wasReleased(), true);
-  const employeeWrites = pool.calls.filter(({ command }) =>
-    command.startsWith('INSERT INTO employees'),
-  );
-  assert.equal(employeeWrites.length, 2);
-  const managerIndex = pool.calls.findIndex(({ command }) =>
-    command.startsWith('UPDATE employees SET manager_id'),
-  );
-  assert.ok(managerIndex > pool.calls.indexOf(employeeWrites[1]));
-  assert.deepEqual(pool.calls[managerIndex].values, [
-    'manager-1',
-    'employee-1',
+test('auth validation links normalized emails and rejects invalid hashes and flags', () => {
+  const source = snapshot();
+  source.authUsers = [
+    { email: " O'BRIEN@EXAMPLE.TEST ", hashed_password: 'snapshot-hash' },
+  ];
+  const employees = validateSnapshot(source);
+  assert.deepEqual(validateAuthUsers(source, employees), [
+    {
+      _id: 'employee-1',
+      email: "o'brien@example.test",
+      hashed_password: 'snapshot-hash',
+      must_change_password: false,
+    },
   ]);
-  assert.equal(employeeWrites[0].values[3], "o'brien@example.test");
-  assert.equal(employeeWrites[0].command.includes("o'brien"), false);
-  for (const call of pool.calls.filter(({ command }) =>
-    command.startsWith('DELETE'),
-  )) {
-    assert.match(call.command, /WHERE employee_id = ANY\(\$1::text\[\]\)/);
-    assert.deepEqual(call.values, [['employee-1', 'manager-1']]);
-  }
-  const requestWrite = pool.calls.find(({ command }) =>
-    command.startsWith('INSERT INTO requests'),
+  source.authUsers[0].hashed_password = undefined;
+  assert.throws(() => validateAuthUsers(source, employees), /nonempty text/);
+  source.authUsers[0].hashed_password = 'snapshot-hash';
+  source.authUsers[0].must_change_password = 'false';
+  assert.throws(
+    () => validateAuthUsers(source, employees),
+    /must be a boolean/,
   );
-  assert.equal(requestWrite.values[0], 'request-1');
-  assert.equal(requestWrite.values[1], 'employee-1');
-  assert.equal(requestWrite.values.at(-1), 0);
 });
 
-test('SQL failure rolls back instead of committing and releases the connection', async () => {
-  const pool = fakePool({ failOn: 'INSERT INTO requests' });
-  await assert.rejects(
-    importSnapshot(pool, validateSnapshot(snapshot()), []),
-    (error) => error === pool.failure,
-  );
-  assert.equal(pool.calls.at(-1).command, 'ROLLBACK');
-  assert.equal(
-    pool.calls.some(({ command }) => command === 'COMMIT'),
-    false,
-  );
-  assert.equal(pool.wasReleased(), true);
-});
+test(
+  'Prisma import preserves identities and credentials when repeated',
+  sqlTestOptions,
+  async (t) => {
+    const { prisma } = await createTestDatabase(t);
+    const employees = validateSnapshot(snapshot());
+    const authUsers = [
+      {
+        _id: employees[0]._id,
+        email: employees[0].email,
+        hashed_password: 'snapshot-hash',
+      },
+    ];
+    await importSnapshot(prisma, employees, authUsers);
+    const employee = await prisma.employee.findUnique({
+      where: { id: 'employee-1' },
+      include: { manager: true, visas: true, requests: true },
+    });
+    assert.equal(employee.manager.id, 'manager-1');
+    assert.equal(employee.visas[0].startDateMs, 0n);
+    assert.equal(employee.requests[0].id, 'request-1');
+    await prisma.authUser.update({
+      where: { employeeId: 'employee-1' },
+      data: { hashedPassword: 'changed-in-sql', mustChangePassword: true },
+    });
+    await importSnapshot(prisma, employees, authUsers);
+    const credential = await prisma.authUser.findUnique({
+      where: { employeeId: 'employee-1' },
+    });
+    assert.equal(credential.hashedPassword, 'changed-in-sql');
+    assert.equal(credential.mustChangePassword, true);
+    assert.equal(await prisma.visa.count(), 1);
+    assert.equal(await prisma.leaveRequest.count(), 1);
+  },
+);
 
-test('conflicting SQL identities fail before employee writes or related-row replacement', async () => {
-  const pool = fakePool({
-    existing: [{ id: 'different-id', email: "o'brien@example.test" }],
-  });
-  await assert.rejects(
-    importSnapshot(pool, validateSnapshot(snapshot()), []),
-    /conflicts with the snapshot identity/,
-  );
-  assert.equal(
-    pool.calls.some(
-      ({ command }) =>
-        command.startsWith('INSERT') || command.startsWith('DELETE'),
-    ),
-    false,
-  );
-  assert.equal(pool.calls.at(-1).command, 'ROLLBACK');
-  assert.equal(pool.wasReleased(), true);
-});
+test(
+  'a late Prisma import failure rolls back newly imported profiles',
+  sqlTestOptions,
+  async (t) => {
+    const { prisma } = await createTestDatabase(t);
+    await prisma.employee.create({
+      data: {
+        id: 'existing-owner',
+        firstName: 'Existing',
+        lastName: 'Owner',
+        email: 'owner@example.test',
+        requests: {
+          create: {
+            id: 'request-1',
+            type: 'Vacation',
+            startDate: new Date('2026-01-01T00:00:00Z'),
+            endDate: new Date('2026-01-02T00:00:00Z'),
+            sourcePosition: 0,
+          },
+        },
+      },
+    });
+    await assert.rejects(
+      importSnapshot(prisma, validateSnapshot(snapshot()), []),
+      (error) => error.code === 'P2002',
+    );
+    assert.deepEqual(await prisma.employee.findMany({ select: { id: true } }), [
+      { id: 'existing-owner' },
+    ]);
+    assert.equal(await prisma.leaveRequest.count(), 1);
+    assert.equal(await prisma.visa.count(), 0);
+  },
+);
 
-test('empty imports do not acquire a connection', async () => {
+test(
+  'conflicting SQL identities stop the Prisma import',
+  sqlTestOptions,
+  async (t) => {
+    const { prisma } = await createTestDatabase(t);
+    await prisma.employee.create({
+      data: {
+        id: 'different-id',
+        firstName: 'Existing',
+        lastName: 'Employee',
+        email: "o'brien@example.test",
+      },
+    });
+    await assert.rejects(
+      importSnapshot(prisma, validateSnapshot(snapshot()), []),
+      /conflicts with the snapshot identity/,
+    );
+    assert.equal(await prisma.employee.count(), 1);
+  },
+);
+
+test('empty imports do not open a transaction', async () => {
   await importSnapshot(
     {
-      connect: () => {
+      $transaction: () => {
         throw new Error('Should not connect');
       },
     },
-    validateSnapshot({ employees: [] }),
+    [],
     [],
   );
 });
