@@ -54,14 +54,14 @@ model AuthUser {
 }
 
 model Visa {
-  id             BigInt   @id @default(autoincrement())
-  employeeId     String   @map("employee_id") @db.Text
-  issuingCountry String   @map("issuing_country") @db.Text
-  type           String   @db.Text
-  startDateMs    BigInt   @map("start_date_ms")
-  endDateMs      BigInt   @map("end_date_ms")
-  sourcePosition Int      @map("source_position")
-  employee       Employee @relation(fields: [employeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id              BigInt   @id @default(autoincrement())
+  employeeId      String   @map("employee_id") @db.Text
+  issuing_country String   @db.Text
+  type            String   @db.Text
+  start_date      DateTime @db.Date
+  end_date        DateTime @db.Date
+  sourcePosition  Int      @map("source_position")
+  employee        Employee @relation(fields: [employeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([employeeId, sourcePosition], map: "visas_employee_id_source_position_key")
   @@map("visas")

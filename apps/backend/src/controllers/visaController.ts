@@ -1,6 +1,6 @@
 import type { RequestHandler } from 'express';
 
-import { IVisa } from '../employeeTypes.js';
+import type { Visa } from '../visaTypes.js';
 import { ErrorResponse } from '../serverTypes.js';
 import { createVisaService } from '../services/visaService.js';
 export function createVisaController(
@@ -8,7 +8,7 @@ export function createVisaController(
 ) {
   const listVisas: RequestHandler<
     { id: string },
-    IVisa[] | ErrorResponse
+    Visa[] | ErrorResponse
   > = async (req, res) => {
     res.status(200).json(await service.listVisas(req.params.id));
   };

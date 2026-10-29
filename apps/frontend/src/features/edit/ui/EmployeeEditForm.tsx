@@ -1,5 +1,5 @@
 import React, { useActionState, useReducer } from 'react';
-import { IEmployee, IVisa } from '@/types/type';
+import { IEmployee, CreateVisaInput } from '@/types/type';
 import { DetailRow } from './DetailRow';
 import VisaEditorList from './VisaEditorList';
 import { getInitialState, submitEditUser } from '../lib/helpers';
@@ -39,7 +39,7 @@ export function EmployeeEditForm({ user, onCancel }: EmployeEditFormProps) {
 
   const handleVisaChange = (
     index: number,
-    field: keyof IVisa,
+    field: keyof CreateVisaInput,
     value: string,
   ) => {
     dispatch(setVisa(index, field, value));
@@ -128,7 +128,11 @@ export function EmployeeEditForm({ user, onCancel }: EmployeEditFormProps) {
         <p className="form-error">{submitState.errors.citizenship}</p>
       )}
 
-      <VisaEditorList visas={formData.visas} onVisaChange={handleVisaChange} />
+      <VisaEditorList
+        visas={formData.visas}
+        onVisaChange={handleVisaChange}
+        errors={submitState.errors}
+      />
 
       {submitState.statusMessage && submitState.statusType === 'error' && (
         <p className="form-error">{submitState.statusMessage}</p>

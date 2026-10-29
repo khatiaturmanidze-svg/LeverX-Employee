@@ -1,15 +1,21 @@
 import React from 'react';
-import { IVisa } from '../../../types/type';
+import { CreateVisaInput } from '../../../types/type';
 import { DetailRow } from './DetailRow';
 
 interface VisaEditorListProps {
-  visas: IVisa[];
-  onVisaChange: (index: number, field: keyof IVisa, value: string) => void;
+  visas: CreateVisaInput[];
+  onVisaChange: (
+    index: number,
+    field: keyof CreateVisaInput,
+    value: string,
+  ) => void;
+  errors?: Record<string, string>;
 }
 
 export default function VisaEditorList({
   visas,
   onVisaChange,
+  errors = {},
 }: VisaEditorListProps) {
   if (!visas || visas.length === 0) {
     return null;
@@ -29,6 +35,9 @@ export default function VisaEditorList({
               onVisaChange(index, 'issuing_country', value)
             }
           />
+          {errors[`visa_${index}_country`] && (
+            <p className="form-error">{errors[`visa_${index}_country`]}</p>
+          )}
           <DetailRow
             icon="globe-icon"
             label="Type"
@@ -37,32 +46,33 @@ export default function VisaEditorList({
             fieldName="type"
             onValueChange={(_, value) => onVisaChange(index, 'type', value)}
           />
+          {errors[`visa_${index}_type`] && (
+            <p className="form-error">{errors[`visa_${index}_type`]}</p>
+          )}
           <DetailRow
             icon="calendar-icon"
             label="Start Date"
-            value={
-              typeof visa.start_date === 'number'
-                ? new Date(visa.start_date).toISOString().slice(0, 10)
-                : visa.start_date
-            }
+            value={visa.start_date}
             isEditing={true}
             fieldName="start_date"
             onValueChange={(_, value) =>
               onVisaChange(index, 'start_date', value)
             }
           />
+          {errors[`visa_${index}_start_date`] && (
+            <p className="form-error">{errors[`visa_${index}_start_date`]}</p>
+          )}
           <DetailRow
             icon="calendar-icon"
             label="End Date"
-            value={
-              typeof visa.end_date === 'number'
-                ? new Date(visa.end_date).toISOString().slice(0, 10)
-                : visa.end_date
-            }
+            value={visa.end_date}
             isEditing={true}
             fieldName="end_date"
             onValueChange={(_, value) => onVisaChange(index, 'end_date', value)}
           />
+          {errors[`visa_${index}_end_date`] && (
+            <p className="form-error">{errors[`visa_${index}_end_date`]}</p>
+          )}
         </div>
       ))}
     </>

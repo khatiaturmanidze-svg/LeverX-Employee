@@ -1,6 +1,4 @@
-// Server-side employee types.
-// Keep these inside `server/` so `tsc` (with rootDir=server) can compile/check
-// without pulling in frontend-only code.
+import type { Visa } from './visaTypes.js';
 
 export interface IDateOfBirth {
   year: number | null;
@@ -12,13 +10,6 @@ export interface IManager {
   id: string;
   first_name: string;
   last_name: string;
-}
-
-export interface IVisa {
-  issuing_country: string;
-  type: string;
-  start_date: string | number;
-  end_date: string | number;
 }
 
 export interface IRequestData {
@@ -57,7 +48,7 @@ export interface IEmployee {
   citizenship?: string;
   date_birth?: IDateOfBirth;
   manager?: IManager;
-  visa?: IVisa[];
+  visa?: Visa[];
 
   requests: IRequestData[];
 }

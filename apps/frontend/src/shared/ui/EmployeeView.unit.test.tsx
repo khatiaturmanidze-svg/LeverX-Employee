@@ -50,10 +50,10 @@ describe('EmployeeView', () => {
     expect(typeRow).toHaveTextContent('Work');
 
     const startDateRow = screen.getByTestId('detail-Start-Date');
-    expect(startDateRow).toHaveTextContent('2023');
+    expect(startDateRow).toHaveTextContent('2023-01-01');
 
     const endDateRow = screen.getByTestId('detail-End-Date');
-    expect(endDateRow).toHaveTextContent('2024');
+    expect(endDateRow).toHaveTextContent('2024-01-01');
   });
 
   it('renders fallback text for missing manager or date of birth', () => {

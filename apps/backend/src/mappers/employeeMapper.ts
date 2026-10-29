@@ -1,9 +1,10 @@
-import type { LeaveRequest, Prisma, Visa } from '../generated/prisma/client.js';
-import type { IEmployee, IRequestData, IVisa } from '../employeeTypes.js';
+import type { LeaveRequest, Prisma } from '../generated/prisma/client.js';
+import type { IEmployee, IRequestData } from '../employeeTypes.js';
 import type { EmployeeWithRelations } from '../repositories/employeeRepository.js';
+import { toVisaResponse } from './visaMapper.js';
 
 export function toEmployeeData(
-  profile: IEmployee,
+  profile: Omit<IEmployee, 'visa'>,
 ): Prisma.EmployeeUncheckedCreateInput {
   return {
     id: profile._id,
@@ -40,20 +41,6 @@ export function toRequestResponse(request: LeaveRequest): IRequestData {
     end_date: request.endDate.toISOString().slice(0, 10),
     note: request.note,
     status: request.status as IRequestData['status'],
-  };
-}
-
-export function toVisaResponse(visa: Visa): IVisa {
-  const start = Number(visa.startDateMs);
-  const end = Number(visa.endDateMs);
-  if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end)) {
-    throw new Error('Invalid visa timestamp');
-  }
-  return {
-    issuing_country: visa.issuingCountry,
-    type: visa.type,
-    start_date: start,
-    end_date: end,
   };
 }
 

@@ -277,6 +277,99 @@ sqlTest(
 );
 
 sqlTest(
+  'employee visa creation, reads, and replacement use one calendar-date contract',
+  async (t) => {
+    const { request, prisma } = await setup(t);
+    const token = 'test-token';
+    const visa = {
+      issuing_country: ' Japanese ',
+      type: ' Work ',
+      start_date: '2024-02-29',
+      end_date: '2027-10-01',
+    };
+    const created = await request('/users', {
+      method: 'POST',
+      token,
+      body: { ...employee, visa: [visa] },
+    });
+    assert.equal(created.status, 201);
+    const id = created.body.employee._id;
+    const saved = created.body.employee.visa[0];
+    assert.match(saved.id, /^[1-9]\d*$/);
+    assert.deepEqual(saved, {
+      ...visa,
+      id: saved.id,
+      employeeId: id,
+      issuing_country: 'Japanese',
+      type: 'Work',
+    });
+    assert.deepEqual((await request(`/users/${id}`, { token })).body.visa, [
+      saved,
+    ]);
+    assert.deepEqual((await request('/users', { token })).body[0].visa, [
+      saved,
+    ]);
+    const stored = await prisma.visa.findUnique({
+      where: { id: BigInt(saved.id) },
+    });
+    assert.equal(stored.start_date.toISOString(), '2024-02-29T00:00:00.000Z');
+
+    const omitted = await request(`/users/${id}`, {
+      method: 'PUT',
+      body: { department: 'Design' },
+    });
+    assert.deepEqual(omitted.body.employee.visa, [saved]);
+    for (const invalid of [
+      null,
+      {},
+      [null],
+      [{ ...visa, start_date: 0 }],
+      [{ ...visa, start_date: '2028-10-01' }],
+      [{ ...visa, id: saved.id }],
+      [{ ...visa, employeeId: 'other' }],
+    ]) {
+      const rejected = await request(`/users/${id}`, {
+        method: 'PUT',
+        body: { department: 'Invalid', visa: invalid },
+      });
+      assert.equal(rejected.status, 400);
+      const after = await request(`/users/${id}`, { token });
+      assert.equal(after.body.department, 'Design');
+      assert.deepEqual(after.body.visa, [saved]);
+    }
+    const replaced = await request(`/users/${id}`, {
+      method: 'PUT',
+      body: { visa: [{ ...visa, type: 'Tourist', end_date: '2028-10-01' }] },
+    });
+    assert.equal(replaced.status, 200);
+    const replacement = replaced.body.employee.visa[0];
+    assert.notEqual(replacement.id, saved.id);
+    assert.deepEqual(replacement, {
+      ...saved,
+      id: replacement.id,
+      type: 'Tourist',
+      end_date: '2028-10-01',
+    });
+    const cleared = await request(`/users/${id}`, {
+      method: 'PUT',
+      body: { visa: [] },
+    });
+    assert.deepEqual(cleared.body.employee.visa, []);
+    const invalidCreate = await request('/users', {
+      method: 'POST',
+      token,
+      body: {
+        ...employee,
+        email: 'invalid@example.test',
+        visa: [{ ...visa, start_date: 0 }],
+      },
+    });
+    assert.equal(invalidCreate.status, 400);
+    assert.equal(await prisma.employee.count(), 1);
+  },
+);
+
+sqlTest(
   'request routes retain creation status, generated IDs, updates, and error shapes',
   async (t) => {
     const { request } = await setup(t);
@@ -401,9 +494,10 @@ sqlTest(
     assert.equal(retried.body.count, 0);
     assert.equal(retried.body.skippedRows.length, 4);
 
-    const connectionMock = t.mock.method(prisma, '$transaction', async () => {
+    const originalTransaction = prisma.$transaction;
+    prisma.$transaction = async () => {
       throw new Error('Storage failure');
-    });
+    };
     try {
       const failed = await request('/users/upload', {
         method: 'POST',
@@ -414,7 +508,7 @@ sqlTest(
       assert.equal(failed.body.count, 0);
       assert.match(failed.body.message, /Import stopped/);
     } finally {
-      connectionMock.mock.restore();
+      prisma.$transaction = originalTransaction;
     }
   },
 );

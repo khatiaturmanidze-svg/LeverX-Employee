@@ -1,5 +1,5 @@
 import type { SpreadsheetRow } from '../serverTypes.js';
-import type { IEmployee } from '../employeeTypes.js';
+import type { NewEmployeeProfile } from './accountCreation.js';
 export function getCellString(value: SpreadsheetRow[string]): string {
   if (typeof value === 'string') {
     return value.trim();
@@ -45,7 +45,7 @@ function getBooleanValue(value: SpreadsheetRow[string]): boolean {
 export function createEmployeeFromSpreadsheetRow(
   row: SpreadsheetRow,
   employeeId: string,
-): IEmployee {
+): NewEmployeeProfile {
   return {
     _id: employeeId,
     role: getCellString(row.role) || 'Employee',

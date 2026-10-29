@@ -1,4 +1,5 @@
 import type { IEmployee, IRequestData } from './employeeTypes.js';
+import type { CreateVisaInput } from './visaTypes.js';
 
 export interface IAuthUser {
   _id: string;
@@ -49,7 +50,7 @@ export interface CreateUserRequest {
   citizenship?: string;
   date_birth?: IEmployee['date_birth'];
   manager?: IEmployee['manager'];
-  visa?: IEmployee['visa'];
+  visa?: CreateVisaInput[];
 }
 
 // Response types

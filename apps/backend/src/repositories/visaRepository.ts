@@ -1,5 +1,5 @@
 import type { PrismaClient } from '../generated/prisma/client.js';
-import { toVisaResponse } from '../mappers/employeeMapper.js';
+import { toVisaResponse } from '../mappers/visaMapper.js';
 
 export function createVisaRepository(prisma: PrismaClient) {
   async function listByEmployeeId(id: string) {

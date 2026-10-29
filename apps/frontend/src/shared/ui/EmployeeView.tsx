@@ -104,15 +104,8 @@ export function EmployeeView({ user }: EmployeeViewProps) {
         <>
           <h3 className="details-section__general">Visas</h3>
           {user.visa?.map((v, i) => {
-            const startDate = v.start_date
-              ? new Date(v.start_date).toLocaleDateString()
-              : '';
-            const endDate = v.end_date
-              ? new Date(v.end_date).toLocaleDateString()
-              : '';
-
             return (
-              <div key={i} className="visa-row">
+              <div key={v.id} className="visa-row">
                 <DetailRow
                   icon="globe-icon"
                   label="Issuing Country"
@@ -130,14 +123,14 @@ export function EmployeeView({ user }: EmployeeViewProps) {
                 <DetailRow
                   icon="calendar-icon"
                   label="Start Date"
-                  value={startDate}
+                  value={v.start_date}
                   isEditing={false}
                   fieldName={`visa_${i}_start_date`}
                 />
                 <DetailRow
                   icon="calendar-icon"
                   label="End Date"
-                  value={endDate}
+                  value={v.end_date}
                   isEditing={false}
                   fieldName={`visa_${i}_end_date`}
                 />

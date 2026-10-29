@@ -52,7 +52,8 @@ test('validation preserves existing IDs and accepts numeric strings without muta
   const employees = validateSnapshot(source);
   assert.equal(employees[0]._id, 'employee-1');
   assert.equal(employees[0].desk_number, 0);
-  assert.equal(employees[0].visa[0].start_date, 0);
+  assert.equal(employees[0].visa[0].start_date, '1970-01-01');
+  assert.equal(employees[0].visa[0].end_date, '1970-01-01');
   assert.equal(employees[0].requests[0].employeeId, 'employee-1');
   assert.deepEqual(employees[1].visa, []);
   assert.deepEqual(employees[1].requests, []);
@@ -69,6 +70,19 @@ test('validation rejects duplicate identities and broken manager references', ()
   source = snapshot();
   source.employees[0].manager.id = 'missing-manager';
   assert.throws(() => validateSnapshot(source), /manager outside the snapshot/);
+});
+
+test('timestamp snapshot visas normalize to UTC dates and reject invalid ranges before import', () => {
+  const source = snapshot();
+  source.employees[0].visa[0].start_date = -1;
+  assert.equal(validateSnapshot(source)[0].visa[0].start_date, '1969-12-31');
+  source.employees[0].visa[0].start_date = Date.parse('2028-10-01T00:00:00Z');
+  assert.throws(
+    () => validateSnapshot(source),
+    /End date must be on or after start date/,
+  );
+  source.employees[0].visa[0].start_date = Number.MAX_SAFE_INTEGER;
+  assert.throws(() => validateSnapshot(source), /supported date range/);
 });
 
 test('validation rejects invalid request dates, statuses and ownership', () => {
@@ -141,7 +155,10 @@ test(
       include: { manager: true, visas: true, requests: true },
     });
     assert.equal(employee.manager.id, 'manager-1');
-    assert.equal(employee.visas[0].startDateMs, 0n);
+    assert.equal(
+      employee.visas[0].start_date.toISOString(),
+      '1970-01-01T00:00:00.000Z',
+    );
     assert.equal(employee.requests[0].id, 'request-1');
     await prisma.authUser.update({
       where: { employeeId: 'employee-1' },

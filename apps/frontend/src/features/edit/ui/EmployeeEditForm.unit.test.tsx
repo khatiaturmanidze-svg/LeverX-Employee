@@ -166,6 +166,7 @@ describe('EmployeeEditForm', () => {
         last_native_name: baseUser.last_native_name,
         date_birth: { year: 1990, month: 5, day: 15 },
         manager: 'manager-1',
+        visa: [],
       },
     });
     expect(onCancel).toHaveBeenCalledTimes(1);

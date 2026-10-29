@@ -4,12 +4,15 @@ import { fileURLToPath } from 'node:url';
 import { readFile } from 'node:fs/promises';
 import dotenv from 'dotenv';
 import type { PrismaClient } from '../generated/prisma/client.js';
-import type { IEmployee, IRequestData, IVisa } from '../employeeTypes.js';
+import type { IEmployee, IRequestData } from '../employeeTypes.js';
+import type { CreateVisaInput } from '../visaTypes.js';
+import { createVisaSchema } from '../schemas/visaSchema.js';
+import { toStoredDate } from '../mappers/visaMapper.js';
 import type { IAuthUser } from '../serverTypes.js';
 import { createPrismaClient } from '../prisma.js';
 import { toEmployeeData } from '../mappers/employeeMapper.js';
 
-type ImportEmployee = IEmployee & { visa: IVisa[]; requests: IRequestData[] };
+type ImportEmployee = Omit<IEmployee, 'visa'> & { visa: CreateVisaInput[] };
 function object(value: unknown, label: string): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value))
     throw new Error(`${label} must be an object`);
@@ -75,9 +78,17 @@ function milliseconds(value: unknown, label: string): number {
   return result;
 }
 
+function calendarDateFromMilliseconds(value: unknown, label: string): string {
+  const parsed = new Date(milliseconds(value, label));
+  if (!Number.isFinite(parsed.getTime())) {
+    throw new Error(`${label} is outside the supported date range`);
+  }
+  return parsed.toISOString().slice(0, 10);
+}
+
 export function validateAuthUsers(
   source: unknown,
-  employees: IEmployee[],
+  employees: Pick<IEmployee, '_id' | 'email'>[],
 ): IAuthUser[] {
   const snapshot = object(source, 'Snapshot');
   const emails = new Set<string>();
@@ -156,21 +167,28 @@ export function validateSnapshot(source: unknown): ImportEmployee[] {
         throw new Error(`${label}.isRemoteWork must be boolean`);
 
       const visas = array(row.visa, `${label}.visa`).map(
-        (value, index): IVisa => {
+        (value, index): CreateVisaInput => {
           const itemLabel = `${label}.visa[${index}]`;
           const visa = object(value, itemLabel);
-          return {
+          const result = createVisaSchema.safeParse({
             issuing_country: text(
               visa.issuing_country,
               `${itemLabel}.issuing_country`,
             ),
             type: text(visa.type, `${itemLabel}.type`),
-            start_date: milliseconds(
+            start_date: calendarDateFromMilliseconds(
               visa.start_date,
               `${itemLabel}.start_date`,
             ),
-            end_date: milliseconds(visa.end_date, `${itemLabel}.end_date`),
-          };
+            end_date: calendarDateFromMilliseconds(
+              visa.end_date,
+              `${itemLabel}.end_date`,
+            ),
+          });
+          if (!result.success) {
+            throw new Error(`${itemLabel}: ${result.error.message}`);
+          }
+          return result.data;
         },
       );
 
@@ -340,10 +358,10 @@ export async function importSnapshot(
           await tx.visa.createMany({
             data: employee.visa.map((visa, sourcePosition) => ({
               employeeId: employee._id,
-              issuingCountry: visa.issuing_country,
+              issuing_country: visa.issuing_country,
               type: visa.type,
-              startDateMs: BigInt(visa.start_date),
-              endDateMs: BigInt(visa.end_date),
+              start_date: toStoredDate(visa.start_date),
+              end_date: toStoredDate(visa.end_date),
               sourcePosition,
             })),
           });

@@ -42,6 +42,8 @@ const employees: IEmployee[] = [
     manager: { id: '1', first_name: 'John', last_name: 'Doe' },
     visa: [
       {
+        id: '1',
+        employeeId: '2',
         issuing_country: 'USA',
         type: 'B1',
         start_date: '2023-01-01',

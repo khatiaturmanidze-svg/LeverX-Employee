@@ -11,7 +11,7 @@ export const sqlTestOptions = {
 };
 
 // Each test gets its own schema. No tables in the development database are used.
-export async function createTestDatabase(t) {
+export async function createTestDatabase(t, { throughMigration } = {}) {
   assert.ok(process.env.TEST_DATABASE_URL, 'TEST_DATABASE_URL is required');
   const url = new URL(process.env.TEST_DATABASE_URL);
   assert.ok(
@@ -49,12 +49,15 @@ export async function createTestDatabase(t) {
   assert.equal(selected.rows[0].name, schema);
 
   const directory = new URL('../../prisma/migrations/', import.meta.url);
-  for (const filename of (await readdir(directory))
+  const migrations = (await readdir(directory))
     .filter((name) => /^\d/.test(name))
-    .sort()) {
+    .sort();
+  if (throughMigration) assert.ok(migrations.includes(throughMigration));
+  for (const filename of migrations) {
     await query(
       await readFile(new URL(`${filename}/migration.sql`, directory), 'utf8'),
     );
+    if (filename === throughMigration) break;
   }
   prisma = createPrismaClient(url.toString());
   return { pool, prisma, url: url.toString() };

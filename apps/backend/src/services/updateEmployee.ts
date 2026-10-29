@@ -1,11 +1,14 @@
 import type { Prisma, PrismaClient } from '../generated/prisma/client.js';
 import type { IEmployee } from '../employeeTypes.js';
+import type { CreateVisaInput } from '../visaTypes.js';
+import { parseEmployeeVisas } from '../schemas/visaSchema.js';
+import { toStoredDate } from '../mappers/visaMapper.js';
 import { isEmailConflict } from './accountCreation.js';
 import { ServiceError } from './serviceError.js';
 
 export type ProfilePatch = Partial<
-  Omit<IEmployee, '_id' | 'manager' | 'role' | 'requests'>
-> & { manager?: string | null };
+  Omit<IEmployee, '_id' | 'manager' | 'role' | 'requests' | 'visa'>
+> & { manager?: string | null; visa?: CreateVisaInput[] };
 
 const editableFields = new Set([
   'first_name',
@@ -42,6 +45,9 @@ export async function updateEmployeeProfile(
   if (patch.email !== undefined && !email) {
     throw new ServiceError(400, { error: 'email is required' });
   }
+
+  const visas =
+    patch.visa === undefined ? undefined : parseEmployeeVisas(patch.visa);
 
   const data: Prisma.EmployeeUncheckedUpdateInput = {
     firstName: patch.first_name,
@@ -91,16 +97,16 @@ export async function updateEmployeeProfile(
           data: { email },
         });
       }
-      if (patch.visa !== undefined) {
+      if (visas !== undefined) {
         await tx.visa.deleteMany({ where: { employeeId: id } });
-        if (patch.visa.length) {
+        if (visas.length) {
           await tx.visa.createMany({
-            data: patch.visa.map((visa, sourcePosition) => ({
+            data: visas.map((visa, sourcePosition) => ({
               employeeId: id,
-              issuingCountry: visa.issuing_country,
+              issuing_country: visa.issuing_country,
               type: visa.type,
-              startDateMs: BigInt(visa.start_date),
-              endDateMs: BigInt(visa.end_date),
+              start_date: toStoredDate(visa.start_date),
+              end_date: toStoredDate(visa.end_date),
               sourcePosition,
             })),
           });
