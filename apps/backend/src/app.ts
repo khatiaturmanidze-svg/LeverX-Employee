@@ -14,7 +14,9 @@ import { createEmployeeRoutes } from './routes/employeeRoutes.js';
 import { createRequestService } from './services/requestService.js';
 import { createRequestController } from './controllers/requestController.js';
 import { createRequestRoutes } from './routes/requestRoutes.js';
-
+import { createVisaRoutes } from './routes/visaRouter.js';
+import { createVisaController } from './controllers/visaController.js';
+import { createVisaService } from './services/visaService.js';
 import { createRepositories } from './repositories/index.js';
 
 interface AppOptions {
@@ -53,6 +55,14 @@ export function createApp(prisma: PrismaClient, options: AppOptions) {
   app.use(
     createRequestRoutes(
       createRequestController(createRequestService(prisma, repositories)),
+    ),
+  );
+
+  app.use(
+    '/employees/:employeeId/visas',
+    authMiddleware,
+    createVisaRoutes(
+      createVisaController(createVisaService(prisma, repositories)),
     ),
   );
   app.use(errorHandler);
