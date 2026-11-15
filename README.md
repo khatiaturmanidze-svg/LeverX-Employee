@@ -46,6 +46,8 @@ For the current Prisma setup, verified status, and examples from this backend, s
 - `npm run dev` -> builds the project, then starts the frontend and backend in parallel
 - `npm run test` -> runs frontend tests with Vitest
 - `npm run test --workspace=@mono/backend` -> builds/runs backend tests; SQL integration cases require `TEST_DATABASE_URL` (see backend README)
+- `npm run test:db:setup` -> creates/checks the dedicated PostgreSQL test database configured in `.env.test`
+- `npm run test:integration` -> builds/runs all backend tests against PostgreSQL; fails if the test database is unavailable (see backend README)
 - `npm run test:watch` -> runs tests in watch mode
 - `npm run test:coverage` -> runs tests with coverage report
 

@@ -30,6 +30,15 @@ export const errorHandler: ErrorRequestHandler = (
     return;
   }
 
+  if (
+    error instanceof Error &&
+    'type' in error &&
+    error.type === 'entity.too.large'
+  ) {
+    res.status(413).json({ error: 'request body too large' });
+    return;
+  }
+
   console.error(error);
   res.status(500).json({ error: 'internal server error' });
 };

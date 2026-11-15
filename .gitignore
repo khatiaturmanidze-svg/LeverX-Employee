@@ -4,6 +4,7 @@ dist/
 .vscode/
 dist-server/
 .env
+.env.test
 apps/backend/src/db.json
 coverage/
 .codex-git-tmp/

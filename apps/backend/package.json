@@ -7,6 +7,8 @@
     "start": "nodemon dist/server.js",
     "typecheck": "prisma generate && tsc --noEmit",
     "test": "npm run build && node --test tests/*.test.js",
+    "test:db:setup": "node scripts/integrationTests.mjs --setup",
+    "test:integration": "npm run build && node scripts/integrationTests.mjs",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
     "db:studio": "prisma studio",
