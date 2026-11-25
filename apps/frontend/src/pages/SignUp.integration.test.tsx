@@ -45,13 +45,16 @@ describe('pages/SignUp (integration)', () => {
     sessionStorage.clear();
   });
 
-  it('submits trimmed email and stores employee in sessionStorage by default', async () => {
+  it('submits trimmed email and stores the signup response in sessionStorage by default', async () => {
+    const result = {
+      message: 'ok',
+      employee: { _id: '1', first_name: 'John', last_name: 'Doe' },
+      token: 'signup-token',
+      userId: '1',
+      mustChangePassword: false,
+    };
     signUpMock.mockReturnValue({
-      unwrap: () =>
-        Promise.resolve({
-          message: 'ok',
-          employee: { _id: '1', first_name: 'John', last_name: 'Doe' },
-        }),
+      unwrap: () => Promise.resolve(result),
     });
 
     const container = document.createElement('div');
@@ -96,13 +99,7 @@ describe('pages/SignUp (integration)', () => {
     });
 
     expect(sessionStorage.getItem('loggedInUser')).toBe('user@example.com');
-    expect(sessionStorage.getItem('result')).toBe(
-      JSON.stringify({
-        _id: '1',
-        first_name: 'John',
-        last_name: 'Doe',
-      }),
-    );
+    expect(sessionStorage.getItem('authData')).toBe(JSON.stringify(result));
     expect(localStorage.getItem('loggedInUser')).toBeNull();
 
     expect(navigateMock).toHaveBeenCalledWith('/main', { replace: true });
@@ -113,12 +110,15 @@ describe('pages/SignUp (integration)', () => {
   });
 
   it('stores sign-up state in localStorage when remember-me is checked', async () => {
+    const result = {
+      message: 'ok',
+      employee: { _id: '2', first_name: 'Alice', last_name: 'Smith' },
+      token: 'signup-token',
+      userId: '2',
+      mustChangePassword: false,
+    };
     signUpMock.mockReturnValue({
-      unwrap: () =>
-        Promise.resolve({
-          message: 'ok',
-          employee: { _id: '2', first_name: 'Alice', last_name: 'Smith' },
-        }),
+      unwrap: () => Promise.resolve(result),
     });
 
     const container = document.createElement('div');
@@ -160,13 +160,7 @@ describe('pages/SignUp (integration)', () => {
     });
 
     expect(localStorage.getItem('loggedInUser')).toBe('alice@site.com');
-    expect(localStorage.getItem('result')).toBe(
-      JSON.stringify({
-        _id: '2',
-        first_name: 'Alice',
-        last_name: 'Smith',
-      }),
-    );
+    expect(localStorage.getItem('authData')).toBe(JSON.stringify(result));
     expect(sessionStorage.getItem('loggedInUser')).toBeNull();
 
     await act(async () => {

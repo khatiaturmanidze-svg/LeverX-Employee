@@ -78,7 +78,7 @@ describe('SignInForm', () => {
       password: 'secret',
     });
     expect(sessionStorage.getItem('loggedInUser')).toBe('user@example.com');
-    expect(sessionStorage.getItem('result')).toBe(
+    expect(sessionStorage.getItem('authData')).toBe(
       JSON.stringify({ token: 'abc', mustChangePassword: false }),
     );
     expect(localStorage.getItem('loggedInUser')).toBeNull();
@@ -126,7 +126,7 @@ describe('SignInForm', () => {
     });
 
     expect(localStorage.getItem('loggedInUser')).toBe('remember@site.com');
-    expect(localStorage.getItem('result')).toBe(
+    expect(localStorage.getItem('authData')).toBe(
       JSON.stringify({ token: 'remember-token', mustChangePassword: false }),
     );
     expect(sessionStorage.getItem('loggedInUser')).toBeNull();

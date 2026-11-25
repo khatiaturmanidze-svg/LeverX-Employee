@@ -17,8 +17,8 @@ export interface IManager {
 export interface IVisa {
   issuing_country: string;
   type: string;
-  start_date: string; // timestamp
-  end_date: string; // timestamp
+  start_date: string | number; // timestamp
+  end_date: string | number; // timestamp
 }
 
 // Employee interface
@@ -121,3 +121,18 @@ export type EditableEmployeeField =
   | 'email';
 
 export type EmployeeDraft = Partial<Record<EditableEmployeeField, string>>;
+
+// Options sent by the frontend and used by the backend.
+export interface EmployeeListQuery {
+  page: number;
+  limit: number;
+  name?: string;
+}
+
+// Response returned by GET /users.
+export interface EmployeePage {
+  items: IEmployee[];
+  total: number;
+  page: number;
+  limit: number;
+}

@@ -1,12 +1,11 @@
 import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import { IEmployee, IDateOfBirth } from '../../types/type';
 import { IRequestData } from '../../features/requests/model/state.types';
+import { getStoredAuth } from './authStorage';
 
 // getting logged in user
 export const getLoggedInUser = (users: IEmployee[]): IEmployee | undefined => {
-  const loggedEmail =
-    localStorage.getItem('loggedInUser') ||
-    sessionStorage.getItem('loggedInUser');
+  const loggedEmail = getStoredAuth()?.email;
   return users.find((u) => u.email === loggedEmail);
 };
 

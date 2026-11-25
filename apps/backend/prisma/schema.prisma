@@ -1,0 +1,92 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Employee {
+  id               String  @id @db.Text
+  firstName        String  @map("first_name") @db.Text
+  lastName         String  @map("last_name") @db.Text
+  email            String  @unique @db.Text
+  role             String  @default("Employee") @db.Text
+  userAvatar       String  @default("/users/dumplinh.jpg") @map("user_avatar") @db.Text
+  firstNativeName  String  @default("") @map("first_native_name") @db.Text
+  middleNativeName String  @default("") @map("middle_native_name") @db.Text
+  lastNativeName   String  @default("") @map("last_native_name") @db.Text
+  department       String  @default("") @db.Text
+  building         String  @default("") @db.Text
+  room             String  @default("") @db.Text
+  deskNumber       Int?    @map("desk_number")
+  isRemoteWork     Boolean @default(false) @map("is_remote_work")
+  phone            String  @default("") @db.Text
+  zoomId           String  @default("") @map("zoom_id") @db.Text
+  zoomLink         String  @default("") @map("zoom_link") @db.Text
+  citizenship      String  @default("") @db.Text
+  birthYear        Int?    @map("birth_year")
+  birthMonth       Int?    @map("birth_month")
+  birthDay         Int?    @map("birth_day")
+  managerId        String? @map("manager_id") @db.Text
+  sourcePosition   Int     @default(0) @map("source_position")
+
+  manager  Employee?      @relation("EmployeeManager", fields: [managerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reports  Employee[]     @relation("EmployeeManager")
+  authUser AuthUser?
+  visas    Visa[]
+  requests LeaveRequest[]
+
+  @@map("employees")
+}
+
+model AuthUser {
+  employeeId         String   @id @map("employee_id") @db.Text
+  email              String   @unique @db.Text
+  hashedPassword     String   @map("hashed_password") @db.Text
+  mustChangePassword Boolean  @default(false) @map("must_change_password")
+  employee           Employee @relation(fields: [employeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("auth_users")
+}
+
+model Visa {
+  id             BigInt   @id @default(autoincrement())
+  employeeId     String   @map("employee_id") @db.Text
+  issuingCountry String   @map("issuing_country") @db.Text
+  type           String   @db.Text
+  startDateMs    BigInt   @map("start_date_ms")
+  endDateMs      BigInt   @map("end_date_ms")
+  sourcePosition Int      @map("source_position")
+  employee       Employee @relation(fields: [employeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([employeeId, sourcePosition], map: "visas_employee_id_source_position_key")
+  @@map("visas")
+}
+
+model LeaveRequest {
+  id             String   @id @db.Text
+  employeeId     String   @map("employee_id") @db.Text
+  type           String   @default("") @db.Text
+  startDate      DateTime @map("start_date") @db.Date
+  endDate        DateTime @map("end_date") @db.Date
+  note           String   @default("") @db.Text
+  status         String   @default("pending") @db.Text
+  sourcePosition Int      @map("source_position")
+  employee       Employee @relation(fields: [employeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([employeeId, sourcePosition], map: "requests_employee_order_idx")
+  @@map("requests")
+}
+
+// Preserve the history from the original SQL migration runner.
+model SchemaMigration {
+  filename  String   @id @db.Text
+  appliedAt DateTime @default(now()) @map("applied_at") @db.Timestamptz(6)
+
+  @@map("schema_migrations")
+  @@ignore
+}

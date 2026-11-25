@@ -1,5 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { IEmployee } from '../types/type';
+import { usersApi } from './usersApi';
+import { getStoredAuth } from '@shared/lib/authStorage';
 
 interface SignInPayload {
   email: string;
@@ -28,7 +30,7 @@ interface setNewPasswordResponse {
   message: string;
 }
 
-interface signUpResponse {
+interface signUpResponse extends signInResponse {
   message: string;
   employee: IEmployee;
 }
@@ -36,22 +38,6 @@ interface signUpResponse {
 const BASE_URL = '/api';
 const FALLBACK_TOKEN =
   import.meta.env.VITE_AUTH_TOKEN || 'authorized-can-access';
-
-function getStoredAuthToken(): string {
-  const storedResult =
-    localStorage.getItem('result') ?? sessionStorage.getItem('result');
-
-  if (!storedResult) {
-    return FALLBACK_TOKEN;
-  }
-
-  try {
-    const parsed = JSON.parse(storedResult) as Partial<signInResponse>;
-    return parsed.token || FALLBACK_TOKEN;
-  } catch {
-    return FALLBACK_TOKEN;
-  }
-}
 
 export const authApi = createApi({
   reducerPath: 'authApi',
@@ -73,26 +59,47 @@ export const authApi = createApi({
       setNewPasswordResponse,
       SetNewPasswordPayload
     >({
-      query: (body) => ({
-        url: '/set-new-password',
-        method: 'POST',
-        headers: {
-          Authorization: getStoredAuthToken(),
-          'Content-Type': 'application/json',
-        },
-        body,
-      }),
+      async queryFn(body, _api, _extraOptions, baseQuery) {
+        const auth = getStoredAuth();
+        if (auth?.error) {
+          return {
+            error: {
+              status: 'CUSTOM_ERROR',
+              error: auth.error.message,
+              data: { error: auth.error.message },
+            },
+          };
+        }
+
+        const response = await baseQuery({
+          url: '/set-new-password',
+          method: 'POST',
+          headers: {
+            Authorization: auth?.authData?.token || FALLBACK_TOKEN,
+            'Content-Type': 'application/json',
+          },
+          body,
+        });
+        if (response.error) return { error: response.error };
+        return { data: response.data as setNewPasswordResponse };
+      },
     }),
 
     signUp: builder.mutation<signUpResponse, SignUpPayload>({
-      query: (body) => ({
-        url: '/sign-up',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body,
-      }),
+      async queryFn(body, { dispatch }, _extraOptions, baseQuery) {
+        const response = await baseQuery({
+          url: '/sign-up',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body,
+        });
+        if (response.error) return { error: response.error };
+
+        dispatch(usersApi.util.invalidateTags(['users']));
+        return { data: response.data as signUpResponse };
+      },
     }),
   }),
 });

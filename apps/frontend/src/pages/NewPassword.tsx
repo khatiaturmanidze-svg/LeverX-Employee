@@ -4,38 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSetNewPasswordMutation } from '../features/authApi';
 import { getErrorMessage } from '@shared/lib';
 import { SignHeader, SignMain, BtnSubmit } from '@shared/ui';
-
-function getStoredEmail(): string {
-  return (
-    localStorage.getItem('loggedInUser') ??
-    sessionStorage.getItem('loggedInUser') ??
-    ''
-  );
-}
-
-function updateStoredResult(): void {
-  const storage = localStorage.getItem('result')
-    ? localStorage
-    : sessionStorage;
-  const storedResult = storage.getItem('result');
-
-  if (!storedResult) {
-    return;
-  }
-
-  try {
-    const parsed = JSON.parse(storedResult) as { mustChangePassword?: boolean };
-    storage.setItem(
-      'result',
-      JSON.stringify({
-        ...parsed,
-        mustChangePassword: false,
-      }),
-    );
-  } catch {
-    // Ignore malformed stored auth payload and continue.
-  }
-}
+import { AUTH_DATA_KEY, getStoredAuth } from '@shared/lib/authStorage';
 
 export default function NewPassword(): React.ReactElement {
   const navigate = useNavigate();
@@ -47,20 +16,25 @@ export default function NewPassword(): React.ReactElement {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const email = getStoredEmail();
-
-    if (!email) {
-      navigate('/signin', { replace: true });
-      return;
-    }
-
     try {
+      const auth = getStoredAuth();
+      if (!auth) {
+        navigate('/signin', { replace: true });
+        return;
+      }
+      if (auth.error) throw auth.error;
+
       const result = await setNewPasswordRequest({
-        email,
+        email: auth.email,
         newPassword,
       }).unwrap();
 
-      updateStoredResult();
+      if (auth.authData) {
+        auth.storage.setItem(
+          AUTH_DATA_KEY,
+          JSON.stringify({ ...auth.authData, mustChangePassword: false }),
+        );
+      }
       setSuccessMessage(result.message);
       setErrorMessage(null);
       navigate('/main', { replace: true });
