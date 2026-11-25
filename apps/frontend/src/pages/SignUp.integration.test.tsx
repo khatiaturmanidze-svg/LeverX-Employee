@@ -49,7 +49,7 @@ describe('pages/SignUp (integration)', () => {
     const result = {
       message: 'ok',
       employee: { _id: '1', first_name: 'John', last_name: 'Doe' },
-      token: 'signup-token',
+      csrfToken: 'signup-token',
       userId: '1',
       mustChangePassword: false,
     };
@@ -96,10 +96,11 @@ describe('pages/SignUp (integration)', () => {
       password: 'secret',
       first_name: 'John',
       last_name: 'Doe',
+      rememberMe: false,
     });
 
-    expect(sessionStorage.getItem('loggedInUser')).toBe('user@example.com');
-    expect(sessionStorage.getItem('authData')).toBe(JSON.stringify(result));
+    expect(sessionStorage.getItem('loggedInUser')).toBeNull();
+    expect(sessionStorage.getItem('authData')).toBeNull();
     expect(localStorage.getItem('loggedInUser')).toBeNull();
 
     expect(navigateMock).toHaveBeenCalledWith('/main', { replace: true });
@@ -109,11 +110,11 @@ describe('pages/SignUp (integration)', () => {
     });
   });
 
-  it('stores sign-up state in localStorage when remember-me is checked', async () => {
+  it('keeps signup credentials out of storage when remember-me is checked', async () => {
     const result = {
       message: 'ok',
       employee: { _id: '2', first_name: 'Alice', last_name: 'Smith' },
-      token: 'signup-token',
+      csrfToken: 'signup-token',
       userId: '2',
       mustChangePassword: false,
     };
@@ -159,8 +160,8 @@ describe('pages/SignUp (integration)', () => {
       );
     });
 
-    expect(localStorage.getItem('loggedInUser')).toBe('alice@site.com');
-    expect(localStorage.getItem('authData')).toBe(JSON.stringify(result));
+    expect(localStorage.getItem('loggedInUser')).toBeNull();
+    expect(localStorage.getItem('authData')).toBeNull();
     expect(sessionStorage.getItem('loggedInUser')).toBeNull();
 
     await act(async () => {

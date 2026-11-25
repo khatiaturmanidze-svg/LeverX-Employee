@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { createApp } from '../dist/app.js';
 import { createTestDatabase, sqlTestOptions } from './helpers/postgres.js';
+import { testSessionOptions, createTestRequest } from './helpers/sessions.js';
 
 const collection = '/employees/employee-a/visas';
 const input = {
@@ -24,8 +25,9 @@ async function setup(t) {
       email: `${letter}@example.test`,
     })),
   });
+  const options = testSessionOptions(t, database);
   const app = createApp(prisma, {
-    token: 'test-token',
+    ...options,
     frontendPort: 5173,
     staticDirectory: fileURLToPath(new URL('../dist/', import.meta.url)),
   });
@@ -39,34 +41,13 @@ async function setup(t) {
       }),
   );
 
-  async function request(
-    path = collection,
-    { method = 'GET', body, rawBody, token = 'test-token' } = {},
-  ) {
-    const headers = {};
-    if (token) headers.authorization = token;
-    if (body !== undefined || rawBody !== undefined)
-      headers['content-type'] = 'application/json';
-    const response = await fetch(
-      `http://127.0.0.1:${server.address().port}${path}`,
-      {
-        method,
-        headers,
-        body:
-          rawBody ?? (body === undefined ? undefined : JSON.stringify(body)),
-        signal: AbortSignal.timeout(10000),
-      },
-    );
-    const text = await response.text();
-    return {
-      status: response.status,
-      text,
-      body:
-        text &&
-        response.headers.get('content-type')?.includes('application/json')
-          ? JSON.parse(text)
-          : text,
-    };
+  const browserRequest = createTestRequest(
+    `http://127.0.0.1:${server.address().port}`,
+    prisma,
+    options,
+  );
+  function request(path = collection, requestOptions = {}) {
+    return browserRequest(path, { authenticated: true, ...requestOptions });
   }
 
   function seedVisa(overrides = {}) {
@@ -90,12 +71,12 @@ function assertError(response, status) {
 }
 
 test(
-  'visa endpoints reject missing/wrong tokens without changing stored rows',
+  'visa endpoints reject unauthenticated sessions without changing stored rows',
   sqlTestOptions,
   async (t) => {
     const { prisma, request, seedVisa } = await setup(t);
     const row = await seedVisa();
-    for (const token of ['', 'wrong']) {
+    for (const authenticated of [false]) {
       for (const [method, path, body] of [
         ['GET', collection],
         ['GET', `${collection}/${row.id}`],
@@ -103,10 +84,7 @@ test(
         ['PATCH', `${collection}/${row.id}`, { type: 'Tourist' }],
         ['DELETE', `${collection}/${row.id}`],
       ]) {
-        assertError(
-          await request(path, { method, body, token }),
-          token ? 403 : 401,
-        );
+        assertError(await request(path, { method, body, authenticated }), 401);
       }
     }
     assert.deepEqual(await prisma.visa.findMany(), [row]);

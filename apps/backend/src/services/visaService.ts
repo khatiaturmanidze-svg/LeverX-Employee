@@ -1,28 +1,24 @@
-import type { Visa, VisaListQuery, VisaPage } from '../visaTypes.js';
+import type { Visa, VisaListQuery, VisaPage } from '../types/visaTypes.js';
 import type { Repositories } from '../repositories/index.js';
 import { toVisaResponse } from '../mappers/visaMapper.js';
 import { ServiceError } from './serviceError.js';
 import type { Prisma, PrismaClient } from '../generated/prisma/client.js';
-import type { CreateVisaInput, UpdateVisaInput } from '../visaTypes.js';
+import type { CreateVisaInput, UpdateVisaInput } from '../types/visaTypes.js';
 import { parseCreateVisa } from '../schemas/visaSchema.js';
 import { toStoredDate } from '../mappers/visaMapper.js';
+import type { VerifiedUser } from '../types/auth.js';
+import { authorizeEmployee, currentActor } from './permissions.js';
 
 export function createVisaService(
   prisma: PrismaClient,
   repositories: Repositories,
 ) {
-  async function requireEmployee(employeeId: string) {
-    const employee = await repositories.employees.findIdentity(employeeId);
-    if (!employee) {
-      throw new ServiceError(404, { error: 'employee not found' });
-    }
-  }
-
   async function listVisas(
+    actor: VerifiedUser,
     employeeId: string,
     query: VisaListQuery,
   ): Promise<VisaPage> {
-    await requireEmployee(employeeId);
+    await authorizeEmployee(prisma, actor, employeeId);
     const { rows, total } = await repositories.visas.listPageByEmployeeId(
       employeeId,
       query,
@@ -35,8 +31,12 @@ export function createVisaService(
     };
   }
 
-  async function getVisa(employeeId: string, visaId: bigint): Promise<Visa> {
-    await requireEmployee(employeeId);
+  async function getVisa(
+    actor: VerifiedUser,
+    employeeId: string,
+    visaId: bigint,
+  ): Promise<Visa> {
+    await authorizeEmployee(prisma, actor, employeeId);
     const row = await repositories.visas.findByEmployeeAndId(
       employeeId,
       visaId,
@@ -57,23 +57,27 @@ export function createVisaService(
   }
 
   async function createVisa(
+    actor: VerifiedUser,
     employeeId: string,
     input: CreateVisaInput,
   ): Promise<Visa> {
     const row = await prisma.$transaction(async (tx) => {
       await requireEmployeeLock(employeeId, tx);
+      await authorizeEmployee(tx, await currentActor(tx, actor), employeeId);
       return repositories.visas.createForEmployee(employeeId, input, tx);
     });
     return toVisaResponse(row);
   }
 
   async function updateVisa(
+    actor: VerifiedUser,
     employeeId: string,
     visaId: bigint,
     patch: UpdateVisaInput,
   ): Promise<Visa> {
     const row = await prisma.$transaction(async (tx) => {
       await requireEmployeeLock(employeeId, tx);
+      await authorizeEmployee(tx, await currentActor(tx, actor), employeeId);
       const existing = await repositories.visas.findByEmployeeAndId(
         employeeId,
         visaId,
@@ -119,9 +123,14 @@ export function createVisaService(
     return toVisaResponse(row);
   }
 
-  async function deleteVisa(employeeId: string, visaId: bigint): Promise<void> {
+  async function deleteVisa(
+    actor: VerifiedUser,
+    employeeId: string,
+    visaId: bigint,
+  ): Promise<void> {
     await prisma.$transaction(async (tx) => {
       await requireEmployeeLock(employeeId, tx);
+      await authorizeEmployee(tx, await currentActor(tx, actor), employeeId);
       const count = await repositories.visas.deleteByEmployeeAndId(
         employeeId,
         visaId,

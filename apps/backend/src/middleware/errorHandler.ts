@@ -39,6 +39,22 @@ export const errorHandler: ErrorRequestHandler = (
     return;
   }
 
-  console.error(error);
+  if (
+    error instanceof Error &&
+    'code' in error &&
+    error.code === 'LIMIT_FILE_SIZE'
+  ) {
+    res.status(413).json({ error: 'Uploaded file is too large' });
+    return;
+  }
+  if (error instanceof Error && error.name === 'MulterError') {
+    res.status(400).json({ error: 'Invalid file upload' });
+    return;
+  }
+  // Driver errors can contain SQL, input values, or connection credentials.
+  console.error({
+    event: 'request_failed',
+    errorType: error instanceof Error ? error.name : 'UnknownError',
+  });
   res.status(500).json({ error: 'internal server error' });
 };

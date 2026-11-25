@@ -1,5 +1,5 @@
 import type { LeaveRequest, Prisma } from '../generated/prisma/client.js';
-import type { IEmployee, IRequestData } from '../employeeTypes.js';
+import type { IEmployee, IRequestData } from '../types/employeeTypes.js';
 import type { EmployeeWithRelations } from '../repositories/employeeRepository.js';
 import { toVisaResponse } from './visaMapper.js';
 

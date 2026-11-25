@@ -48,6 +48,7 @@ model AuthUser {
   email              String   @unique @db.Text
   hashedPassword     String   @map("hashed_password") @db.Text
   mustChangePassword Boolean  @default(false) @map("must_change_password")
+  sessionVersion     Int      @default(0) @map("session_version")
   employee           Employee @relation(fields: [employeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("auth_users")
@@ -65,6 +66,24 @@ model Visa {
 
   @@unique([employeeId, sourcePosition], map: "visas_employee_id_source_position_key")
   @@map("visas")
+}
+
+model WebSession {
+  id        String   @id @map("sid") @db.VarChar(255)
+  data      Json     @map("sess") @db.Json
+  expiresAt DateTime @map("expire") @db.Timestamp(6)
+
+  @@index([expiresAt], map: "web_sessions_expire_idx")
+  @@map("web_sessions")
+}
+
+model AuthRateLimit {
+  key       String   @id @db.Text
+  hits      Int      @default(1)
+  expiresAt DateTime @map("expires_at") @db.Timestamp(6)
+
+  @@index([expiresAt], map: "auth_rate_limits_expires_at_idx")
+  @@map("auth_rate_limits")
 }
 
 model LeaveRequest {

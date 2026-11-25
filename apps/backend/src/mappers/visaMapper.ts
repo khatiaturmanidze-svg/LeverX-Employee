@@ -1,5 +1,5 @@
 import type { Visa as PrismaVisa } from '../generated/prisma/client.js';
-import type { Visa } from '../visaTypes.js';
+import type { Visa } from '../types/visaTypes.js';
 
 export function toVisaResponse(visa: PrismaVisa): Visa {
   return {

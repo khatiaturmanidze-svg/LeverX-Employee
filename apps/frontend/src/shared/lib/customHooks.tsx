@@ -1,3 +1,5 @@
+import { useSelector } from 'react-redux';
+import { selectSession } from '../../app/sessionSlice';
 import { useMemo, useState } from 'react';
 import { IEmployee } from '../../types/type';
 import {
@@ -48,19 +50,21 @@ export function useGetManager(employeeId: string) {
 }
 
 export function useGetHeaderProps() {
+  const { account } = useSelector(selectSession);
   const { data: allUsers = [], isLoading } = useGetUsersQuery();
   const loggedUser = useMemo(() => {
-    return getLoggedInUser(allUsers) || null;
-  }, [allUsers]);
+    return getLoggedInUser(allUsers, account?.userId) || null;
+  }, [allUsers, account?.userId]);
   const isAdmin = useMemo(() => loggedUser?.role === 'Admin', [loggedUser]);
   return { loggedUser, isAdmin, isLoading };
 }
 
 export function useCanEdit(targetUser: IEmployee | null) {
+  const { account } = useSelector(selectSession);
   const { data: allUsers = [] } = useGetUsersQuery();
   const loggedUser = useMemo(() => {
-    return getLoggedInUser(allUsers) || null;
-  }, [allUsers]);
+    return getLoggedInUser(allUsers, account?.userId) || null;
+  }, [allUsers, account?.userId]);
 
   return useMemo(() => {
     if (!loggedUser) return false;

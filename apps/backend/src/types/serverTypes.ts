@@ -12,10 +12,10 @@ export interface IAuthUser {
 export interface SignInRequest {
   email: string;
   password: string;
+  rememberMe?: boolean;
 }
 
 export interface SetNewPasswordRequest {
-  email: string;
   newPassword: string;
 }
 
@@ -24,6 +24,7 @@ export interface SignUpRequest {
   last_name: string;
   email: string;
   password: string;
+  rememberMe?: boolean;
 }
 
 export interface UpdateRoleRequest {
@@ -56,9 +57,9 @@ export interface CreateUserRequest {
 // Response types
 export interface SignInResponse {
   message: string;
-  token: string;
   userId: string;
   mustChangePassword: boolean;
+  csrfToken: string;
 }
 
 export interface SignUpResponse extends SignInResponse {
@@ -78,6 +79,7 @@ export interface CreateUserResponse {
 
 export interface SetNewPasswordResponse {
   message: string;
+  csrfToken: string;
 }
 
 export type SpreadsheetRow = Record<string, string | number | boolean | null>;
@@ -103,6 +105,7 @@ export interface UploadSpreadsheetResponse {
 
 export interface ErrorResponse {
   error: string;
+  code?: string;
 }
 
 export interface HealthResponse {

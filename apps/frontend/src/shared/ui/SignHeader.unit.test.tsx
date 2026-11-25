@@ -1,3 +1,6 @@
+vi.mock('./BtnLogOff', () => ({
+  default: () => <button aria-label="Sign out" />,
+}));
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import SignHeader from './SignHeader';
 import { vi, describe, it, afterEach, expect } from 'vitest';

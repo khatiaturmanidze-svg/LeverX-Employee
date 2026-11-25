@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useSignUpMutation } from '../../authApi';
 import { getErrorMessage } from '@shared/lib';
 import { BtnSubmit } from '@/shared/ui';
-import { AUTH_DATA_KEY } from '@shared/lib/authStorage';
 
 export default function SignUpForm(): React.ReactElement {
   const navigate = useNavigate();
@@ -20,15 +19,13 @@ export default function SignUpForm(): React.ReactElement {
     e.preventDefault();
     const trimmedEmail = email.trim();
     try {
-      const result = await signUp({
+      await signUp({
         email: trimmedEmail,
         password,
         first_name: firstName,
         last_name: lastName,
+        rememberMe,
       }).unwrap();
-      const storage = rememberMe ? localStorage : sessionStorage;
-      storage.setItem('loggedInUser', trimmedEmail);
-      storage.setItem(AUTH_DATA_KEY, JSON.stringify(result));
 
       navigate('/main', { replace: true });
     } catch (err) {

@@ -43,6 +43,11 @@ export const requestFormApiModule = {
 };
 
 export const requestFormSharedLibModule = {
+  useGetHeaderProps: () => ({
+    loggedUser: getLoggedInUserMock(),
+    isAdmin: false,
+    isLoading: false,
+  }),
   validateRequest: validateRequestMock,
   getErrorMessage: getErrorMessageMock,
   getLoggedInUser: getLoggedInUserMock,
@@ -68,6 +73,8 @@ export const requestListUsersApiModule = {
 
 export const requestListRouterModule = {
   useParams: useParamsMock,
+  Link: ({ to, children }: { to: string; children: React.ReactNode }) =>
+    React.createElement('a', { href: to }, children),
 };
 
 export const requestListReduxModule = {
@@ -75,6 +82,11 @@ export const requestListReduxModule = {
 };
 
 export const requestListSharedLibModule = {
+  useGetHeaderProps: () => ({
+    loggedUser: { _id: 'u-1' },
+    isAdmin: false,
+    isLoading: false,
+  }),
   getManagedEmployees: getManagedEmployeesMock,
 };
 

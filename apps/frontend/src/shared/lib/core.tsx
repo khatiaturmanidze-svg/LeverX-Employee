@@ -1,12 +1,13 @@
 import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import { IEmployee, IDateOfBirth } from '../../types/type';
 import { IRequestData } from '../../features/requests/model/state.types';
-import { getStoredAuth } from './authStorage';
 
 // getting logged in user
-export const getLoggedInUser = (users: IEmployee[]): IEmployee | undefined => {
-  const loggedEmail = getStoredAuth()?.email;
-  return users.find((u) => u.email === loggedEmail);
+export const getLoggedInUser = (
+  users: IEmployee[],
+  userId?: string,
+): IEmployee | undefined => {
+  return users.find((user) => user._id === userId);
 };
 
 export const getUserById = (
@@ -58,7 +59,8 @@ export function getErrorMessage(err: unknown): string {
     }
     // HTTP status based
     if (typeof error.status === 'number') {
-      if (error.status === 401) return 'Invalid email or password';
+      if (error.status === 401)
+        return 'Your session has ended. Please sign in again';
       if (error.status === 403) return 'You are not authorized';
       if (error.status === 404) return 'Resource not found';
       if (error.status >= 500) return 'Server error, try again later';
@@ -85,8 +87,11 @@ export function getDisplayStatus(req: IRequestData) {
   return 'completed';
 }
 
-export const getManagedEmployees = (users: IEmployee[]): IEmployee[] => {
-  const currentUser = getLoggedInUser(users);
+export const getManagedEmployees = (
+  users: IEmployee[],
+  userId?: string,
+): IEmployee[] => {
+  const currentUser = getLoggedInUser(users, userId);
   if (!currentUser) return [];
   return users.filter((u) => u.manager?.id === currentUser._id);
 };

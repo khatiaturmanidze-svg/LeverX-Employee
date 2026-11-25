@@ -3,24 +3,34 @@ import RequestListItem from './RequestListItem';
 import { useGetRequestsQuery } from '../api/RequestsApi';
 import { useParams } from 'react-router-dom';
 import { LazyImage, TabGroup } from '@shared/ui';
-import { getManagedEmployees } from '@shared/lib';
+import { getManagedEmployees, useGetHeaderProps } from '@shared/lib';
 import { useGetUsersQuery, usersApi } from '../../usersApi';
 import { useDispatch } from 'react-redux';
 import { IRequestData } from '../model/state.types';
+import AccessDenied from '@/shared/ui/AccessDenied';
 
 export default function RequestList(): React.ReactElement {
   const [requestType, setRequestType] = useState('');
   const [isPersonal, setIsPersonal] = useState(true);
   const { id } = useParams();
   const dispatch = useDispatch();
-  const { data: requests = [] } = useGetRequestsQuery(id);
+  const { data: requests = [], error } = useGetRequestsQuery(id);
   const { data: allUsers = [] } = useGetUsersQuery();
+  const { loggedUser } = useGetHeaderProps();
 
   useEffect(() => {
     dispatch(usersApi.util.invalidateTags(['users']));
   }, []);
 
-  const managedUsers = getManagedEmployees(allUsers);
+  if (error && 'status' in error && error.status === 403) {
+    return (
+      <div className="request-list card">
+        <AccessDenied />
+      </div>
+    );
+  }
+
+  const managedUsers = getManagedEmployees(allUsers, loggedUser?._id);
   const teamRequests = managedUsers.flatMap((user) =>
     user.requests?.map((req) => ({
       ...req,

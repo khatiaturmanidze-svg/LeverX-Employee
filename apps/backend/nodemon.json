@@ -1,5 +1,6 @@
 {
   "ignore": ["src/db.json"],
   "watch": ["src"],
-  "ext": "ts,js,json"
+  "ext": "ts,js,json",
+  "exec": "tsc -p tsconfig.json && node"
 }

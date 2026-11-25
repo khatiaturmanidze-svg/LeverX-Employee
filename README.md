@@ -9,12 +9,13 @@ npm i
 Create a `.env` file in the root directory and define the following variables:
 `VITE_API_PORT` -> The port the backend server runs on
 `VITE_API_TARGET` -> The full URL the frontend proxies to
-`VITE_AUTH_TOKEN` -> Static token for API authorization
+`SESSION_SECRET` -> Stable backend-only cookie signing secret (generate from at least 32 random bytes)
+`APP_ORIGIN` -> Browser-visible origin used for CSRF and CORS policy
 `BCRYPT_SALT_ROUNDS` -> Cost factor for password hashing
 `DATABASE_URL` -> PostgreSQL connection URL used by the backend
 `DATABASE_PATH` -> Optional JSON snapshot path for the manual importer, relative to `apps/backend`
-`VITE_TEST_USER_EMAIL` -> Email for the explicitly seeded development Admin
-`VITE_TEST_USER_PASSWORD` -> Password used when creating that development Admin
+`SEED_ADMIN_EMAIL` -> Email for the explicitly seeded development Admin
+`SEED_ADMIN_PASSWORD` -> Password used when creating that development Admin
 
 ### database
 

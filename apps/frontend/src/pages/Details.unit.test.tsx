@@ -118,6 +118,28 @@ describe('pages/Details', () => {
     });
   });
 
+  it('shows access denied instead of cached employee details after a 403', async () => {
+    setupBaseMocks();
+    useGetEmployeeDetailsQueryMock.mockReturnValue({
+      data: detailsViewedEmployee,
+      isLoading: false,
+      isError: true,
+      error: { status: 403, data: { error: 'Forbidden' } },
+    });
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(React.createElement(Details));
+    });
+    expect(container.textContent).toContain('Not authorized');
+    expect(container.querySelector('[role="alert"]')).not.toBeNull();
+    expect(container.querySelector('a')?.getAttribute('href')).toBe('/main');
+    expect(container.querySelector('[data-testid="employee-view"]')).toBeNull();
+    await act(async () => {
+      root.unmount();
+    });
+  });
+
   it('renders "Employee not found" when employee details query errors', async () => {
     useParamsMock.mockReturnValue({ id: detailsViewedEmployee._id });
     useGetUsersQueryMock.mockReturnValue({ data: [detailsLoggedUser] });
@@ -143,6 +165,25 @@ describe('pages/Details', () => {
 
     expect(container.textContent).toContain('Employee not found');
 
+    await act(async () => {
+      root.unmount();
+    });
+  });
+
+  it('shows another employee profile without edit controls for a read-only viewer', async () => {
+    setupBaseMocks();
+    canEditMock.mockReturnValue(false);
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(React.createElement(Details));
+    });
+    await resolveLazySections();
+    expect(
+      container.querySelector('[data-testid="employee-view"]'),
+    ).not.toBeNull();
+    expect(container.querySelector('button.avatar-section__edit')).toBeNull();
+    expect(container.textContent).not.toContain('Not authorized');
     await act(async () => {
       root.unmount();
     });

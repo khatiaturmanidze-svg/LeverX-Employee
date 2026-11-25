@@ -1,6 +1,6 @@
 import { Prisma, type PrismaClient } from '../generated/prisma/client.js';
-import type { IEmployee } from '../employeeTypes.js';
-import type { CreateVisaInput } from '../visaTypes.js';
+import type { IEmployee } from '../types/employeeTypes.js';
+import type { CreateVisaInput } from '../types/visaTypes.js';
 import { parseEmployeeVisas } from '../schemas/visaSchema.js';
 import { toStoredDate } from '../mappers/visaMapper.js';
 import { employeeRelations } from '../repositories/employeeRepository.js';
@@ -9,6 +9,8 @@ import {
   toEmployeeResponse,
 } from '../mappers/employeeMapper.js';
 import { ServiceError } from './serviceError.js';
+import type { VerifiedUser } from '../types/auth.js';
+import { currentActor, requireAdmin, ROLES } from './permissions.js';
 
 type ProfileInput = Pick<IEmployee, 'first_name' | 'last_name' | 'email'> &
   Partial<Omit<IEmployee, 'visa'>> & { visa?: CreateVisaInput[] };
@@ -83,8 +85,12 @@ export async function createAccount(
   profile: NewEmployeeProfile,
   hash: string,
   mustChangePassword: boolean,
+  actor?: VerifiedUser,
 ): Promise<IEmployee> {
   return prisma.$transaction(async (tx) => {
+    if (actor) requireAdmin(await currentActor(tx, actor));
+    if (!ROLES.includes(profile.role as (typeof ROLES)[number]))
+      throw new ServiceError(400, { error: 'Invalid employee role' });
     const position = await tx.employee.aggregate({
       _max: { sourcePosition: true },
     });

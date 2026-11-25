@@ -1,7 +1,7 @@
 import type { Prisma, PrismaClient } from '../generated/prisma/client.js';
-import type { VisaListQuery } from '../visaTypes.js';
+import type { VisaListQuery } from '../types/visaTypes.js';
 import { toVisaResponse } from '../mappers/visaMapper.js';
-import type { CreateVisaInput } from '../visaTypes.js';
+import type { CreateVisaInput } from '../types/visaTypes.js';
 import { toStoredDate } from '../mappers/visaMapper.js';
 
 export function createVisaRepository(prisma: PrismaClient) {

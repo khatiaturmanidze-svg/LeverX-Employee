@@ -1,62 +1,35 @@
-import { it, expect, describe, vi } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import React from 'react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import BtnLogOff from './BtnLogOff';
-import * as router from 'react-router-dom';
-import userEvent from '@testing-library/user-event';
-
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
-  return {
-    ...actual,
-    useNavigate: vi.fn(),
-  };
-});
-
-describe('BtnLogOff', () => {
-  it('should render button', () => {
-    render(<BtnLogOff />);
-    const button = screen.getByRole('button');
-    expect(button).toBeInTheDocument();
-
-    const img = within(button).getByRole('img');
-    expect(img).toBeInTheDocument();
+const mocks = vi.hoisted(() => ({ logout: vi.fn(), navigate: vi.fn() }));
+vi.mock('../../features/authApi', () => ({
+  useSignOutMutation: () => [mocks.logout, { isLoading: false }],
+}));
+vi.mock('react-router-dom', () => ({ useNavigate: () => mocks.navigate }));
+describe('server logout', () => {
+  beforeEach(() => {
+    mocks.logout.mockReset();
+    mocks.navigate.mockReset();
   });
-
-  it('navigates to / when clicking the image', async () => {
-    const navigateMock = vi.fn();
-    vi.spyOn(router, 'useNavigate').mockReturnValue(navigateMock);
-
+  it('waits for server logout before navigating', async () => {
+    mocks.logout.mockReturnValue({ unwrap: async () => undefined });
     render(<BtnLogOff />);
-
-    const img = screen.getByAltText('log off icon');
-    await userEvent.click(img);
-
-    expect(navigateMock).toHaveBeenCalledWith('/');
+    fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
+    await waitFor(() => expect(mocks.logout).toHaveBeenCalled());
+    expect(mocks.navigate).toHaveBeenCalledWith('/signin', { replace: true });
   });
-  it('removes user from localStorage if present and navigates', async () => {
-    const navigateMock = vi.fn();
-    vi.spyOn(router, 'useNavigate').mockReturnValue(navigateMock);
-
-    localStorage.setItem('loggedInUser', 'testUser');
+  it('keeps the user on the page and displays a failed logout', async () => {
+    mocks.logout.mockReturnValue({
+      unwrap: async () => {
+        throw new Error('Service unavailable');
+      },
+    });
     render(<BtnLogOff />);
-
-    await userEvent.click(screen.getByRole('button'));
-
-    expect(localStorage.getItem('loggedInUser')).toBeNull();
-    expect(navigateMock).toHaveBeenCalledWith('/');
-  });
-
-  it('removes user from sessionStorage if localStorage is empty', async () => {
-    const navigateMock = vi.fn();
-    vi.spyOn(router, 'useNavigate').mockReturnValue(navigateMock);
-
-    sessionStorage.setItem('loggedInUser', 'sessionUser');
-
-    render(<BtnLogOff />);
-
-    await userEvent.click(screen.getByRole('button'));
-
-    expect(sessionStorage.getItem('loggedInUser')).toBeNull();
-    expect(navigateMock).toHaveBeenCalledWith('/');
+    fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Service unavailable',
+    );
+    expect(mocks.navigate).not.toHaveBeenCalled();
   });
 });

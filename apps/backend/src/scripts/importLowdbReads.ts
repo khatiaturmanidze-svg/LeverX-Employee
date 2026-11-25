@@ -4,11 +4,11 @@ import { fileURLToPath } from 'node:url';
 import { readFile } from 'node:fs/promises';
 import dotenv from 'dotenv';
 import type { PrismaClient } from '../generated/prisma/client.js';
-import type { IEmployee, IRequestData } from '../employeeTypes.js';
-import type { CreateVisaInput } from '../visaTypes.js';
+import type { IEmployee, IRequestData } from '../types/employeeTypes.js';
+import type { CreateVisaInput } from '../types/visaTypes.js';
 import { createVisaSchema } from '../schemas/visaSchema.js';
 import { toStoredDate } from '../mappers/visaMapper.js';
-import type { IAuthUser } from '../serverTypes.js';
+import type { IAuthUser } from '../types/serverTypes.js';
 import { createPrismaClient } from '../prisma.js';
 import { toEmployeeData } from '../mappers/employeeMapper.js';
 

@@ -29,8 +29,10 @@ export async function createTestDatabase(t, { throughMigration } = {}) {
   const query = pool.query.bind(pool);
   let created = false;
   let prisma;
+  const cleanups = [];
   t.after(async () => {
     try {
+      for (const cleanup of cleanups.reverse()) await cleanup();
       await prisma?.$disconnect();
       if (created) await query(`DROP SCHEMA "${schema}" CASCADE`);
     } finally {
@@ -60,5 +62,11 @@ export async function createTestDatabase(t, { throughMigration } = {}) {
     if (filename === throughMigration) break;
   }
   prisma = createPrismaClient(url.toString());
-  return { pool, prisma, url: url.toString() };
+  return {
+    pool,
+    prisma,
+    schema,
+    url: url.toString(),
+    addCleanup: (cleanup) => cleanups.push(cleanup),
+  };
 }

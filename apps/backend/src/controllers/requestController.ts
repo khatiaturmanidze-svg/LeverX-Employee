@@ -1,9 +1,10 @@
+import { verifiedActor } from '../middleware/authorization.js';
 import type { RequestHandler } from 'express';
 import type {
   ErrorResponse,
   UpdateRequestStatusRequest,
-} from '../serverTypes.js';
-import type { IRequestData } from '../employeeTypes.js';
+} from '../types/serverTypes.js';
+import type { IRequestData } from '../types/employeeTypes.js';
 import type { createRequestService } from '../services/requestService.js';
 
 export function createRequestController(
@@ -13,7 +14,9 @@ export function createRequestController(
     { id: string },
     IRequestData[] | ErrorResponse
   > = async (req, res) => {
-    res.status(200).json(await service.listRequests(req.params.id));
+    res
+      .status(200)
+      .json(await service.listRequests(verifiedActor(req), req.params.id));
   };
 
   const createRequest: RequestHandler<
@@ -21,7 +24,15 @@ export function createRequestController(
     IRequestData | ErrorResponse,
     IRequestData
   > = async (req, res) => {
-    res.status(201).json(await service.createRequest(req.params.id, req.body));
+    res
+      .status(201)
+      .json(
+        await service.createRequest(
+          verifiedActor(req),
+          req.params.id,
+          req.body,
+        ),
+      );
   };
 
   const updateRequest: RequestHandler<
@@ -31,7 +42,13 @@ export function createRequestController(
   > = async (req, res) => {
     res
       .status(200)
-      .json(await service.updateRequest(req.params.employeeId, req.body));
+      .json(
+        await service.updateRequest(
+          verifiedActor(req),
+          req.params.employeeId,
+          req.body,
+        ),
+      );
   };
   return { listRequests, createRequest, updateRequest };
 }

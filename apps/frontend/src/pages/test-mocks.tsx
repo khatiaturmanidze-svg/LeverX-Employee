@@ -311,6 +311,8 @@ export const requestsRequestListModule = {
 
 export const detailsRouterModule = {
   useParams: useParamsMock,
+  Link: ({ to, children }: { to: string; children: React.ReactNode }) =>
+    React.createElement('a', { href: to }, children),
 };
 
 export const detailsUsersApiModule = {

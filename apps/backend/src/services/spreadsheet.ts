@@ -1,4 +1,4 @@
-import type { SpreadsheetRow } from '../serverTypes.js';
+import type { SpreadsheetRow } from '../types/serverTypes.js';
 import type { NewEmployeeProfile } from './accountCreation.js';
 export function getCellString(value: SpreadsheetRow[string]): string {
   if (typeof value === 'string') {

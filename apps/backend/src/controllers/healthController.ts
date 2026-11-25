@@ -1,5 +1,5 @@
 import type { RequestHandler } from 'express';
-import type { HealthResponse } from '../serverTypes.js';
+import type { HealthResponse } from '../types/serverTypes.js';
 export const getHealth: RequestHandler<
   Record<string, never>,
   HealthResponse

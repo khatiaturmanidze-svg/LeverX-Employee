@@ -1,3 +1,11 @@
+import React from 'react';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
+import { sessionReducer, sessionActions } from '../../app/sessionSlice';
+const sessionStore = configureStore({ reducer: { session: sessionReducer } });
+const sessionWrapper = ({ children }: { children: React.ReactNode }) => (
+  <Provider store={sessionStore}>{children}</Provider>
+);
 import { renderHook, act } from '@testing-library/react';
 import {
   useCanEdit,
@@ -111,7 +119,13 @@ describe('useGetManager', () => {
 
 describe('useCanEdit', () => {
   it('returns true for an admin user', () => {
-    localStorage.setItem('loggedInUser', employees[0].email);
+    sessionStore.dispatch(
+      sessionActions.accountReceived({
+        userId: employees[0]._id,
+        role: employees[0].role,
+        mustChangePassword: false,
+      }),
+    );
     vi.spyOn(usersApi, 'useGetUsersQuery').mockReturnValue({
       data: employees,
       isLoading: false,
@@ -119,13 +133,21 @@ describe('useCanEdit', () => {
       refetch: vi.fn(),
     } as unknown as ReturnType<typeof usersApi.useGetUsersQuery>);
 
-    const { result } = renderHook(() => useCanEdit(employees[1]));
+    const { result } = renderHook(() => useCanEdit(employees[1]), {
+      wrapper: sessionWrapper,
+    });
 
     expect(result.current).toBe(true);
   });
 
   it('returns true for the target employee manager', () => {
-    localStorage.setItem('loggedInUser', employees[0].email);
+    sessionStore.dispatch(
+      sessionActions.accountReceived({
+        userId: employees[0]._id,
+        role: employees[0].role,
+        mustChangePassword: false,
+      }),
+    );
     vi.spyOn(usersApi, 'useGetUsersQuery').mockReturnValue({
       data: [{ ...employees[0], role: 'Manager' }, employees[1]],
       isLoading: false,
@@ -133,7 +155,9 @@ describe('useCanEdit', () => {
       refetch: vi.fn(),
     } as unknown as ReturnType<typeof usersApi.useGetUsersQuery>);
 
-    const { result } = renderHook(() => useCanEdit(employees[1]));
+    const { result } = renderHook(() => useCanEdit(employees[1]), {
+      wrapper: sessionWrapper,
+    });
 
     expect(result.current).toBe(true);
   });
@@ -145,7 +169,13 @@ describe('useCanEdit', () => {
       role: 'Employee',
       email: 'other@example.com',
     };
-    localStorage.setItem('loggedInUser', nonManager.email);
+    sessionStore.dispatch(
+      sessionActions.accountReceived({
+        userId: nonManager._id,
+        role: nonManager.role,
+        mustChangePassword: false,
+      }),
+    );
     vi.spyOn(usersApi, 'useGetUsersQuery').mockReturnValue({
       data: [nonManager, employees[1]],
       isLoading: false,
@@ -153,7 +183,9 @@ describe('useCanEdit', () => {
       refetch: vi.fn(),
     } as unknown as ReturnType<typeof usersApi.useGetUsersQuery>);
 
-    const { result } = renderHook(() => useCanEdit(employees[1]));
+    const { result } = renderHook(() => useCanEdit(employees[1]), {
+      wrapper: sessionWrapper,
+    });
 
     expect(result.current).toBe(false);
   });

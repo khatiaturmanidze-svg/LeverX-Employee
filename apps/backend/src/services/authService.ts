@@ -2,67 +2,129 @@ import bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import type {
   SetNewPasswordRequest,
-  SetNewPasswordResponse,
   SignInRequest,
   SignUpRequest,
-  SignInResponse,
-} from '../serverTypes.js';
+} from '../types/serverTypes.js';
 import { ServiceError } from './serviceError.js';
 import type { PrismaClient } from '../generated/prisma/client.js';
 import { createAuthRepository } from '../repositories/authRepository.js';
+import type { VerifiedUser } from '../types/auth.js';
+import { validatePassword } from './password.js';
 import {
   createAccount,
   isEmailConflict,
   makeProfile,
 } from './accountCreation.js';
 
-export function createAuthService(prisma: PrismaClient, token: string) {
+type VerifiedLogin = {
+  employeeId: string;
+  sessionVersion: number;
+  mustChangePassword: boolean;
+};
+
+const DUMMY_HASH =
+  '$2b$13$FczKwu6okJoEh54aOY/YgeqVsXNM2kcC1w4IqjebQgzLV1QBM0NBa';
+
+function validateIdentity(body: SignInRequest) {
+  if (
+    typeof body?.email !== 'string' ||
+    body.email.length > 254 ||
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email.trim()) ||
+    typeof body.password !== 'string' ||
+    !body.password ||
+    Buffer.byteLength(body.password) > 72 ||
+    (body.rememberMe !== undefined && typeof body.rememberMe !== 'boolean')
+  ) {
+    throw new ServiceError(400, { error: 'Invalid authentication request' });
+  }
+}
+
+export function createAuthService(prisma: PrismaClient) {
   const auth = createAuthRepository(prisma);
 
-  async function signIn(body: SignInRequest): Promise<SignInResponse> {
+  async function signIn(body: SignInRequest): Promise<VerifiedLogin> {
+    validateIdentity(body);
     const normalizedEmail = body.email.trim().toLowerCase();
     const user = await auth.findByEmail(normalizedEmail);
-    if (!user) throw new ServiceError(400, { error: 'user not found' });
 
-    const matches = await bcrypt.compare(body.password, user.hashedPassword);
-    if (!matches) {
-      throw new ServiceError(401, { error: 'wrong password' });
+    const matches = await bcrypt.compare(
+      body.password,
+      user?.hashedPassword ?? DUMMY_HASH,
+    );
+
+    if (!user || !matches) {
+      throw new ServiceError(401, {
+        error: 'Invalid email or password',
+      });
     }
 
     return {
-      message: 'signed in!',
-      token,
-      userId: user.employeeId,
+      employeeId: user.employeeId,
+      sessionVersion: user.sessionVersion,
       mustChangePassword: user.mustChangePassword,
     };
   }
 
   async function setNewPassword(
+    actor: VerifiedUser,
     body: SetNewPasswordRequest,
-  ): Promise<SetNewPasswordResponse> {
-    const { email, newPassword } = body;
-    if (!email?.trim() || !newPassword) {
+  ) {
+    if (!body || Object.keys(body).some((key) => key !== 'newPassword')) {
       throw new ServiceError(400, {
-        error: 'email and new password are required',
+        error: 'Submit only newPassword; the session identifies your account',
       });
     }
-    const normalizedEmail = email.trim().toLowerCase();
-    const user = await auth.findByEmail(normalizedEmail);
-    if (!user) throw new ServiceError(404, { error: 'user not found' });
-    const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS) || 13;
-    const hash = await bcrypt.hash(newPassword, saltRounds);
-    const result = await auth.replaceRequiredPassword(user.employeeId, hash);
-
-    if (!result) {
+    validatePassword(body.newPassword);
+    if (!actor.mustChangePassword)
       throw new ServiceError(400, { error: 'password change is not required' });
-    }
-
-    return { message: 'password updated successfully' };
+    const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS) || 13;
+    const hash = await bcrypt.hash(body.newPassword, saltRounds);
+    return prisma.$transaction(async (tx) => {
+      const changed = await tx.authUser.updateMany({
+        where: {
+          employeeId: actor.id,
+          sessionVersion: actor.sessionVersion,
+          mustChangePassword: true,
+        },
+        data: {
+          hashedPassword: hash,
+          mustChangePassword: false,
+          sessionVersion: { increment: 1 },
+        },
+      });
+      if (changed.count !== 1)
+        throw new ServiceError(409, {
+          error: 'Account state changed; sign in again',
+        });
+      return { employeeId: actor.id, sessionVersion: actor.sessionVersion + 1 };
+    });
   }
 
   async function signUp(body: SignUpRequest) {
-    if (!body.password)
-      throw new ServiceError(400, { error: 'password is required' });
+    validateIdentity(body);
+    validatePassword(body.password);
+    if (
+      Object.keys(body).some(
+        (key) =>
+          ![
+            'email',
+            'password',
+            'first_name',
+            'last_name',
+            'rememberMe',
+          ].includes(key),
+      )
+    ) {
+      throw new ServiceError(400, { error: 'Unsupported signup field' });
+    }
+    if (
+      typeof body.first_name !== 'string' ||
+      typeof body.last_name !== 'string' ||
+      body.first_name.length > 100 ||
+      body.last_name.length > 100
+    ) {
+      throw new ServiceError(400, { error: 'Invalid name' });
+    }
     const profile = makeProfile(
       {
         first_name: body.first_name,
@@ -78,12 +140,17 @@ export function createAuthService(prisma: PrismaClient, token: string) {
     );
     try {
       const employee = await createAccount(prisma, profile, hash, false);
+      const account = await prisma.authUser.findUniqueOrThrow({
+        where: { employeeId: employee._id },
+        select: {
+          employeeId: true,
+          sessionVersion: true,
+          mustChangePassword: true,
+        },
+      });
       return {
-        message: 'User signed up successfully',
         employee,
-        token,
-        userId: employee._id,
-        mustChangePassword: false,
+        ...account,
       };
     } catch (error) {
       if (isEmailConflict(error))

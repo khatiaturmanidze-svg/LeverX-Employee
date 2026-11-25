@@ -1,10 +1,12 @@
 import type { Prisma, PrismaClient } from '../generated/prisma/client.js';
-import type { IEmployee } from '../employeeTypes.js';
-import type { CreateVisaInput } from '../visaTypes.js';
+import type { IEmployee } from '../types/employeeTypes.js';
+import type { CreateVisaInput } from '../types/visaTypes.js';
 import { parseEmployeeVisas } from '../schemas/visaSchema.js';
 import { toStoredDate } from '../mappers/visaMapper.js';
 import { isEmailConflict } from './accountCreation.js';
 import { ServiceError } from './serviceError.js';
+import type { VerifiedUser } from '../types/auth.js';
+import { authorizeEmployee, currentActor } from './permissions.js';
 
 export type ProfilePatch = Partial<
   Omit<IEmployee, '_id' | 'manager' | 'role' | 'requests' | 'visa'>
@@ -37,7 +39,10 @@ export async function updateEmployeeProfile(
   id: string,
   patch: ProfilePatch,
   readEmployee: (id: string) => Promise<IEmployee>,
+  actor: VerifiedUser,
 ) {
+  if (!patch || typeof patch !== 'object' || Array.isArray(patch))
+    throw new ServiceError(400, { error: 'Invalid employee update' });
   if (Object.keys(patch).some((key) => !editableFields.has(key))) {
     throw new ServiceError(400, { error: 'unsupported employee field' });
   }
@@ -90,6 +95,21 @@ export async function updateEmployeeProfile(
       if (!found.length) {
         throw new ServiceError(404, { error: 'employee not found' });
       }
+      const verified = await currentActor(tx, actor);
+      const target = await authorizeEmployee(tx, verified, id, 'edit');
+      if (
+        patch.manager !== undefined &&
+        (patch.manager || null) !== target.managerId &&
+        verified.role !== 'Admin'
+      ) {
+        throw new ServiceError(403, {
+          error: 'Only Admins can change a manager',
+        });
+      }
+      if (patch.manager === id)
+        throw new ServiceError(400, {
+          error: 'An employee cannot manage themselves',
+        });
       await tx.employee.update({ where: { id }, data });
       if (email !== undefined) {
         await tx.authUser.updateMany({

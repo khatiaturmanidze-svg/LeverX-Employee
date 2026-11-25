@@ -4,12 +4,14 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { createApp } from '../dist/app.js';
 import { createTestDatabase, sqlTestOptions } from './helpers/postgres.js';
+import { testSessionOptions, createTestRequest } from './helpers/sessions.js';
 
 test(
   'visa CRUD keeps the contract and employee scope',
   sqlTestOptions,
   async (t) => {
-    const { prisma } = await createTestDatabase(t);
+    const database = await createTestDatabase(t);
+    const { prisma } = database;
     await prisma.employee.createMany({
       data: [
         {
@@ -37,8 +39,9 @@ test(
       },
     });
 
+    const options = testSessionOptions(t, database);
     const app = createApp(prisma, {
-      token: 'test-token',
+      ...options,
       frontendPort: 5173,
       staticDirectory: fileURLToPath(new URL('../dist/', import.meta.url)),
     });
@@ -52,34 +55,13 @@ test(
         }),
     );
 
-    async function request(
-      path,
-      { method = 'GET', body, rawBody, token = 'test-token' } = {},
-    ) {
-      const headers = {};
-      if (token) headers.authorization = token;
-      if (body !== undefined || rawBody !== undefined) {
-        headers['content-type'] = 'application/json';
-      }
-      const response = await fetch(
-        `http://127.0.0.1:${server.address().port}${path}`,
-        {
-          method,
-          headers,
-          body:
-            rawBody ?? (body === undefined ? undefined : JSON.stringify(body)),
-        },
-      );
-      const text = await response.text();
-      return {
-        status: response.status,
-        text,
-        body:
-          text &&
-          response.headers.get('content-type')?.includes('application/json')
-            ? JSON.parse(text)
-            : text,
-      };
+    const browserRequest = createTestRequest(
+      `http://127.0.0.1:${server.address().port}`,
+      prisma,
+      options,
+    );
+    function request(path, requestOptions = {}) {
+      return browserRequest(path, { authenticated: true, ...requestOptions });
     }
 
     const collection = '/employees/employee-a/visas';

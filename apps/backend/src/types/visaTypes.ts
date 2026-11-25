@@ -2,7 +2,7 @@ import type { z } from 'zod';
 import type {
   createVisaSchema,
   patchVisaSchema,
-} from './schemas/visaSchema.js';
+} from '../schemas/visaSchema.js';
 
 export type CreateVisaInput = z.infer<typeof createVisaSchema>;
 export type UpdateVisaInput = z.infer<typeof patchVisaSchema>;

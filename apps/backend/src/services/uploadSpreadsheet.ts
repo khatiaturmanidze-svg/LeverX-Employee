@@ -5,7 +5,7 @@ import type { PrismaClient } from '../generated/prisma/client.js';
 import type {
   SpreadsheetRow,
   UploadSpreadsheetResponse,
-} from '../serverTypes.js';
+} from '../types/serverTypes.js';
 import {
   getCellString,
   createEmployeeFromSpreadsheetRow,
@@ -13,17 +13,23 @@ import {
 import { generateTemporaryPassword } from './password.js';
 import { createAccount, isEmailConflict } from './accountCreation.js';
 import { ServiceError } from './serviceError.js';
+import type { VerifiedUser } from '../types/auth.js';
 
 export async function importSpreadsheet(
   prisma: PrismaClient,
   buffer: Buffer,
+  actor: VerifiedUser,
 ): Promise<UploadSpreadsheetResponse> {
-  const workbook = xlsx.read(buffer, { type: 'buffer' });
+  const workbook = xlsx.read(buffer, { type: 'buffer', sheetRows: 5002 });
   const name = workbook.SheetNames[0];
   if (!name) throw new ServiceError(400, { error: 'spreadsheet is empty' });
   const rows = xlsx.utils.sheet_to_json<SpreadsheetRow>(workbook.Sheets[name], {
     defval: null,
   });
+  if (rows.length > 5000)
+    throw new ServiceError(400, {
+      error: 'Upload at most 5000 employees at a time',
+    });
   const importedUsers: UploadSpreadsheetResponse['importedUsers'] = [];
   const skippedRows: UploadSpreadsheetResponse['skippedRows'] = [];
   const seen = new Set<string>();
@@ -56,7 +62,7 @@ export async function importSpreadsheet(
       Number(process.env.BCRYPT_SALT_ROUNDS) || 13,
     );
     try {
-      await createAccount(prisma, profile, hash, true);
+      await createAccount(prisma, profile, hash, true, actor);
       seen.add(email);
       importedUsers.push({ email, temporaryPassword, employeeId: profile._id });
     } catch (error) {

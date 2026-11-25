@@ -6,6 +6,7 @@ import xlsx from 'xlsx';
 import { validate as isUuid, version as uuidVersion } from 'uuid';
 import { createApp } from '../dist/app.js';
 import { createTestDatabase, sqlTestOptions } from './helpers/postgres.js';
+import { testSessionOptions, createTestRequest } from './helpers/sessions.js';
 
 const sqlTest = (name, fn) => test(name, sqlTestOptions, fn);
 
@@ -23,11 +24,13 @@ async function setup(t, latency = '', suppliedPool) {
       else process.env[key] = previous;
     });
   }
-  const { pool, prisma } = suppliedPool
+  const database = suppliedPool
     ? { pool: undefined, prisma: suppliedPool }
     : await createTestDatabase(t);
+  const { pool, prisma } = database;
+  const options = testSessionOptions(t, database);
   const app = createApp(prisma, {
-    token: 'test-token',
+    ...options,
     frontendPort: 5173,
     staticDirectory: fileURLToPath(new URL('../dist', import.meta.url)),
   });
@@ -40,27 +43,11 @@ async function setup(t, latency = '', suppliedPool) {
         server.closeAllConnections();
       }),
   );
-  async function request(path, { method = 'GET', body, token, form } = {}) {
-    const headers = {};
-    if (token) headers.authorization = token;
-    if (body !== undefined) headers['content-type'] = 'application/json';
-    const response = await fetch(
-      `http://127.0.0.1:${server.address().port}${path}`,
-      {
-        method,
-        headers,
-        body: form ?? (body === undefined ? undefined : JSON.stringify(body)),
-      },
-    );
-    const text = await response.text();
-    return {
-      status: response.status,
-      body: response.headers.get('content-type')?.includes('application/json')
-        ? JSON.parse(text)
-        : text,
-      headers: response.headers,
-    };
-  }
+  const request = createTestRequest(
+    `http://127.0.0.1:${server.address().port}`,
+    prisma,
+    options,
+  );
   return { pool, prisma, request };
 }
 
@@ -78,6 +65,54 @@ const employee = {
   building: 'A',
   room: '1',
 };
+
+sqlTest(
+  'cookie login rotates sessions, enforces CSRF, and supports revocation and logout',
+  async (t) => {
+    const { request, pool } = await setup(t);
+    const health = await request('/health');
+    assert.equal(health.headers.get('set-cookie'), null);
+    assert.equal((await request('/me')).status, 401);
+
+    const registered = await request('/sign-up', {
+      method: 'POST',
+      body: signup,
+    });
+    assert.equal(registered.status, 200);
+    assert.equal(registered.body.token, undefined);
+    assert.equal((await request('/me')).body.userId, registered.body.userId);
+    const oldCookie = registered.headers.get('set-cookie').split(';')[0];
+
+    const login = await request('/sign-in', { method: 'POST', body: signup });
+    assert.equal(login.status, 200);
+    assert.notEqual(login.headers.get('set-cookie').split(';')[0], oldCookie);
+    assert.notEqual(login.body.csrfToken, registered.body.csrfToken);
+
+    for (const headers of [
+      { origin: 'https://untrusted.example' },
+      { 'x-csrf-token': registered.body.csrfToken },
+    ]) {
+      const rejected = await request('/sign-out', { method: 'POST', headers });
+      assert.equal(rejected.status, 403);
+      assert.equal((await request('/me')).status, 200);
+    }
+
+    const stale = await request('/me', { headers: { cookie: oldCookie } });
+    assert.equal(stale.status, 401);
+    await request('/sign-in', { method: 'POST', body: signup });
+    await pool.query(
+      'UPDATE auth_users SET session_version = session_version + 1 WHERE employee_id = $1',
+      [registered.body.userId],
+    );
+    assert.equal((await request('/me')).status, 401);
+
+    await request('/sign-in', { method: 'POST', body: signup });
+    const logout = await request('/sign-out', { method: 'POST' });
+    assert.equal(logout.status, 204);
+    assert.match(logout.headers.get('set-cookie'), /^leverx\.sid=;/);
+    assert.equal((await request('/me')).status, 401);
+  },
+);
 
 async function assertSharedUuid(pool, email, id) {
   assert.equal(isUuid(id), true);
@@ -117,7 +152,11 @@ test('health remains public and bypasses synthetic latency while business routes
   assert.equal(delays, 0);
   assert.equal((await request('/users')).status, 401);
   assert.equal(delays, 1);
-  assert.equal((await request('/users', { token: 'wrong' })).status, 403);
+  assert.equal(
+    (await request('/users', { headers: { cookie: 'leverx.sid=forged' } }))
+      .status,
+    401,
+  );
 });
 
 sqlTest(
@@ -126,7 +165,7 @@ sqlTest(
     const { request, pool } = await setup(t);
     assert.equal(
       (await request('/sign-in', { method: 'POST', body: signup })).status,
-      400,
+      401,
     );
     const registered = await request('/sign-up', {
       method: 'POST',
@@ -136,14 +175,14 @@ sqlTest(
     assert.equal(registered.body.employee.role, 'Employee');
     assert.equal(registered.body.userId, registered.body.employee._id);
     await assertSharedUuid(pool, signup.email, registered.body.userId);
-    assert.equal(registered.body.token, 'test-token');
+    assert.equal(registered.body.token, undefined);
+    assert.match(registered.body.csrfToken, /^[a-f0-9]{64}$/);
     assert.equal(registered.body.mustChangePassword, false);
     assert.deepEqual(
       (
         await request('/set-new-password', {
           method: 'POST',
-          token: registered.body.token,
-          body: { email: signup.email, newPassword: 'unnecessary-change' },
+          body: { newPassword: 'unnecessary-change' },
         })
       ).body,
       { error: 'password change is not required' },
@@ -163,14 +202,14 @@ sqlTest(
     );
     const login = await request('/sign-in', { method: 'POST', body: signup });
     assert.deepEqual(login.body, {
-      message: 'signed in!',
-      token: 'test-token',
+      message: 'Signed in',
+      csrfToken: login.body.csrfToken,
       userId: registered.body.employee._id,
       mustChangePassword: false,
     });
     const created = await request('/users', {
       method: 'POST',
-      token: 'test-token',
+      authenticated: true,
       body: employee,
     });
     assert.equal(created.status, 201);
@@ -187,8 +226,7 @@ sqlTest(
     );
     const change = {
       method: 'POST',
-      token: 'test-token',
-      body: { email: employee.email, newPassword: 'replacement' },
+      body: { newPassword: 'replacement' },
     };
     assert.equal((await request('/set-new-password', change)).status, 200);
     assert.equal((await request('/set-new-password', change)).status, 400);
@@ -212,36 +250,52 @@ sqlTest(
   'employee list, detail, creation, editing, and role routes keep existing behavior',
   async (t) => {
     const { request } = await setup(t);
-    const token = 'test-token';
+    const authenticated = true;
     assert.equal(
-      (await request('/users', { method: 'POST', token, body: {} })).status,
+      (await request('/users', { method: 'POST', authenticated, body: {} }))
+        .status,
       400,
     );
     const created = await request('/users', {
       method: 'POST',
-      token,
+      authenticated,
       body: employee,
     });
     const id = created.body.employee._id;
     assert.equal(
-      (await request('/users', { method: 'POST', token, body: employee }))
-        .status,
+      (
+        await request('/users', {
+          method: 'POST',
+          authenticated,
+          body: employee,
+        })
+      ).status,
       400,
     );
-    assert.equal((await request('/users', { token })).body.length, 1);
+    assert.equal((await request('/users', { authenticated })).body.length, 2);
     assert.equal(
-      (await request(`/users/${id}`, { token })).body.email,
+      (await request(`/users/${id}`, { authenticated })).body.email,
       employee.email,
     );
-    assert.equal((await request('/users/missing', { token })).status, 400);
-    // Existing employee edits are public; this refactor does not change authorization policy.
+    assert.equal(
+      (await request('/users/missing', { authenticated })).status,
+      404,
+    );
+    // Employee mutations now require a verified actor.
     const updated = await request(`/users/${id}`, {
       method: 'PUT',
+      authenticated: true,
       body: { department: 'Design' },
     });
     assert.equal(updated.body.employee.department, 'Design');
     assert.equal(
-      (await request('/users/missing', { method: 'PUT', body: {} })).status,
+      (
+        await request('/users/missing', {
+          method: 'PUT',
+          authenticated: true,
+          body: {},
+        })
+      ).status,
       404,
     );
     assert.equal(
@@ -257,7 +311,7 @@ sqlTest(
       (
         await request(`/users/${id}/role`, {
           method: 'PUT',
-          token,
+          authenticated,
           body: { newRole: 'Admin' },
         })
       ).body.employee.role,
@@ -267,7 +321,7 @@ sqlTest(
       (
         await request('/users/missing/role', {
           method: 'PUT',
-          token,
+          authenticated,
           body: { newRole: 'Employee' },
         })
       ).body,
@@ -280,7 +334,7 @@ sqlTest(
   'employee visa creation, reads, and replacement use one calendar-date contract',
   async (t) => {
     const { request, prisma } = await setup(t);
-    const token = 'test-token';
+    const authenticated = true;
     const visa = {
       issuing_country: ' Japanese ',
       type: ' Work ',
@@ -289,7 +343,7 @@ sqlTest(
     };
     const created = await request('/users', {
       method: 'POST',
-      token,
+      authenticated,
       body: { ...employee, visa: [visa] },
     });
     assert.equal(created.status, 201);
@@ -303,12 +357,16 @@ sqlTest(
       issuing_country: 'Japanese',
       type: 'Work',
     });
-    assert.deepEqual((await request(`/users/${id}`, { token })).body.visa, [
-      saved,
-    ]);
-    assert.deepEqual((await request('/users', { token })).body[0].visa, [
-      saved,
-    ]);
+    assert.deepEqual(
+      (await request(`/users/${id}`, { authenticated })).body.visa,
+      [saved],
+    );
+    assert.deepEqual(
+      (await request('/users', { authenticated })).body.find(
+        (row) => row._id === id,
+      ).visa,
+      [saved],
+    );
     const stored = await prisma.visa.findUnique({
       where: { id: BigInt(saved.id) },
     });
@@ -316,6 +374,7 @@ sqlTest(
 
     const omitted = await request(`/users/${id}`, {
       method: 'PUT',
+      authenticated: true,
       body: { department: 'Design' },
     });
     assert.deepEqual(omitted.body.employee.visa, [saved]);
@@ -330,15 +389,17 @@ sqlTest(
     ]) {
       const rejected = await request(`/users/${id}`, {
         method: 'PUT',
+        authenticated: true,
         body: { department: 'Invalid', visa: invalid },
       });
       assert.equal(rejected.status, 400);
-      const after = await request(`/users/${id}`, { token });
+      const after = await request(`/users/${id}`, { authenticated });
       assert.equal(after.body.department, 'Design');
       assert.deepEqual(after.body.visa, [saved]);
     }
     const replaced = await request(`/users/${id}`, {
       method: 'PUT',
+      authenticated: true,
       body: { visa: [{ ...visa, type: 'Tourist', end_date: '2028-10-01' }] },
     });
     assert.equal(replaced.status, 200);
@@ -352,12 +413,13 @@ sqlTest(
     });
     const cleared = await request(`/users/${id}`, {
       method: 'PUT',
+      authenticated: true,
       body: { visa: [] },
     });
     assert.deepEqual(cleared.body.employee.visa, []);
     const invalidCreate = await request('/users', {
       method: 'POST',
-      token,
+      authenticated,
       body: {
         ...employee,
         email: 'invalid@example.test',
@@ -365,7 +427,7 @@ sqlTest(
       },
     });
     assert.equal(invalidCreate.status, 400);
-    assert.equal(await prisma.employee.count(), 1);
+    assert.equal(await prisma.employee.count(), 2);
   },
 );
 
@@ -383,7 +445,7 @@ sqlTest(
       method: 'POST',
       body: {
         id: 'client-id',
-        employeeId: 'wrong-id',
+        employeeId: id,
         status: 'approved',
         type: 'leave',
         start_date: '2026-10-10',
@@ -398,18 +460,20 @@ sqlTest(
     assert.equal((await request(`/requests/${id}`)).body.length, 1);
     const updated = await request(`/requests/${id}`, {
       method: 'PUT',
+      authenticated: true,
       body: { requestId: created.body.id, newStatus: 'approved' },
     });
     assert.equal(updated.body.status, 'approved');
-    assert.equal((await request('/requests/missing')).status, 401);
+    assert.equal((await request('/requests/missing')).status, 404);
     assert.equal(
       (await request('/requests/missing', { method: 'POST', body: {} })).status,
-      401,
+      403,
     );
     assert.deepEqual(
       (
         await request(`/requests/${id}`, {
           method: 'PUT',
+          authenticated: true,
           body: { requestId: 'missing', newStatus: 'approved' },
         })
       ).body,
@@ -432,7 +496,7 @@ sqlTest(
   async (t) => {
     const { request, pool, prisma } = await setup(t);
     assert.equal(
-      (await request('/users/upload', { method: 'POST', token: 'test-token' }))
+      (await request('/users/upload', { method: 'POST', authenticated: true }))
         .status,
       400,
     );
@@ -451,7 +515,7 @@ sqlTest(
     form.append('file', new Blob([buffer]), 'employees.xlsx');
     const uploaded = await request('/users/upload', {
       method: 'POST',
-      token: 'test-token',
+      authenticated: true,
       form,
     });
     assert.equal(uploaded.status, 200);
@@ -465,7 +529,7 @@ sqlTest(
       },
     ]);
     const flags = await pool.query(
-      'SELECT must_change_password FROM auth_users',
+      "SELECT must_change_password FROM auth_users WHERE employee_id <> 'test-session-actor'",
     );
     assert.equal(flags.rows.length, 2);
     assert.ok(flags.rows.every((row) => row.must_change_password === true));
@@ -488,7 +552,7 @@ sqlTest(
     );
     const retried = await request('/users/upload', {
       method: 'POST',
-      token: 'test-token',
+      authenticated: true,
       form,
     });
     assert.equal(retried.body.count, 0);
@@ -501,7 +565,7 @@ sqlTest(
     try {
       const failed = await request('/users/upload', {
         method: 'POST',
-        token: 'test-token',
+        authenticated: true,
         form,
       });
       assert.equal(failed.status, 200);
