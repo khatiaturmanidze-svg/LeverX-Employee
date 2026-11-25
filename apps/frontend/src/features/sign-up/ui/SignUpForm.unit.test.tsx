@@ -41,7 +41,7 @@ describe('SignUpForm', () => {
   it('stores the sign-up userId and auth state in sessionStorage and goes directly to main', async () => {
     const result = {
       employee: { _id: '1', first_name: 'John', last_name: 'Doe' },
-      token: 'signup-token',
+      csrfToken: 'signup-token',
       userId: '1',
       mustChangePassword: false,
     };
@@ -88,9 +88,10 @@ describe('SignUpForm', () => {
       password: 'secret',
       first_name: 'John',
       last_name: 'Doe',
+      rememberMe: false,
     });
-    expect(sessionStorage.getItem('loggedInUser')).toBe('user@example.com');
-    expect(sessionStorage.getItem('authData')).toBe(JSON.stringify(result));
+    expect(sessionStorage.getItem('loggedInUser')).toBeNull();
+    expect(sessionStorage.getItem('authData')).toBeNull();
     expect(localStorage.getItem('loggedInUser')).toBeNull();
     expect(navigateMock).toHaveBeenCalledExactlyOnceWith('/main', {
       replace: true,
@@ -101,10 +102,10 @@ describe('SignUpForm', () => {
     });
   });
 
-  it('stores signup state in localStorage when remember-me is checked', async () => {
+  it('keeps signup credentials out of storage when remember-me is checked', async () => {
     const result = {
       employee: { _id: '2', first_name: 'Alice', last_name: 'Smith' },
-      token: 'signup-token',
+      csrfToken: 'signup-token',
       userId: '2',
       mustChangePassword: false,
     };
@@ -150,8 +151,8 @@ describe('SignUpForm', () => {
       );
     });
 
-    expect(localStorage.getItem('loggedInUser')).toBe('alice@site.com');
-    expect(localStorage.getItem('authData')).toBe(JSON.stringify(result));
+    expect(localStorage.getItem('loggedInUser')).toBeNull();
+    expect(localStorage.getItem('authData')).toBeNull();
     expect(sessionStorage.getItem('loggedInUser')).toBeNull();
 
     await act(async () => {

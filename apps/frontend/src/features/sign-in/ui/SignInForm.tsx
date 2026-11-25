@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { useSignInMutation } from '../../authApi';
 import { getErrorMessage } from '@shared/lib';
 import { BtnSubmit } from '@/shared/ui';
-import { AUTH_DATA_KEY } from '@shared/lib/authStorage';
 
 export default function SignInForm(): React.ReactElement {
   const navigate = useNavigate();
@@ -20,11 +19,11 @@ export default function SignInForm(): React.ReactElement {
     e.preventDefault();
     const trimmedEmail = email.trim();
     try {
-      const result = await signIn({ email: trimmedEmail, password }).unwrap();
-
-      const storage = rememberMe ? localStorage : sessionStorage;
-      storage.setItem('loggedInUser', trimmedEmail);
-      storage.setItem(AUTH_DATA_KEY, JSON.stringify(result));
+      const result = await signIn({
+        email: trimmedEmail,
+        password,
+        rememberMe,
+      }).unwrap();
       navigate(result.mustChangePassword ? '/new-password' : '/main', {
         replace: true,
       });

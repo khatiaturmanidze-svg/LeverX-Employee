@@ -1,21 +1,16 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { sessionBaseQuery } from '../../../shared/lib/sessionBaseQuery';
+import { createApi } from '@reduxjs/toolkit/query/react';
 
 import { IRequestData } from '../model/state.types';
 
-const DUMMY_TOKEN = import.meta.env.VITE_AUTH_TOKEN;
-const BASE_URL = '/api';
-
 export const requestsApi = createApi({
   reducerPath: 'requestsApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: BASE_URL,
-  }),
+  baseQuery: sessionBaseQuery,
   tagTypes: ['requests'],
   endpoints: (builder) => ({
     getRequests: builder.query<IRequestData[], string | undefined>({
       query: (id) => ({
         url: `/requests/${id}`,
-        headers: { Authorization: DUMMY_TOKEN },
       }),
       providesTags: (result, error, id) => [{ type: 'requests', id }],
     }),
@@ -42,7 +37,6 @@ export const requestsApi = createApi({
       query: ({ employeeId, requestId, newStatus }) => ({
         url: `/requests/${employeeId}`,
         method: 'PUT',
-        headers: { Authorization: DUMMY_TOKEN },
         body: { requestId, newStatus },
       }),
       invalidatesTags: (result, error, { employeeId }) => [

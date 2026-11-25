@@ -1,4 +1,5 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { sessionBaseQuery } from '../../../shared/lib/sessionBaseQuery';
+import { createApi } from '@reduxjs/toolkit/query/react';
 import {
   CreateUserPayload,
   CreateUserResponse,
@@ -6,12 +7,9 @@ import {
 } from '@/types/type';
 import { usersApi } from '../../usersApi';
 
-const DUMMY_TOKEN = import.meta.env.VITE_AUTH_TOKEN || 'authorized-can-access';
-const BASE_URL = '/api';
-
 export const createUserApi = createApi({
   reducerPath: 'createUserApi',
-  baseQuery: fetchBaseQuery({ baseUrl: BASE_URL }),
+  baseQuery: sessionBaseQuery,
   endpoints: (builder) => ({
     addUser: builder.mutation<CreateUserResponse, CreateUserPayload>({
       async onQueryStarted(_body, { dispatch, queryFulfilled }) {
@@ -26,7 +24,6 @@ export const createUserApi = createApi({
         url: '/users',
         method: 'POST',
         headers: {
-          Authorization: DUMMY_TOKEN,
           'Content-Type': 'application/json',
         },
         body,
@@ -49,9 +46,7 @@ export const createUserApi = createApi({
         return {
           url: '/users/upload',
           method: 'POST',
-          headers: {
-            Authorization: DUMMY_TOKEN,
-          },
+          headers: {},
           body: formData,
         };
       },

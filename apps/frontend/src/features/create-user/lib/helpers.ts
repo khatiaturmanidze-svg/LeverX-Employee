@@ -5,6 +5,7 @@ import {
   SubmitState,
 } from '../model/state.types';
 import { getErrorMessage } from '@/shared';
+import { toVisaInput, validateVisaInputs } from '@/shared/lib/visa';
 
 type AddUserMutation = (payload: CreateUserPayload) => {
   unwrap: () => Promise<CreateUserResponse>;
@@ -81,6 +82,7 @@ export const validateCreateUserForm = (
     errors.desk_number = 'Desk number must be a number';
   }
 
+  Object.assign(errors, validateVisaInputs(formData.visas));
   return errors;
 };
 
@@ -109,7 +111,7 @@ export const buildCreateUserPayload = (
         return { year, month, day };
       })()
     : undefined,
-  visa: formData.visas,
+  visa: formData.visas.map(toVisaInput),
 });
 
 export async function submitCreateUser(

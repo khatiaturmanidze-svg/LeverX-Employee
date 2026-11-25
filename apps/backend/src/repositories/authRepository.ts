@@ -15,13 +15,5 @@ export function createAuthRepository(prisma: PrismaClient) {
     return tx.authUser.create({ data: row });
   }
 
-  async function replaceRequiredPassword(id: string, hash: string) {
-    const result = await prisma.authUser.updateMany({
-      where: { employeeId: id, mustChangePassword: true },
-      data: { hashedPassword: hash, mustChangePassword: false },
-    });
-    return result.count === 1;
-  }
-
-  return { findByEmail, insertAuthUser, replaceRequiredPassword };
+  return { findByEmail, insertAuthUser };
 }

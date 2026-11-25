@@ -76,6 +76,8 @@ export const employeeViewMockUser: IEmployee = {
   },
   visa: [
     {
+      id: '1',
+      employeeId: '1',
       issuing_country: 'Canada',
       type: 'Work',
       start_date: '2023-01-01',

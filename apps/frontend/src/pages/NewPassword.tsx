@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { useSetNewPasswordMutation } from '../features/authApi';
 import { getErrorMessage } from '@shared/lib';
 import { SignHeader, SignMain, BtnSubmit } from '@shared/ui';
-import { AUTH_DATA_KEY, getStoredAuth } from '@shared/lib/authStorage';
 
 export default function NewPassword(): React.ReactElement {
   const navigate = useNavigate();
@@ -17,24 +16,8 @@ export default function NewPassword(): React.ReactElement {
     event.preventDefault();
 
     try {
-      const auth = getStoredAuth();
-      if (!auth) {
-        navigate('/signin', { replace: true });
-        return;
-      }
-      if (auth.error) throw auth.error;
+      const result = await setNewPasswordRequest({ newPassword }).unwrap();
 
-      const result = await setNewPasswordRequest({
-        email: auth.email,
-        newPassword,
-      }).unwrap();
-
-      if (auth.authData) {
-        auth.storage.setItem(
-          AUTH_DATA_KEY,
-          JSON.stringify({ ...auth.authData, mustChangePassword: false }),
-        );
-      }
       setSuccessMessage(result.message);
       setErrorMessage(null);
       navigate('/main', { replace: true });

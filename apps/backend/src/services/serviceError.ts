@@ -2,7 +2,10 @@
 export class ServiceError extends Error {
   constructor(
     public readonly status: number,
-    public readonly body: { error: string } | { message: string } | string,
+    public readonly body:
+      | { error: string; code?: string }
+      | { message: string; code?: string }
+      | string,
   ) {
     super(
       typeof body === 'string'

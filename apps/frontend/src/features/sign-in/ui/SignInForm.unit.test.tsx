@@ -41,10 +41,10 @@ describe('SignInForm', () => {
     sessionStorage.clear();
   });
 
-  it('submits trimmed email and stores result in sessionStorage by default', async () => {
+  it('submits trimmed email and keeps sign-in data out of web storage', async () => {
     signInMock.mockReturnValue({
       unwrap: () =>
-        Promise.resolve({ token: 'abc', mustChangePassword: false }),
+        Promise.resolve({ csrfToken: 'abc', mustChangePassword: false }),
     });
 
     const container = document.createElement('div');
@@ -76,11 +76,10 @@ describe('SignInForm', () => {
     expect(signInMock).toHaveBeenCalledWith({
       email: 'user@example.com',
       password: 'secret',
+      rememberMe: false,
     });
-    expect(sessionStorage.getItem('loggedInUser')).toBe('user@example.com');
-    expect(sessionStorage.getItem('authData')).toBe(
-      JSON.stringify({ token: 'abc', mustChangePassword: false }),
-    );
+    expect(sessionStorage.getItem('loggedInUser')).toBeNull();
+    expect(sessionStorage.getItem('authData')).toBeNull();
     expect(localStorage.getItem('loggedInUser')).toBeNull();
     expect(navigateMock).toHaveBeenCalledWith('/main', { replace: true });
 
@@ -89,10 +88,13 @@ describe('SignInForm', () => {
     });
   });
 
-  it('stores sign-in state in localStorage when remember-me is checked', async () => {
+  it('keeps credentials out of storage when remember-me is checked', async () => {
     signInMock.mockReturnValue({
       unwrap: () =>
-        Promise.resolve({ token: 'remember-token', mustChangePassword: false }),
+        Promise.resolve({
+          csrfToken: 'remember-token',
+          mustChangePassword: false,
+        }),
     });
 
     const container = document.createElement('div');
@@ -125,10 +127,8 @@ describe('SignInForm', () => {
       );
     });
 
-    expect(localStorage.getItem('loggedInUser')).toBe('remember@site.com');
-    expect(localStorage.getItem('authData')).toBe(
-      JSON.stringify({ token: 'remember-token', mustChangePassword: false }),
-    );
+    expect(localStorage.getItem('loggedInUser')).toBeNull();
+    expect(localStorage.getItem('authData')).toBeNull();
     expect(sessionStorage.getItem('loggedInUser')).toBeNull();
 
     await act(async () => {
@@ -139,7 +139,7 @@ describe('SignInForm', () => {
   it('redirects to new-password when password change is required', async () => {
     signInMock.mockReturnValue({
       unwrap: () =>
-        Promise.resolve({ token: 'temp-token', mustChangePassword: true }),
+        Promise.resolve({ csrfToken: 'temp-token', mustChangePassword: true }),
     });
 
     const container = document.createElement('div');

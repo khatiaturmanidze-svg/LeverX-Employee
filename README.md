@@ -9,12 +9,13 @@ npm i
 Create a `.env` file in the root directory and define the following variables:
 `VITE_API_PORT` -> The port the backend server runs on
 `VITE_API_TARGET` -> The full URL the frontend proxies to
-`VITE_AUTH_TOKEN` -> Static token for API authorization
+`SESSION_SECRET` -> Stable backend-only cookie signing secret (generate from at least 32 random bytes)
+`APP_ORIGIN` -> Browser-visible origin used for CSRF and CORS policy
 `BCRYPT_SALT_ROUNDS` -> Cost factor for password hashing
 `DATABASE_URL` -> PostgreSQL connection URL used by the backend
 `DATABASE_PATH` -> Optional JSON snapshot path for the manual importer, relative to `apps/backend`
-`VITE_TEST_USER_EMAIL` -> Email for the explicitly seeded development Admin
-`VITE_TEST_USER_PASSWORD` -> Password used when creating that development Admin
+`SEED_ADMIN_EMAIL` -> Email for the explicitly seeded development Admin
+`SEED_ADMIN_PASSWORD` -> Password used when creating that development Admin
 
 ### database
 
@@ -46,6 +47,8 @@ For the current Prisma setup, verified status, and examples from this backend, s
 - `npm run dev` -> builds the project, then starts the frontend and backend in parallel
 - `npm run test` -> runs frontend tests with Vitest
 - `npm run test --workspace=@mono/backend` -> builds/runs backend tests; SQL integration cases require `TEST_DATABASE_URL` (see backend README)
+- `npm run test:db:setup` -> creates/checks the dedicated PostgreSQL test database configured in `.env.test`
+- `npm run test:integration` -> builds/runs all backend tests against PostgreSQL; fails if the test database is unavailable (see backend README)
 - `npm run test:watch` -> runs tests in watch mode
 - `npm run test:coverage` -> runs tests with coverage report
 

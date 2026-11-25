@@ -1,16 +1,28 @@
 import { Prisma, type PrismaClient } from '../generated/prisma/client.js';
-import type { IEmployee } from '../employeeTypes.js';
+import type { IEmployee } from '../types/employeeTypes.js';
+import type { CreateVisaInput } from '../types/visaTypes.js';
+import { parseEmployeeVisas } from '../schemas/visaSchema.js';
+import { toStoredDate } from '../mappers/visaMapper.js';
 import { employeeRelations } from '../repositories/employeeRepository.js';
 import {
   toEmployeeData,
   toEmployeeResponse,
 } from '../mappers/employeeMapper.js';
 import { ServiceError } from './serviceError.js';
+import type { VerifiedUser } from '../types/auth.js';
+import { currentActor, requireAdmin, ROLES } from './permissions.js';
 
 type ProfileInput = Pick<IEmployee, 'first_name' | 'last_name' | 'email'> &
-  Partial<IEmployee>;
+  Partial<Omit<IEmployee, 'visa'>> & { visa?: CreateVisaInput[] };
 
-export function makeProfile(input: ProfileInput, id: string): IEmployee {
+export type NewEmployeeProfile = Omit<IEmployee, 'visa'> & {
+  visa: CreateVisaInput[];
+};
+
+export function makeProfile(
+  input: ProfileInput,
+  id: string,
+): NewEmployeeProfile {
   if (
     !input.first_name?.trim() ||
     !input.last_name?.trim() ||
@@ -39,7 +51,7 @@ export function makeProfile(input: ProfileInput, id: string): IEmployee {
     citizenship: input.citizenship ?? '',
     date_birth: input.date_birth ?? { year: null, month: null, day: null },
     manager: input.manager ?? { id: '', first_name: '', last_name: '' },
-    visa: input.visa ?? [],
+    visa: input.visa === undefined ? [] : parseEmployeeVisas(input.visa),
     requests: [],
   };
 }
@@ -70,11 +82,15 @@ export function isEmailConflict(error: unknown): boolean {
 
 export async function createAccount(
   prisma: PrismaClient,
-  profile: IEmployee,
+  profile: NewEmployeeProfile,
   hash: string,
   mustChangePassword: boolean,
+  actor?: VerifiedUser,
 ): Promise<IEmployee> {
   return prisma.$transaction(async (tx) => {
+    if (actor) requireAdmin(await currentActor(tx, actor));
+    if (!ROLES.includes(profile.role as (typeof ROLES)[number]))
+      throw new ServiceError(400, { error: 'Invalid employee role' });
     const position = await tx.employee.aggregate({
       _max: { sourcePosition: true },
     });
@@ -91,10 +107,10 @@ export async function createAccount(
         },
         visas: {
           create: (profile.visa ?? []).map((visa, sourcePosition) => ({
-            issuingCountry: visa.issuing_country,
+            issuing_country: visa.issuing_country,
             type: visa.type,
-            startDateMs: BigInt(visa.start_date),
-            endDateMs: BigInt(visa.end_date),
+            start_date: toStoredDate(visa.start_date),
+            end_date: toStoredDate(visa.end_date),
             sourcePosition,
           })),
         },

@@ -7,6 +7,50 @@
   gap: $space-md;
 }
 
+.access-denied {
+  width: min(100% - 4rem, 56rem);
+  margin: 8rem auto;
+  padding: $space-xxl $space-lg;
+  border: 1px solid $color-100;
+  border-radius: $radius-medium;
+  background: $color-white;
+  box-shadow: $card-shadow;
+  text-align: center;
+  font-size: $font-small;
+  line-height: 1.6;
+
+  h1 {
+    margin-bottom: $space-sm;
+    color: $color-1000;
+    font-size: $font-large;
+  }
+
+  &__code {
+    color: $color-900;
+    font-size: $font-largest;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  &__link {
+    display: inline-block;
+    margin-top: $space-md;
+    padding: $space-sm $space-md;
+    border-radius: $radius-small;
+    background: $color-1000;
+    color: $color-white;
+    text-decoration: none;
+
+    &:hover {
+      background: $color-900;
+    }
+    &:focus-visible {
+      outline: 3px solid $color-500;
+      outline-offset: 3px;
+    }
+  }
+}
+
 .loading {
   min-height: min(50vh, 32rem);
   width: 100%;

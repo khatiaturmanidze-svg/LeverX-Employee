@@ -48,6 +48,26 @@ vi.mock(
 );
 
 describe('RequestList', () => {
+  it('shows access denied instead of an empty list when the server returns 403', async () => {
+    useDispatchMock.mockReturnValue(vi.fn());
+    useParamsMock.mockReturnValue({ id: 'another-user' });
+    useGetRequestsQueryMock.mockReturnValue({
+      error: { status: 403, data: { error: 'Forbidden' } },
+    });
+    useGetUsersQueryMock.mockReturnValue({ data: [] });
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(React.createElement(RequestList));
+    });
+    expect(container.textContent).toContain('Not authorized');
+    expect(container.querySelector('[role="alert"]')).not.toBeNull();
+    expect(container.textContent).not.toContain('No  requests found');
+    await act(async () => {
+      root.unmount();
+    });
+  });
+
   it('renders personal requests by default and dispatches users invalidation on mount', async () => {
     const dispatch = vi.fn();
     useDispatchMock.mockReturnValue(dispatch);

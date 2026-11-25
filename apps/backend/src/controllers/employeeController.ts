@@ -1,3 +1,4 @@
+import { verifiedActor } from '../middleware/authorization.js';
 import type { RequestHandler } from 'express';
 import type {
   CreateUserRequest,
@@ -6,8 +7,8 @@ import type {
   ErrorResponse,
   UploadSpreadsheetResponse,
   UpdateRoleResponse,
-} from '../serverTypes.js';
-import type { IEmployee } from '../employeeTypes.js';
+} from '../types/serverTypes.js';
+import type { IEmployee } from '../types/employeeTypes.js';
 import type { createEmployeeService } from '../services/employeeService.js';
 import type { ProfilePatch } from '../services/updateEmployee.js';
 
@@ -17,15 +18,17 @@ export function createEmployeeController(
   const listEmployees: RequestHandler<
     Record<string, never>,
     IEmployee[] | ErrorResponse
-  > = async (_req, res) => {
-    res.status(200).json(await service.listEmployees());
+  > = async (req, res) => {
+    res.status(200).json(await service.listEmployees(verifiedActor(req)));
   };
 
   const getEmployee: RequestHandler<
     { id: string },
     IEmployee | ErrorResponse
   > = async (req, res) => {
-    res.status(200).json(await service.getEmployee(req.params.id));
+    res
+      .status(200)
+      .json(await service.getEmployee(verifiedActor(req), req.params.id));
   };
 
   const updateEmployee: RequestHandler<
@@ -33,7 +36,15 @@ export function createEmployeeController(
     { message: string; employee: IEmployee } | ErrorResponse,
     ProfilePatch
   > = async (req, res) => {
-    res.status(200).json(await service.updateEmployee(req.params.id, req.body));
+    res
+      .status(200)
+      .json(
+        await service.updateEmployee(
+          verifiedActor(req),
+          req.params.id,
+          req.body,
+        ),
+      );
   };
 
   const updateRole: RequestHandler<
@@ -41,7 +52,11 @@ export function createEmployeeController(
     UpdateRoleResponse | ErrorResponse,
     UpdateRoleRequest
   > = async (req, res) => {
-    res.status(200).json(await service.updateRole(req.params.id, req.body));
+    res
+      .status(200)
+      .json(
+        await service.updateRole(verifiedActor(req), req.params.id, req.body),
+      );
   };
 
   const createEmployee: RequestHandler<
@@ -49,7 +64,9 @@ export function createEmployeeController(
     CreateUserResponse | ErrorResponse,
     CreateUserRequest
   > = async (req, res) => {
-    res.status(201).json(await service.createEmployee(req.body));
+    res
+      .status(201)
+      .json(await service.createEmployee(verifiedActor(req), req.body));
   };
 
   const uploadSpreadsheet: RequestHandler<
@@ -60,7 +77,11 @@ export function createEmployeeController(
       res.status(400).json({ error: 'file is required' });
       return;
     }
-    res.status(200).json(await service.uploadSpreadsheet(req.file.buffer));
+    res
+      .status(200)
+      .json(
+        await service.uploadSpreadsheet(verifiedActor(req), req.file.buffer),
+      );
   };
   return {
     listEmployees,

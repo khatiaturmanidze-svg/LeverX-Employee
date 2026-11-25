@@ -1,111 +1,106 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { IEmployee } from '../types/type';
-import { usersApi } from './usersApi';
-import { getStoredAuth } from '@shared/lib/authStorage';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import type { IEmployee } from '../types/type';
+import { sessionBaseQuery } from '../shared/lib/sessionBaseQuery';
+import { sessionActions, type SessionAccount } from '../app/sessionSlice';
 
 interface SignInPayload {
   email: string;
   password: string;
+  rememberMe?: boolean;
 }
-
-interface SetNewPasswordPayload {
-  email: string;
-  newPassword: string;
-}
-
-interface SignUpPayload {
-  email: string;
-  password: string;
+interface SignUpPayload extends SignInPayload {
   first_name: string;
   last_name: string;
 }
-
-interface signInResponse {
-  token: string;
+export interface SignInResponse {
+  message: string;
   userId: string;
   mustChangePassword: boolean;
+  csrfToken: string;
 }
-
-interface setNewPasswordResponse {
-  message: string;
-}
-
-interface signUpResponse extends signInResponse {
-  message: string;
+interface SignUpResponse extends SignInResponse {
   employee: IEmployee;
 }
-
-const BASE_URL = '/api';
-const FALLBACK_TOKEN =
-  import.meta.env.VITE_AUTH_TOKEN || 'authorized-can-access';
+interface PasswordResponse {
+  message: string;
+  csrfToken: string;
+}
 
 export const authApi = createApi({
   reducerPath: 'authApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: BASE_URL,
-  }),
+  baseQuery: sessionBaseQuery,
   endpoints: (builder) => ({
-    signIn: builder.mutation<signInResponse, SignInPayload>({
-      query: (body) => ({
-        url: '/sign-in',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body,
-      }),
-    }),
-    setNewPassword: builder.mutation<
-      setNewPasswordResponse,
-      SetNewPasswordPayload
-    >({
-      async queryFn(body, _api, _extraOptions, baseQuery) {
-        const auth = getStoredAuth();
-        if (auth?.error) {
-          return {
-            error: {
-              status: 'CUSTOM_ERROR',
-              error: auth.error.message,
-              data: { error: auth.error.message },
-            },
-          };
-        }
-
-        const response = await baseQuery({
-          url: '/set-new-password',
+    getMe: builder.query<SessionAccount, void>({ query: () => '/me' }),
+    getCsrfToken: builder.query<
+      { csrfToken: string; allowPublicSignup: boolean },
+      void
+    >({ query: () => '/csrf' }),
+    signIn: builder.mutation<SignInResponse, SignInPayload>({
+      async queryFn(body, api, _extra, baseQuery) {
+        const result = await baseQuery({
+          url: '/sign-in',
           method: 'POST',
-          headers: {
-            Authorization: auth?.authData?.token || FALLBACK_TOKEN,
-            'Content-Type': 'application/json',
-          },
           body,
         });
-        if (response.error) return { error: response.error };
-        return { data: response.data as setNewPasswordResponse };
+        if (result.error) return { error: result.error };
+        const data = result.data as SignInResponse;
+        api.dispatch(sessionActions.csrfReceived(data));
+        const me = await baseQuery('/me');
+        if (me.error) return { error: me.error };
+        api.dispatch(sessionActions.clearCaches());
+        return { data };
       },
     }),
-
-    signUp: builder.mutation<signUpResponse, SignUpPayload>({
-      async queryFn(body, { dispatch }, _extraOptions, baseQuery) {
-        const response = await baseQuery({
+    signUp: builder.mutation<SignUpResponse, SignUpPayload>({
+      async queryFn(body, api, _extra, baseQuery) {
+        const result = await baseQuery({
           url: '/sign-up',
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
           body,
         });
-        if (response.error) return { error: response.error };
-
-        dispatch(usersApi.util.invalidateTags(['users']));
-        return { data: response.data as signUpResponse };
+        if (result.error) return { error: result.error };
+        const data = result.data as SignUpResponse;
+        api.dispatch(sessionActions.csrfReceived(data));
+        const me = await baseQuery('/me');
+        if (me.error) return { error: me.error };
+        api.dispatch(sessionActions.clearCaches());
+        return { data };
+      },
+    }),
+    setNewPassword: builder.mutation<PasswordResponse, { newPassword: string }>(
+      {
+        async queryFn(body, api, _extra, baseQuery) {
+          const result = await baseQuery({
+            url: '/set-new-password',
+            method: 'POST',
+            body,
+          });
+          if (result.error) return { error: result.error };
+          const data = result.data as PasswordResponse;
+          api.dispatch(sessionActions.csrfReceived(data));
+          const me = await baseQuery('/me');
+          if (me.error) return { error: me.error };
+          api.dispatch(sessionActions.clearCaches());
+          return { data };
+        },
+      },
+    ),
+    signOut: builder.mutation<void, void>({
+      async queryFn(_body, api, _extra, baseQuery) {
+        const result = await baseQuery({ url: '/sign-out', method: 'POST' });
+        if (result.error) return { error: result.error };
+        api.dispatch(sessionActions.anonymous());
+        api.dispatch(sessionActions.clearCaches());
+        return { data: undefined };
       },
     }),
   }),
 });
-
 export const {
   useSignInMutation,
-  useSetNewPasswordMutation,
   useSignUpMutation,
+  useSetNewPasswordMutation,
+  useGetMeQuery,
+  useGetCsrfTokenQuery,
+  useSignOutMutation,
 } = authApi;

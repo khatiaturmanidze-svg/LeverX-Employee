@@ -1,11 +1,11 @@
 import React, { lazy, Suspense, useState, useMemo, useCallback } from 'react';
 import { Header } from '@shared/ui';
-import { canEdit } from '@shared/lib';
+import { canEdit, getErrorMessage } from '@shared/lib';
 import { useParams } from 'react-router-dom';
 import { useGetEmployeeDetailsQuery } from '../features/usersApi';
 import { useGetHeaderProps } from '@shared/lib';
 import Loading from '@/shared/ui/Loading';
-import { getStoredAuth } from '@shared/lib/authStorage';
+import AccessDenied from '@/shared/ui/AccessDenied';
 
 const AvatarSection = lazy(() => import('@shared/ui/AvatarSection'));
 
@@ -34,6 +34,7 @@ export default function Details(): React.ReactElement {
     isLoading,
     isFetching,
     isError,
+    error,
   } = useGetEmployeeDetailsQuery(id!, { skip: !id });
 
   const canUserEdit = useMemo(() => {
@@ -50,7 +51,7 @@ export default function Details(): React.ReactElement {
   };
 
   const handleCopyLink = () => {
-    if (getStoredAuth()) {
+    if (loggedUser) {
       navigator.clipboard.writeText(window.location.href);
     }
   };
@@ -71,11 +72,16 @@ export default function Details(): React.ReactElement {
   }
 
   if (isError || !viewedEmployee) {
+    const forbidden = error && 'status' in error && error.status === 403;
     return (
       <>
         <Header loggedInUser={loggedUser} isAdmin={isAdmin} />
         <main>
-          <h1>Employee not found</h1>
+          {forbidden ? (
+            <AccessDenied />
+          ) : (
+            <h1>{error ? getErrorMessage(error) : 'Employee not found'}</h1>
+          )}
         </main>
       </>
     );

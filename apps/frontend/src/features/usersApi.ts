@@ -1,18 +1,14 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { sessionBaseQuery } from '../shared/lib/sessionBaseQuery';
+import { createApi } from '@reduxjs/toolkit/query/react';
 import { IEmployee, EmployeeUpdate } from '../types/type';
-const DUMMY_TOKEN = import.meta.env.VITE_AUTH_TOKEN || 'authorized-can-access';
-const BASE_URL = '/api';
 export const usersApi = createApi({
   reducerPath: 'usersApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: BASE_URL,
-  }),
+  baseQuery: sessionBaseQuery,
   tagTypes: ['users'],
   endpoints: (builder) => ({
     getUsers: builder.query<IEmployee[], void>({
       query: () => ({
         url: '/users',
-        headers: { Authorization: DUMMY_TOKEN },
       }),
       providesTags: ['users'],
     }),
@@ -20,7 +16,6 @@ export const usersApi = createApi({
     getEmployeeDetails: builder.query<IEmployee, string>({
       query: (id) => ({
         url: `/users/${id}`,
-        headers: { Authorization: DUMMY_TOKEN },
       }),
       providesTags: (result, error, id) => [{ type: 'users', id }],
     }),
@@ -33,7 +28,6 @@ export const usersApi = createApi({
         url: `/users/${id}`,
         method: 'PUT',
         headers: {
-          Authorization: DUMMY_TOKEN,
           'Content-Type': 'application/json',
         },
         body: update,
@@ -52,7 +46,6 @@ export const usersApi = createApi({
         url: `/users/${id}/role`,
         method: 'PUT',
         headers: {
-          Authorization: DUMMY_TOKEN,
           'Content-Type': 'application/json',
         },
         body: { newRole },

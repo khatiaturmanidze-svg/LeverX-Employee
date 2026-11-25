@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { EmployeeListQuery } from '../serverTypes.js';
+import type { EmployeeListQuery } from '../types/serverTypes.js';
 import { ServiceError } from '../services/serviceError.js';
 
 // accept strings such as 1, 2, 20.

@@ -4,7 +4,7 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { renderToStaticMarkup } from 'react-dom/server';
 import VisaEditorList from './VisaEditorList';
-import { IVisa } from '../../../types/type';
+import { CreateVisaInput } from '../../../types/type';
 
 describe('VisaEditorList', () => {
   it('returns null when visas is empty', () => {
@@ -22,7 +22,7 @@ describe('VisaEditorList', () => {
     const container = document.createElement('div');
     const root = createRoot(container);
 
-    const visas: IVisa[] = [
+    const visas: CreateVisaInput[] = [
       {
         issuing_country: 'US',
         type: 'tourist',
@@ -64,6 +64,8 @@ describe('VisaEditorList', () => {
     // React uses `defaultValue`, so the DOM input should expose it.
     expect(issuingCountryInput?.value).toBe('US');
     expect(typeInput?.value).toBe('tourist');
+    expect(startDateInput?.value).toBe('2020-01-01');
+    expect(endDateInput?.value).toBe('2020-12-31');
 
     await act(async () => {
       root.unmount();
@@ -74,7 +76,7 @@ describe('VisaEditorList', () => {
     const container = document.createElement('div');
     const root = createRoot(container);
 
-    const visas: IVisa[] = [
+    const visas: CreateVisaInput[] = [
       {
         issuing_country: 'US',
         type: 'tourist',

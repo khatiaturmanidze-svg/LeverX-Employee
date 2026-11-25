@@ -1,238 +1,84 @@
 import React from 'react';
-import { act } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createRoot } from 'react-dom/client';
-
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import NewPassword from './NewPassword';
-import {
-  getErrorMessageMock,
-  navigateMock,
-  setNewPasswordMock,
-} from './test-mocks';
-
-vi.mock(
-  '@shared/ui',
-  async () => (await import('./test-mocks')).authPagesSharedUiModule,
-);
-
-vi.mock(
-  'react-router-dom',
-  async () => (await import('./test-mocks')).authPagesRouterModule,
-);
-
-vi.mock(
-  '../features/authApi',
-  async () => (await import('./test-mocks')).newPasswordPageAuthApiModule,
-);
-
-vi.mock(
-  '@shared/lib',
-  async () => (await import('./test-mocks')).authPagesSharedLibModule,
-);
-
-describe('pages/NewPassword (integration)', () => {
-  const setInputValue = (input: HTMLInputElement, value: string) => {
-    const setter = Object.getOwnPropertyDescriptor(
-      HTMLInputElement.prototype,
-      'value',
-    )?.set;
-    if (!setter) throw new Error('Input value setter not found');
-    setter.call(input, value);
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-  };
-
+const mocks = vi.hoisted(() => ({ update: vi.fn(), navigate: vi.fn() }));
+vi.mock('../features/authApi', () => ({
+  useSetNewPasswordMutation: () => [mocks.update, { isLoading: false }],
+}));
+vi.mock('react-router-dom', () => ({ useNavigate: () => mocks.navigate }));
+vi.mock('@shared/ui', () => ({
+  SignHeader: () => <header />,
+  SignMain: ({ children }: { children: React.ReactNode }) => (
+    <main>{children}</main>
+  ),
+  BtnSubmit: ({ children }: { children: React.ReactNode }) => (
+    <button type="submit">{children}</button>
+  ),
+}));
+describe('required password replacement', () => {
   beforeEach(() => {
-    setNewPasswordMock.mockReset();
-    navigateMock.mockReset();
-    getErrorMessageMock.mockReset();
+    mocks.update.mockReset();
+    mocks.navigate.mockReset();
     localStorage.clear();
     sessionStorage.clear();
   });
-
-  it('submits stored localStorage email, updates auth result, and redirects to main', async () => {
-    localStorage.setItem('loggedInUser', 'user@example.com');
+  it('submits only the new password, ignoring spoofed stored email and flags', async () => {
+    localStorage.setItem('loggedInUser', 'victim@example.test');
     localStorage.setItem(
       'authData',
-      JSON.stringify({ token: 'abc', mustChangePassword: true }),
+      JSON.stringify({ mustChangePassword: false }),
     );
-    setNewPasswordMock.mockReturnValue({
-      unwrap: () => Promise.resolve({ message: 'Password updated' }),
+    mocks.update.mockReturnValue({
+      unwrap: async () => ({
+        message: 'Password updated',
+        csrfToken: 'new-csrf',
+      }),
     });
-
-    const container = document.createElement('div');
-    const root = createRoot(container);
-
-    await act(async () => {
-      root.render(React.createElement(NewPassword));
+    render(<NewPassword />);
+    fireEvent.change(screen.getByPlaceholderText('Enter new password'), {
+      target: { value: 'my-new-password' },
     });
-
-    const passwordInput = container.querySelector(
-      '.signin__form-password',
-    ) as HTMLInputElement;
-    const form = container.querySelector('form') as HTMLFormElement;
-
-    await act(async () => {
-      setInputValue(passwordInput, 'better-password');
-    });
-
-    await act(async () => {
-      form.dispatchEvent(
-        new Event('submit', { bubbles: true, cancelable: true }),
-      );
-    });
-
-    expect(setNewPasswordMock).toHaveBeenCalledWith({
-      email: 'user@example.com',
-      newPassword: 'better-password',
-    });
-    expect(localStorage.getItem('authData')).toBe(
-      JSON.stringify({ token: 'abc', mustChangePassword: false }),
+    fireEvent.click(screen.getByRole('button', { name: 'Set new password' }));
+    await waitFor(() =>
+      expect(mocks.update).toHaveBeenCalledWith({
+        newPassword: 'my-new-password',
+      }),
     );
-    expect(navigateMock).toHaveBeenCalledWith('/main', { replace: true });
-
-    await act(async () => {
-      root.unmount();
-    });
+    expect(mocks.navigate).toHaveBeenCalledWith('/main', { replace: true });
   });
-
-  it('updates the active session result when an earlier localStorage result remains', async () => {
-    const previousResult = JSON.stringify({
-      token: 'previous-token',
-      mustChangePassword: true,
+  it('works without any browser-stored identity', async () => {
+    mocks.update.mockReturnValue({
+      unwrap: async () => ({
+        message: 'Password updated',
+        csrfToken: 'new-csrf',
+      }),
     });
-    localStorage.setItem('authData', previousResult);
-    sessionStorage.setItem('loggedInUser', 'session@example.com');
-    sessionStorage.setItem(
-      'authData',
-      JSON.stringify({ token: 'session-token', mustChangePassword: true }),
+    render(<NewPassword />);
+    fireEvent.change(screen.getByPlaceholderText('Enter new password'), {
+      target: { value: 'replacement' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Set new password' }));
+    await waitFor(() =>
+      expect(mocks.navigate).toHaveBeenCalledWith('/main', { replace: true }),
     );
-    setNewPasswordMock.mockReturnValue({
-      unwrap: () => Promise.resolve({ message: 'Password updated' }),
-    });
-
-    const container = document.createElement('div');
-    const root = createRoot(container);
-
-    await act(async () => {
-      root.render(React.createElement(NewPassword));
-    });
-
-    const passwordInput = container.querySelector(
-      '.signin__form-password',
-    ) as HTMLInputElement;
-    const form = container.querySelector('form') as HTMLFormElement;
-
-    await act(async () => {
-      setInputValue(passwordInput, 'session-password');
-    });
-
-    await act(async () => {
-      form.dispatchEvent(
-        new Event('submit', { bubbles: true, cancelable: true }),
-      );
-    });
-
-    expect(setNewPasswordMock).toHaveBeenCalledWith({
-      email: 'session@example.com',
-      newPassword: 'session-password',
-    });
-    expect(sessionStorage.getItem('authData')).toBe(
-      JSON.stringify({ token: 'session-token', mustChangePassword: false }),
-    );
-    expect(localStorage.getItem('authData')).toBe(previousResult);
-
-    await act(async () => {
-      root.unmount();
-    });
+    expect(localStorage.getItem('authData')).toBeNull();
+    expect(sessionStorage.getItem('authData')).toBeNull();
   });
-
-  it('redirects to sign-in when there is no stored email', async () => {
-    const container = document.createElement('div');
-    const root = createRoot(container);
-
-    await act(async () => {
-      root.render(React.createElement(NewPassword));
+  it('shows server failures without navigating or changing client flags', async () => {
+    mocks.update.mockReturnValue({
+      unwrap: async () => {
+        throw new Error('Account state changed');
+      },
     });
-
-    const form = container.querySelector('form') as HTMLFormElement;
-
-    await act(async () => {
-      form.dispatchEvent(
-        new Event('submit', { bubbles: true, cancelable: true }),
-      );
+    render(<NewPassword />);
+    fireEvent.change(screen.getByPlaceholderText('Enter new password'), {
+      target: { value: 'replacement' },
     });
-
-    expect(setNewPasswordMock).not.toHaveBeenCalled();
-    expect(navigateMock).toHaveBeenCalledWith('/signin', { replace: true });
-
-    await act(async () => {
-      root.unmount();
-    });
-  });
-
-  it('shows the shared error message for corrupt auth data without sending a request', async () => {
-    sessionStorage.setItem('loggedInUser', 'user@example.com');
-    sessionStorage.setItem('authData', '{invalid json');
-    getErrorMessageMock.mockReturnValue('Please sign in again.');
-    const container = document.createElement('div');
-    const root = createRoot(container);
-
-    await act(async () => {
-      root.render(React.createElement(NewPassword));
-    });
-    const form = container.querySelector('form') as HTMLFormElement;
-    await act(async () => {
-      form.dispatchEvent(
-        new Event('submit', { bubbles: true, cancelable: true }),
-      );
-    });
-
-    expect(getErrorMessageMock).toHaveBeenCalledWith(expect.any(Error));
-    expect(container.querySelector('.signin__error')?.textContent).toBe(
-      'Please sign in again.',
-    );
-    expect(setNewPasswordMock).not.toHaveBeenCalled();
-    expect(navigateMock).not.toHaveBeenCalled();
-    await act(async () => root.unmount());
-  });
-
-  it('renders an error message when the password update fails', async () => {
-    localStorage.setItem('loggedInUser', 'user@example.com');
-    const error = new Error('request failed');
-    setNewPasswordMock.mockReturnValue({
-      unwrap: () => Promise.reject(error),
-    });
-    getErrorMessageMock.mockReturnValue('Could not update password');
-
-    const container = document.createElement('div');
-    const root = createRoot(container);
-
-    await act(async () => {
-      root.render(React.createElement(NewPassword));
-    });
-
-    const passwordInput = container.querySelector(
-      '.signin__form-password',
-    ) as HTMLInputElement;
-    const form = container.querySelector('form') as HTMLFormElement;
-
-    await act(async () => {
-      setInputValue(passwordInput, 'bad-password');
-    });
-
-    await act(async () => {
-      form.dispatchEvent(
-        new Event('submit', { bubbles: true, cancelable: true }),
-      );
-    });
-
-    const errorNode = container.querySelector('.signin__error');
-    expect(getErrorMessageMock).toHaveBeenCalledWith(error);
-    expect(errorNode?.textContent).toBe('Could not update password');
-    expect(navigateMock).not.toHaveBeenCalled();
-
-    await act(async () => {
-      root.unmount();
-    });
+    fireEvent.click(screen.getByRole('button', { name: 'Set new password' }));
+    expect(
+      await screen.findByText('Account state changed'),
+    ).toBeInTheDocument();
+    expect(mocks.navigate).not.toHaveBeenCalled();
   });
 });

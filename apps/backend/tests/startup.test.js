@@ -8,6 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { createTestDatabase, sqlTestOptions } from './helpers/postgres.js';
+import { testSessionOptions, createTestRequest } from './helpers/sessions.js';
 
 async function launch(t, url, snapshotPath) {
   const child = spawn(
@@ -19,7 +20,9 @@ async function launch(t, url, snapshotPath) {
         DATABASE_URL: url,
         DATABASE_PATH: snapshotPath,
         PORT: '0',
-        VITE_AUTH_TOKEN: 'startup-test-token',
+        SESSION_SECRET: 'startup-test-session-secret-with-at-least-32-bytes',
+        APP_ORIGIN: 'http://localhost:5173',
+        NODE_ENV: 'test',
         BCRYPT_SALT_ROUNDS: '4',
         SYNTHETIC_LATENCY_MIN: '',
         SYNTHETIC_LATENCY_MAX: '',
@@ -80,29 +83,42 @@ test(
       email: 'startup@example.test',
       password: 'startup-test-password',
     };
-    const response = await fetch(`${first.base}/sign-up`, {
+    const firstRequest = createTestRequest(
+      first.base,
+      database.prisma,
+      testSessionOptions(),
+    );
+    const response = await firstRequest('/sign-up', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(credentials),
+      body: credentials,
     });
     assert.equal(response.status, 200);
-    const account = await response.json();
+    const account = response.body;
     assert.equal(existsSync(snapshotPath), false);
     await first.stop();
 
     const second = await launch(t, database.url, snapshotPath);
-    const login = await fetch(`${second.base}/sign-in`, {
+    const secondRequest = createTestRequest(
+      second.base,
+      database.prisma,
+      testSessionOptions(),
+    );
+    const resumed = await secondRequest('/me', {
+      headers: { cookie: response.headers.getSetCookie()[0].split(';')[0] },
+    });
+    assert.equal(resumed.status, 200);
+    assert.equal(resumed.body.userId, account.userId);
+    const login = await secondRequest('/sign-in', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(credentials),
+      body: credentials,
     });
     assert.equal(login.status, 200);
-    assert.equal((await login.json()).userId, account.userId);
-    const detail = await fetch(`${second.base}/users/${account.userId}`, {
-      headers: { authorization: 'startup-test-token' },
-    });
+    assert.equal(login.body.userId, account.userId);
+    const detail = await secondRequest(`/users/${account.userId}`);
     assert.equal(detail.status, 200);
-    assert.equal((await detail.json()).email, credentials.email);
+    assert.equal(detail.body.email, credentials.email);
     assert.equal(existsSync(snapshotPath), false);
     await second.stop();
   },

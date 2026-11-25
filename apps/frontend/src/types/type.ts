@@ -14,12 +14,18 @@ export interface IManager {
 }
 
 // Visa info
-export interface IVisa {
+
+export interface Visa {
+  id: string;
+  employeeId: string;
   issuing_country: string;
   type: string;
-  start_date: string | number; // timestamp
-  end_date: string | number; // timestamp
+  start_date: string; // YYYY-MM-DD
+  end_date: string; // YYYY-MM-DD
 }
+
+export type CreateVisaInput = Omit<Visa, 'id' | 'employeeId'>;
+export type UpdateVisaInput = Partial<CreateVisaInput>;
 
 // Employee interface
 export interface IEmployee {
@@ -52,13 +58,14 @@ export interface IEmployee {
   citizenship?: string;
   date_birth?: IDateOfBirth;
   manager?: IManager;
-  visa?: IVisa[];
+  visa?: Visa[];
 
   requests?: IRequestData[];
 }
 
-export type EmployeeUpdate = Partial<Omit<IEmployee, 'manager'>> & {
+export type EmployeeUpdate = Partial<Omit<IEmployee, 'manager' | 'visa'>> & {
   manager?: string | null;
+  visa?: CreateVisaInput[];
 };
 
 export type CreateUserPayload = {
@@ -81,7 +88,7 @@ export type CreateUserPayload = {
   citizenship?: string;
   date_birth?: IDateOfBirth;
   manager?: IManager;
-  visa?: IVisa[];
+  visa?: CreateVisaInput[];
 };
 
 export type CreateUserResponse = {

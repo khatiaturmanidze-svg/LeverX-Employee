@@ -7,9 +7,9 @@ import {
   SetVisaAction,
 } from './state.types';
 
-import { IVisa } from '@/types/type';
+import { CreateVisaInput } from '@/types/type';
 
-const defaultVisa: IVisa = {
+const defaultVisa: CreateVisaInput = {
   issuing_country: '',
   type: '',
   start_date: '',
@@ -51,10 +51,10 @@ export const setField = <K extends keyof EmployeeFormState>(
   value,
 });
 
-export const setVisa = <K extends keyof IVisa>(
+export const setVisa = <K extends keyof CreateVisaInput>(
   index: number,
   field: K,
-  value: IVisa[K],
+  value: CreateVisaInput[K],
 ): SetVisaAction<K> => ({
   type: EmployeeCreateActionType.SET_VISA,
   index,

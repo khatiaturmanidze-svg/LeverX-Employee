@@ -21,7 +21,11 @@ describe('EmployeeView', () => {
     expect(deptRow).toHaveTextContent('Engineering');
 
     const dobRow = screen.getByTestId('detail-Date-Birth');
-    expect(dobRow).toHaveTextContent('Jan'); // avoid locale pain
+    expect(dobRow).toHaveTextContent(
+      new Intl.DateTimeFormat(undefined, { month: 'short' }).format(
+        new Date(1999, 0, 1),
+      ),
+    );
 
     const managerRow = screen.getByTestId('detail-Manager');
     expect(managerRow).toHaveTextContent('John Doe');
@@ -50,10 +54,10 @@ describe('EmployeeView', () => {
     expect(typeRow).toHaveTextContent('Work');
 
     const startDateRow = screen.getByTestId('detail-Start-Date');
-    expect(startDateRow).toHaveTextContent('2023');
+    expect(startDateRow).toHaveTextContent('2023-01-01');
 
     const endDateRow = screen.getByTestId('detail-End-Date');
-    expect(endDateRow).toHaveTextContent('2024');
+    expect(endDateRow).toHaveTextContent('2024-01-01');
   });
 
   it('renders fallback text for missing manager or date of birth', () => {

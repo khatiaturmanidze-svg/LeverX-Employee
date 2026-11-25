@@ -215,6 +215,47 @@ describe('validateEmployeeForm', () => {
       last_native_name: 'Doe',
       date_birth: { year: 1990, month: 5, day: 15 },
       manager: 'manager1',
+      visa: [],
     });
+  });
+
+  it('submits only editable visa fields with unchanged calendar dates', () => {
+    const savedVisa = {
+      id: '12',
+      employeeId: 'employee-a',
+      issuing_country: ' Japanese ',
+      type: ' Work ',
+      start_date: '2024-02-29',
+      end_date: '2027-10-01',
+    };
+    expect(
+      buildUpdatePayload({ ...validFormData, visas: [savedVisa] }).visa,
+    ).toEqual([
+      {
+        issuing_country: 'Japanese',
+        type: 'Work',
+        start_date: '2024-02-29',
+        end_date: '2027-10-01',
+      },
+    ]);
+  });
+
+  it('rejects invalid visa dates and reversed calendar ranges before saving', () => {
+    const visa = {
+      issuing_country: 'Japanese',
+      type: 'Work',
+      start_date: '2026-02-30',
+      end_date: '2027-10-01',
+    };
+    expect(
+      validateEmployeeForm({ ...validFormData, visas: [visa] })
+        .visa_0_start_date,
+    ).toBeDefined();
+    expect(
+      validateEmployeeForm({
+        ...validFormData,
+        visas: [{ ...visa, start_date: '2028-10-01' }],
+      }).visa_0_end_date,
+    ).toBeDefined();
   });
 });

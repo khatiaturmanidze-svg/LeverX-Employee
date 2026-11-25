@@ -59,15 +59,15 @@ describe('core utilities', () => {
   };
 
   describe('getLoggedInUser', () => {
-    it('should return user from localStorage', () => {
+    it('uses the verified account ID rather than a stored email', () => {
       localStorage.setItem('loggedInUser', 'test@example.com');
-      const result = getLoggedInUser([mockEmployee]);
+      const result = getLoggedInUser([mockEmployee], mockEmployee._id);
       expect(result).toEqual(mockEmployee);
     });
 
-    it('should return user from sessionStorage', () => {
+    it('resolves an account ID even when web storage contains another identity', () => {
       sessionStorage.setItem('loggedInUser', 'test@example.com');
-      const result = getLoggedInUser([mockEmployee]);
+      const result = getLoggedInUser([mockEmployee], mockEmployee._id);
       expect(result).toEqual(mockEmployee);
     });
 
@@ -181,7 +181,15 @@ describe('core utilities', () => {
       const date: IDateOfBirth = { year: 1990, month: 5, day: 15 };
       const result = formatDateOfBirth(date);
       expect(result).toContain('15');
-      expect(result).toContain('May');
+      expect(result).toContain(
+        new Intl.DateTimeFormat(undefined, {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+        })
+          .formatToParts(new Date(1990, 4, 15))
+          .find((part) => part.type === 'month')!.value,
+      );
       expect(result).toContain('1990');
     });
   });
@@ -214,7 +222,7 @@ describe('core utilities', () => {
     it('should return 401 status message', () => {
       const error = { status: 401, data: {} };
       const result = getErrorMessage(error);
-      expect(result).toBe('Invalid email or password');
+      expect(result).toBe('Your session has ended. Please sign in again');
     });
 
     it('should return 403 status message', () => {
@@ -342,7 +350,10 @@ describe('core utilities', () => {
           last_name: 'User',
         },
       };
-      const result = getManagedEmployees([mockManager, managed, mockAdmin]);
+      const result = getManagedEmployees(
+        [mockManager, managed, mockAdmin],
+        mockManager._id,
+      );
       expect(result).toEqual([managed]);
     });
 
@@ -365,13 +376,19 @@ describe('core utilities', () => {
           last_name: 'User',
         },
       };
-      const result = getManagedEmployees([mockManager, managed1, managed2]);
+      const result = getManagedEmployees(
+        [mockManager, managed1, managed2],
+        mockManager._id,
+      );
       expect(result).toHaveLength(2);
     });
 
     it('should not return employees without manager', () => {
       localStorage.setItem('loggedInUser', 'manager@example.com');
-      const result = getManagedEmployees([mockManager, mockEmployee]);
+      const result = getManagedEmployees(
+        [mockManager, mockEmployee],
+        mockManager._id,
+      );
       expect(result).toHaveLength(0);
     });
   });

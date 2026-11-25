@@ -3,9 +3,35 @@ import {
   initialState,
   initialSubmitState,
   validateCreateUserForm,
+  buildCreateUserPayload,
 } from './helpers';
 
 describe('create-user helpers', () => {
+  it('submits date-only visa input and validates calendar ranges', () => {
+    const visa = {
+      issuing_country: ' Japanese ',
+      type: ' Work ',
+      start_date: '2024-02-29',
+      end_date: '2027-10-01',
+    };
+    const form = { ...initialState.formData, visas: [visa] };
+    expect(buildCreateUserPayload(form).visa).toEqual([
+      { ...visa, issuing_country: 'Japanese', type: 'Work' },
+    ]);
+    expect(validateCreateUserForm(form).visa_0_start_date).toBeUndefined();
+    expect(
+      validateCreateUserForm({
+        ...form,
+        visas: [{ ...visa, start_date: '2026-02-30' }],
+      }).visa_0_start_date,
+    ).toBeDefined();
+    expect(
+      validateCreateUserForm({
+        ...form,
+        visas: [{ ...visa, start_date: '2028-10-01' }],
+      }).visa_0_end_date,
+    ).toBeDefined();
+  });
   it('provides expected initial state', () => {
     expect(initialState.formData.first_name).toBe('');
     expect(initialState.formData.role).toBe('Employee');

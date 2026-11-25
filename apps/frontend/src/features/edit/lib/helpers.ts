@@ -6,6 +6,7 @@ import {
   SubmitState,
 } from '../model/state.types';
 import { getErrorMessage, initialSubmitState } from '@shared/lib';
+import { toVisaInput, validateVisaInputs } from '@/shared/lib/visa';
 
 export const getEmployeeFormState = (user: IEmployee): EmployeeFormState => ({
   department: user.department,
@@ -32,12 +33,8 @@ export const getEmployeeFormState = (user: IEmployee): EmployeeFormState => ({
     user.visa?.map((v) => ({
       issuing_country: v.issuing_country,
       type: v.type,
-      start_date: v.start_date
-        ? new Date(v.start_date).toISOString().slice(0, 10)
-        : '',
-      end_date: v.end_date
-        ? new Date(v.end_date).toISOString().slice(0, 10)
-        : '',
+      start_date: v.start_date,
+      end_date: v.end_date,
     })) || [],
 });
 
@@ -57,11 +54,7 @@ export const validateEmployeeForm = (formData: EmployeeFormState) => {
       errors.date_birth = 'input format should be year-month-day';
   }
 
-  // visas
-  formData.visas.forEach((v, i) => {
-    if (!v.issuing_country) errors[`visa_${i}_country`] = 'Required';
-    if (!v.type) errors[`visa_${i}_type`] = 'Required';
-  });
+  Object.assign(errors, validateVisaInputs(formData.visas));
 
   return errors;
 };
@@ -91,6 +84,7 @@ export const buildUpdatePayload = (
       })()
     : undefined,
   manager: formData.manager_id || undefined,
+  visa: formData.visas.map(toVisaInput),
 });
 
 export async function submitEditUser(

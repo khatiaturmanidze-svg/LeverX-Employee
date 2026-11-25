@@ -12,8 +12,8 @@ async function main(): Promise<void> {
     '../..',
   );
   dotenv.config({ path: path.resolve(backendDir, '../../.env'), quiet: true });
-  const email = process.env.VITE_TEST_USER_EMAIL?.trim().toLowerCase();
-  const password = process.env.VITE_TEST_USER_PASSWORD;
+  const email = process.env.SEED_ADMIN_EMAIL?.trim().toLowerCase();
+  const password = process.env.SEED_ADMIN_PASSWORD;
   if (!email || !password)
     throw new Error('Both test-admin settings are required');
 

@@ -9,11 +9,10 @@ import {
 import { InputField, FormGroup, BtnSubmit, LazyImage } from '@shared/ui';
 import { getInitialState, submitRequest } from '../lib/helpers';
 import { SubmitState } from '../model/state.types';
-import { getLoggedInUser, initialSubmitState } from '@shared/lib';
-import { useGetUsersQuery } from '../../usersApi';
+import { useGetHeaderProps, initialSubmitState } from '@shared/lib';
 
 export default function RequestForm(): React.ReactElement {
-  const { data: allUsers = [] } = useGetUsersQuery();
+  const { loggedUser } = useGetHeaderProps();
   const [state, dispatch] = useReducer(
     requestReducer,
     initialState,
@@ -26,10 +25,9 @@ export default function RequestForm(): React.ReactElement {
     SubmitState,
     FormData
   >(async () => {
-    const loggedInUser = getLoggedInUser(allUsers);
     const result = await submitRequest(
       formData,
-      loggedInUser?._id ?? '',
+      loggedUser?._id ?? '',
       addRequest,
     );
 

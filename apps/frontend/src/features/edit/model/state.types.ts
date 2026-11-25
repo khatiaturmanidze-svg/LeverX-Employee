@@ -1,4 +1,4 @@
-import { IVisa } from '@/types/type';
+import { CreateVisaInput } from '@/types/type';
 
 export type EmployeeFormState = {
   department: string;
@@ -14,7 +14,7 @@ export type EmployeeFormState = {
   last_native_name: string;
   date_birth: string;
   manager_id: string;
-  visas: IVisa[];
+  visas: CreateVisaInput[];
 };
 
 export interface FormState {
@@ -34,11 +34,13 @@ export type SetFieldAction<
   value: EmployeeFormState[K];
 };
 
-export type SetVisaAction<K extends keyof IVisa = keyof IVisa> = {
+export type SetVisaAction<
+  K extends keyof CreateVisaInput = keyof CreateVisaInput,
+> = {
   type: EmployeeEditActionType.SET_VISA;
   index: number;
   field: K;
-  value: IVisa[K];
+  value: CreateVisaInput[K];
 };
 
 // current result of action
